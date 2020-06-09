@@ -22,7 +22,7 @@ public class PolePositionManager : NetworkBehaviour
     #region Variables Privadas
     private readonly List<PlayerInfo> m_Players = new List<PlayerInfo>(4); // Lista de jugadores
     private CircuitController m_CircuitController; // Controlador del circuito
-    private GameObject[] m_DebuggingSpheres;       // Esferas para depurar
+    public GameObject[] m_DebuggingSpheres;       // Esferas para depurar
     #endregion
 
     private void Awake()

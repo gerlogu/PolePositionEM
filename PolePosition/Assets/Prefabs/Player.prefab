@@ -79,6 +79,7 @@ GameObject:
   - component: {fileID: 449604030476931776}
   - component: {fileID: 3466774584401487325}
   - component: {fileID: 1137246169109603126}
+  - component: {fileID: 7426359134981378254}
   - component: {fileID: 6346869062069434778}
   - component: {fileID: 2697569808015383802}
   m_Layer: 0
@@ -131,7 +132,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 1.0799457, y: 0.51, z: 2.45}
-  m_Center: {x: -0.005710423, y: 0.45, z: -0.028551817}
+  m_Center: {x: -0.005710423, y: 0, z: -0.028551817}
 --- !u!114 &528894820688187042
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -222,6 +223,22 @@ MonoBehaviour:
   topSpeed: 200
   downForce: 1000
   slipLimit: 0.2
+--- !u!114 &7426359134981378254
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1508097745644926054}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ce967f2111dbed43b4076ca451631e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  whatIsRoad:
+    serializedVersion: 2
+    m_Bits: 512
+  checkRadius: 0.5
 --- !u!114 &6346869062069434778
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -395,9 +412,9 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: fc1d1f0caee958744a6d65b1881cee60, type: 2}
-  - {fileID: 2100000, guid: b3a1a38aa29c4154fb1792e5c2365363, type: 2}
-  - {fileID: 2100000, guid: 5f427e6be12916142af724cfb0c6912c, type: 2}
+  - {fileID: 2100000, guid: 9a9f3fd50d3bd0141a59b6d1ef535c53, type: 2}
+  - {fileID: 2100000, guid: e97337c9101718c468f024ea47a31eca, type: 2}
+  - {fileID: 2100000, guid: 7fa9587ffbf2299448d1efe19dbe022a, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
