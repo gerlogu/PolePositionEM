@@ -24,6 +24,7 @@ namespace Mirror
     public class NetworkManager : MonoBehaviour
     {
         [HideInInspector] public Material[] playerCarMaterials;
+        [HideInInspector] public int carType;
 
         /// <summary>
         /// A flag to control whether the NetworkManager object is destroyed when the scene changes.
@@ -1281,8 +1282,6 @@ namespace Mirror
         public virtual void OnServerAddPlayer(NetworkConnection conn)
         {
             Transform startPos = GetStartPosition();
-
-            playerPrefab.GetComponentInChildren<MeshRenderer>().materials = playerCarMaterials;
 
             GameObject player = startPos != null
                 ? Instantiate(playerPrefab, startPos.position, startPos.rotation)

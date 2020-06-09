@@ -46,7 +46,13 @@ public class SetupPlayer : NetworkBehaviour
         #region De Germán
         m_Name = m_UIManager.playerName; // Nombre del jugador (variable privada)
         m_PlayerInfo.Name = m_Name;      // Nombre del jugador
-        // Mirar la función AddPlayer de PolePositionManager
+        this.GetComponentInChildren<TextMesh>().text = m_PlayerInfo.Name;
+        if (isLocalPlayer)
+        {
+            this.GetComponentInChildren<MeshRenderer>().materials = m_NetworkManager.playerCarMaterials;
+            m_PlayerInfo.SetCarType(m_NetworkManager.carType);
+        }
+        Debug.Log("COLOR DE COCHE ESCOGIDO: <color=orange>" + m_PlayerInfo.carType + "</color>");
         #endregion
         m_PlayerInfo.CurrentLap = 0;                   // Vuelta actual alcanzada por el jugador
         m_PolePositionManager.AddPlayer(m_PlayerInfo); // Se añade el jugador a la lista de jugadores del manager de la partida

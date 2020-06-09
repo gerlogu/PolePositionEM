@@ -20,6 +20,38 @@ public class PlayerInfo : MonoBehaviour
     // Vuelta en la que se encuentra el jugador actualmente
     public int CurrentLap { get; set; }
 
+    public CarType carType { get; set; }
+
+    public enum CarType
+    {
+        GREEN = 0,
+        ORANGE = 1,
+        RED = 2,
+        WHITE = 3
+    }
+
+    public void SetCarType(int index)
+    {
+        switch (index)
+        {
+            case 0:
+                carType = CarType.GREEN;
+                break;
+            case 1:
+                carType = CarType.ORANGE;
+                break;
+            case 2:
+                carType = CarType.RED;
+                break;
+            case 3:
+                carType = CarType.WHITE;
+                break;
+            default:
+                carType = CarType.GREEN;
+                break;
+        }
+    }
+
     /// <summary>
     /// Imprime información del jugador.
     /// </summary>

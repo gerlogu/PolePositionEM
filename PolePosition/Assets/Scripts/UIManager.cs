@@ -153,6 +153,7 @@ public class UIManager : MonoBehaviour
     private void SelectCar(int carType, int type)
     {
         m_NetworkManager.playerCarMaterials = cars[carType].carMaterials;
+        m_NetworkManager.carType = carType;
         switch (type)
         {
             case 0:
