@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d0f1cd9860c68f4d858f2c6df9cc016, type: 3}
+  m_Name: White
+  m_EditorClassIdentifier: 
+  carMaterials:
+  - {fileID: 2100000, guid: ec502748ea50cbf4fb9fb4dd8f21dd04, type: 2}
+  - {fileID: 2100000, guid: 7612aaf8f0435ad46aba6666d55b1450, type: 2}
+  - {fileID: 2100000, guid: 36b71c7352cb6f64eaf0fd6eb1365198, type: 2}
