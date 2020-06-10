@@ -5,7 +5,6 @@ using UnityEngine;
 public class CrashDetector : MonoBehaviour
 {
     #region Variables privadas
-    private GameObject esfera; //Esfera que se mueve junto al coche
     private WheelCollider[] ruedas; //Array de ruedas del coche
     private int contadorSegundos = 0; //Contador de segundos para cuando el coche ha tenido una colisión
     private float proximoSegundo = 0; //Tiempo de ejecución del próximo segundo para el contador
@@ -21,10 +20,6 @@ public class CrashDetector : MonoBehaviour
     //Función Start, que inicializa las siguientes variables.
     private void Start()
     {
-        //Se obtiene la esfera del jugador del array que se encuentra en el PolePositionManager
-        int playerID = GetComponent<PlayerInfo>().ID;
-        esfera = GameObject.Find("@PolePositionManager").GetComponent<PolePositionManager>().m_DebuggingSpheres[playerID];
-
         //Se obtiene la cámara que sigue al jugador
         transformCamera = GameObject.FindGameObjectWithTag("MainCamera").transform;
 
@@ -63,8 +58,9 @@ public class CrashDetector : MonoBehaviour
         else
         {
             //Si el coche está en el suelo, pero no puede moverse, también se considera
-            float InputAcceleration = Input.GetAxis("vertical");
-            if (playerRB.velocity.magnitude > 0.2f && InputAcceleration != 0)
+            float InputAcceleration = Input.GetAxis("Vertical");
+
+            if (playerRB.velocity.magnitude < 0.5f && InputAcceleration != 0)
             {
                 if (Time.time >= proximoSegundo)
                 {
@@ -82,9 +78,14 @@ public class CrashDetector : MonoBehaviour
         if (contadorSegundos == 3)
         {
             contadorSegundos = 0;
+
+            //Se obtiene la esfera del jugador del array que se encuentra en el PolePositionManager
+            int playerPosition = GetComponent<PlayerInfo>().CurrentPosition;
+            Transform esfera = GameObject.Find("@PolePositionManager").GetComponent<PolePositionManager>().m_DebuggingSpheres[playerPosition].transform;
+
             transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transformCamera.rotation.eulerAngles.y, 0);
             playerRB.velocity = new Vector3();
-            transform.position = new Vector3(esfera.transform.position.x, 3.0f, esfera.transform.position.z);
+            transform.position = new Vector3(esfera.position.x, 3.0f, esfera.position.z);
         }
     }
 }
