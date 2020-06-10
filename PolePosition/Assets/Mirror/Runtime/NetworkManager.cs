@@ -23,8 +23,6 @@ namespace Mirror
     [HelpURL("https://mirror-networking.com/docs/Components/NetworkManager.html")]
     public class NetworkManager : MonoBehaviour
     {
-        [HideInInspector] public Material[] playerCarMaterials;
-        [HideInInspector] public int carType;
 
         /// <summary>
         /// A flag to control whether the NetworkManager object is destroyed when the scene changes.

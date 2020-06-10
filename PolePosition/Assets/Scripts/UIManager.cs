@@ -46,7 +46,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private InputField inputFieldName;
 
     [Header("Car Selector")]
-    [SerializeField] private Car[] cars;
+    public Car[] cars;
     [SerializeField] private GameObject carSelector;
     [SerializeField] private Button buttonRedCar;
     [SerializeField] private Button buttonWhiteCar;
@@ -55,6 +55,8 @@ public class UIManager : MonoBehaviour
 
     NameSelectorManager selectorManager;                       // Clase que contiene las funciones necesarias para el selector de nombres
     [HideInInspector] public string playerName = "player"; // Nombre introducido en el InputField
+
+    public int carType = 0;
 
     private void Awake()
     {
@@ -152,8 +154,7 @@ public class UIManager : MonoBehaviour
     /// <param name="type"> 0: Host | 1: Cliente </param>
     private void SelectCar(int carType, int type)
     {
-        m_NetworkManager.playerCarMaterials = cars[carType].carMaterials;
-        m_NetworkManager.carType = carType;
+        this.carType = carType;
         switch (type)
         {
             case 0:

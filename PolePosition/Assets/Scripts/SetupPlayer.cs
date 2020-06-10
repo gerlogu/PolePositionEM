@@ -13,8 +13,10 @@ using Random = System.Random;
 /// </summary>
 public class SetupPlayer : NetworkBehaviour
 {
-    [SyncVar] private int m_ID;                         // ID del jugador
-    [SyncVar] private string m_Name = "Player";         // Nombre del jugador
+    [SyncVar] private int m_ID; // ID del jugador
+    [SyncVar(hook = nameof(SetName))] private string m_Name = "Player"; // Nombre del jugador
+    [SyncVar(hook = nameof(SetCarType))] private int m_CarType = 0;     // Color del coche seleccionado
+    SyncListString playerNames = new SyncListString();
 
     private UIManager m_UIManager;                      // UIManager de la escena
     private NetworkManager m_NetworkManager;            // NetworkManager de la escena
@@ -35,6 +37,35 @@ public class SetupPlayer : NetworkBehaviour
         m_ID = connectionToClient.connectionId;
     }
 
+    #region Commands
+    [Command]
+    void CmdUpdateName(string name)
+    {
+        GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
+        m_Name = name;
+    }
+
+    [Command]
+    void CmdUpdateColor(int type)
+    {
+        GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
+        m_CarType = type;
+    }
+    #endregion
+
+    #region Funciones Hook
+    void SetName(string anterior, string nuevo)
+    {
+        m_PlayerInfo.Name = nuevo; // Nombre del jugador
+    }
+
+    void SetCarType(int anterior, int nuevo)
+    {
+        m_PlayerInfo.SetCarType(nuevo);
+        this.GetComponentInChildren<MeshRenderer>().materials = m_UIManager.cars[nuevo].carMaterials;
+    }
+    #endregion
+
     /// <summary>
     /// Called on every NetworkBehaviour when it is activated on a client.
     /// <para>Objects on the host have this function called, as there is a local client on the host. The values of SyncVars on object are guaranteed to be initialized correctly with the latest state from the server when this function is called on the client.</para>
@@ -44,17 +75,22 @@ public class SetupPlayer : NetworkBehaviour
         base.OnStartClient();
         m_PlayerInfo.ID = m_ID; // ID del jugador
         #region De Germán
-        m_Name = m_UIManager.playerName; // Nombre del jugador (variable privada)
-        m_PlayerInfo.Name = m_Name;      // Nombre del jugador
-        this.GetComponentInChildren<TextMesh>().text = m_PlayerInfo.Name;
+
         if (isLocalPlayer)
         {
-            this.GetComponentInChildren<MeshRenderer>().materials = m_NetworkManager.playerCarMaterials;
-            m_PlayerInfo.SetCarType(m_NetworkManager.carType);
+            m_Name = m_UIManager.playerName; // Nombre del jugador (variable privada)
+            CmdUpdateName(m_Name);
+
+            m_CarType = m_UIManager.carType;
+            CmdUpdateColor(m_CarType);
+            
+            m_PlayerInfo.SetCarType(m_UIManager.carType);
         }
+
         Debug.Log("COLOR DE COCHE ESCOGIDO: <color=orange>" + m_PlayerInfo.carType + "</color>");
         #endregion
         m_PlayerInfo.CurrentLap = 0;                   // Vuelta actual alcanzada por el jugador
+
         m_PolePositionManager.AddPlayer(m_PlayerInfo); // Se añade el jugador a la lista de jugadores del manager de la partida
     }
 

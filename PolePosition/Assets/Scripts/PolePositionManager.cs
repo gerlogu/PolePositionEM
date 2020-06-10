@@ -66,15 +66,6 @@ public class PolePositionManager : NetworkBehaviour
     public void AddPlayer(PlayerInfo player)
     {
         m_Players.Add(player); // Se añade a la lista el jugador
-        #region De Germán
-        string names = ""; // Nombres de los jugadores
-        // Se recorre la lista de jugadores
-        foreach(PlayerInfo p in m_Players)
-        {
-            names += p.Name + "\n"; // Se añade el nombre del jugador
-        }
-        uiManager.UpdatePlayerNames(names); // Se muestra por pantalla los nombres de los jugadores [ESTO FALLA, IMPRIME DOS VECES EL MISMO NOMBRE]
-        #endregion
     }
 
     private class PlayerInfoComparer : Comparer<PlayerInfo>
@@ -88,7 +79,7 @@ public class PolePositionManager : NetworkBehaviour
 
         public override int Compare(PlayerInfo x, PlayerInfo y)
         {
-            if (this.m_ArcLengths[x.ID] < m_ArcLengths[y.ID])
+            if ((this.m_ArcLengths[x.ID] - m_ArcLengths[y.ID]) > float.Epsilon)
                 return 1;
             else return -1;
         }
@@ -109,9 +100,9 @@ public class PolePositionManager : NetworkBehaviour
         string myRaceOrder = "";
         foreach (var _player in m_Players)
         {
-            myRaceOrder += _player.Name + " ";
+            myRaceOrder += _player.Name + "\n";
         }
-
+        uiManager.UpdatePlayerNames(myRaceOrder);
         Debug.Log("El orden de carrera es: " + myRaceOrder);
     }
 
