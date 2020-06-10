@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Mirror.Examples.Basic;
+using UnityEngine;
 
 //Clase CrashDetector, que comprueba si el coche ha tenido una colisión.
 public class CrashDetector : MonoBehaviour
@@ -82,6 +83,7 @@ public class CrashDetector : MonoBehaviour
         {
             contadorSegundos = 0;
             transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transformCamera.rotation.eulerAngles.y, 0);
+            playerRB.velocity = new Vector3();
             transform.position = new Vector3(esfera.transform.position.x, 3.0f, esfera.transform.position.z);
         }
     }
