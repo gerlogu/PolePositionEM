@@ -8,8 +8,8 @@ public class CrashDetector : MonoBehaviour
     private WheelCollider[] ruedas; //Array de ruedas del coche
     private int contadorSegundos = 0; //Contador de segundos para cuando el coche ha tenido una colisión
     private float proximoSegundo = 0; //Tiempo de ejecución del próximo segundo para el contador
-    private Vector3 posicionAnterior; //Vector que guarda la posición del vehículo para compararla posteriormente
     private Transform transformCamera; //Transform de la cámara
+    private Rigidbody playerRB; //Rigidbody del coche
     #endregion
 
     #region Variables publicas
@@ -30,8 +30,8 @@ public class CrashDetector : MonoBehaviour
         //Se guardan las ruedas en el array
         ruedas = GetComponentsInChildren<WheelCollider>();
 
-        //Se establece la primera posición del coche
-        posicionAnterior = transform.position;
+        //Se obtiene el rigidbody del coche
+        playerRB = GetComponent<Rigidbody>();
     }
 
     //Función Update, que se ejecuta cada frame.
@@ -62,8 +62,8 @@ public class CrashDetector : MonoBehaviour
         else
         {
             //Si el coche está en el suelo, pero no puede moverse, también se considera
-            float InputAcceleration = Input.GetAxis("Vertical");
-            if (InputAcceleration != 0 && transform.position == posicionAnterior)
+            float InputAcceleration = Input.GetAxis("vertical");
+            if (playerRB.velocity.magnitude > 0.2f && InputAcceleration != 0)
             {
                 if (Time.time >= proximoSegundo)
                 {
@@ -84,8 +84,5 @@ public class CrashDetector : MonoBehaviour
             transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transformCamera.rotation.eulerAngles.y, 0);
             transform.position = new Vector3(esfera.transform.position.x, 3.0f, esfera.transform.position.z);
         }
-
-        //Se guarda la posición anterior del coche.
-        posicionAnterior = transform.position;
     }
 }

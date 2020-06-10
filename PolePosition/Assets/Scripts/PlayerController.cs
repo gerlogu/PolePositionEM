@@ -165,6 +165,14 @@ public class PlayerController : NetworkBehaviour
                 var howMuchSlip = (wheelHitRight.forwardSlip - slipLimit) / (1 - slipLimit);
                 axleInfo.rightWheel.motorTorque -= axleInfo.rightWheel.motorTorque * howMuchSlip * slipLimit;
             }
+
+            //Corrección de la deriva
+            WheelFrictionCurve wheelCurve = axleInfo.leftWheel.sidewaysFriction;
+
+            wheelCurve.extremumSlip = (m_Rigidbody.velocity.magnitude > 0.2f) ? 0.2f : 0.3f;
+
+            axleInfo.leftWheel.sidewaysFriction = wheelCurve;
+            axleInfo.rightWheel.sidewaysFriction = wheelCurve;
         }
     }
 

@@ -131,8 +131,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1.0799457, y: 0.51, z: 2.45}
-  m_Center: {x: -0.005710423, y: 0.45, z: -0.028551817}
+  m_Size: {x: 1.0799457, y: 0.5, z: 2.45}
+  m_Center: {x: -0.005710423, y: 0.15, z: -0.028551817}
 --- !u!114 &528894820688187042
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -206,8 +206,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  nameTag: {fileID: 3031375024440321392}
-  transformCamera: {fileID: 0}
   axleInfos:
   - leftWheel: {fileID: 7529074410251188952}
     rightWheel: {fileID: 2399590223335585634}
@@ -225,6 +223,7 @@ MonoBehaviour:
   topSpeed: 200
   downForce: 1000
   slipLimit: 0.2
+  nameTag: {fileID: 3031375024440321392}
 --- !u!114 &7426359134981378254
 MonoBehaviour:
   m_ObjectHideFlags: 0
