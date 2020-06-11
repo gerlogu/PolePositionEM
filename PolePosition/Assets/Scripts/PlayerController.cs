@@ -79,6 +79,8 @@ public class PlayerController : NetworkBehaviour
             Speed = m_Rigidbody.velocity.magnitude;
         }
 
+        //Debug.LogWarning("ID: " + m_PlayerInfo.ID);
+
         nameTag.transform.LookAt(transformCamera); // El nametag del jugador mira a la cámara
 
         nameTag.transform.rotation = Quaternion.LookRotation(transform.position - transformCamera.position); // Se rota el nametag para que no se vea al revés
@@ -170,10 +172,13 @@ public class PlayerController : NetworkBehaviour
             }
 
             //Corrección de la deriva
+            //Se guarda en una curva de fricción la información de la fricción lateral
             WheelFrictionCurve wheelCurve = axleInfo.leftWheel.sidewaysFriction;
 
+            //Se modifica el límite de fricción dependiendo de si el coche está o no en movimiento
             wheelCurve.extremumSlip = (m_Rigidbody.velocity.magnitude > 0.2f) ? 0.2f : 0.3f;
 
+            //Asignamos la nueva curva a los valores de fricción lateral
             axleInfo.leftWheel.sidewaysFriction = wheelCurve;
             axleInfo.rightWheel.sidewaysFriction = wheelCurve;
         }

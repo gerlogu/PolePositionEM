@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.Diagnostics;
 using UnityEngine.UI;
 public class GameStartManager : MonoBehaviour
 {
@@ -31,7 +33,7 @@ public class GameStartManager : MonoBehaviour
 
     public void UpdateGameStarted(int numJugadores, List<PlayerInfo> players)
     {
-        m_Players = players;
+        m_Players = players.ToList<PlayerInfo>();
         if (numJugadores > 1)
         {
             gameStarted = true;

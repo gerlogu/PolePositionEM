@@ -93,7 +93,7 @@ public class UIManager : MonoBehaviour
     /// </summary>
     public void UpdatePlayerNames(string playerName)
     {
-        textPosition.text = playerName; // Se actualiza el texto con la velocidad nueva
+        textPosition.text = playerName; // Se actualiza el texto con el nombre nuevo
     }
 
     /// <summary>

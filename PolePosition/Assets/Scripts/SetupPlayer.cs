@@ -89,7 +89,7 @@ public class SetupPlayer : NetworkBehaviour
     {
         base.OnStartClient();
         m_PlayerInfo.ID = m_ID; // ID del jugador
-        #region De Germán
+        Debug.Log("ENTRO AL SERVIDOR: " + m_ID);
 
         if (isLocalPlayer)
         {
@@ -103,7 +103,7 @@ public class SetupPlayer : NetworkBehaviour
         }
 
         Debug.Log("COLOR DE COCHE ESCOGIDO: <color=orange>" + m_PlayerInfo.carType + "</color>");
-        #endregion
+
         m_PlayerInfo.CurrentLap = 0;                   // Vuelta actual alcanzada por el jugador
 
         m_PolePositionManager.AddPlayer(m_PlayerInfo); // Se añade el jugador a la lista de jugadores del manager de la partida

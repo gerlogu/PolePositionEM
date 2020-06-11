@@ -90,7 +90,8 @@ public class CrashDetector : MonoBehaviour
             Transform esfera = GameObject.Find("@PolePositionManager").GetComponent<PolePositionManager>().m_DebuggingSpheres[playerPosition].transform;
 
             transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transformCamera.rotation.eulerAngles.y, 0);
-            playerRB.velocity = new Vector3();
+            playerRB.velocity = Vector3.zero;
+            playerRB.angularVelocity = Vector3.zero;
             transform.position = new Vector3(esfera.position.x, 3.0f, esfera.position.z);
         }
     }
