@@ -23,6 +23,7 @@ public class SetupPlayer : NetworkBehaviour
     private PlayerController m_PlayerController;        // PlayerController del personaje (el vehículo)
     private PlayerInfo m_PlayerInfo;                    // Info del jugador
     private PolePositionManager m_PolePositionManager;  // Manager del juego
+    private CrashDetector m_CrashDetector;              //Detector de colisiones
 
     //[SyncVar(hook = nameof(SetGameStarted))] bool gameStarted = false;
 
@@ -134,6 +135,7 @@ public class SetupPlayer : NetworkBehaviour
         m_NetworkManager = FindObjectOfType<NetworkManager>();           // Se busca el NetworkManager
         m_PolePositionManager = FindObjectOfType<PolePositionManager>(); // Se busca el Manager del Pole Position
         m_UIManager = FindObjectOfType<UIManager>();                     // Se busca el Manager de la UI
+        m_CrashDetector = GetComponent<CrashDetector>();                 // Se busca el componente CrashDetector
     }
 
     // Start is called before the first frame update
@@ -142,6 +144,7 @@ public class SetupPlayer : NetworkBehaviour
         if (isLocalPlayer)
         {
             m_PlayerController.enabled = true;
+            m_CrashDetector.enabled = true;
             m_PlayerController.OnSpeedChangeEvent += OnSpeedChangeEventHandler;
             ConfigureCamera();
         }
