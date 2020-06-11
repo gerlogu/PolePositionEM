@@ -52,6 +52,8 @@ public class PlayerInfo : MonoBehaviour
         }
     }
 
+    public bool canMove { get; set; }
+
     /// <summary>
     /// Imprime información del jugador.
     /// </summary>

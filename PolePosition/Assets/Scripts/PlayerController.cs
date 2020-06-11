@@ -11,7 +11,7 @@ using Mirror;
 public class PlayerController : NetworkBehaviour
 {
     #region Variables
-    
+    public bool gameStarted;
 
     [Header("Movement")] public List<AxleInfo> axleInfos;
     public float forwardMotorTorque = 100000;
@@ -71,10 +71,13 @@ public class PlayerController : NetworkBehaviour
 
     public void Update()
     {
-        InputAcceleration = Input.GetAxis("Vertical");
-        InputSteering = Input.GetAxis(("Horizontal"));
-        InputBrake = Input.GetAxis("Jump");
-        Speed = m_Rigidbody.velocity.magnitude;
+        if (m_PlayerInfo.canMove)
+        {
+            InputAcceleration = Input.GetAxis("Vertical");
+            InputSteering = Input.GetAxis(("Horizontal"));
+            InputBrake = Input.GetAxis("Jump");
+            Speed = m_Rigidbody.velocity.magnitude;
+        }
 
         nameTag.transform.LookAt(transformCamera); // El nametag del jugador mira a la cámara
 

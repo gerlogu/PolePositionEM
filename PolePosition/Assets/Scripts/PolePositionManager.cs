@@ -12,17 +12,35 @@ public class PolePositionManager : NetworkBehaviour
 {
     #region Variables Públicas
     [Tooltip("Número de Jugadores")]
-    public int numPlayers;
+    [SyncVar(hook = nameof(H_UpdateNumPlayers))] public int numPlayers;
     [Tooltip("Network Manager")]
     public NetworkManager networkManager;
 
     public UIManager uiManager;
+
+    public GameStartManager gameStartManager;
     #endregion
 
     #region Variables Privadas
     private readonly List<PlayerInfo> m_Players = new List<PlayerInfo>(4); // Lista de jugadores
     private CircuitController m_CircuitController; // Controlador del circuito
     public GameObject[] m_DebuggingSpheres;       // Esferas para depurar
+    #endregion
+
+    #region Funciones Hook
+    void H_UpdateNumPlayers(int anterior, int nuevo)
+    {
+        numPlayers = nuevo;
+    }
+    #endregion
+
+    #region Funciones Command
+    [Command]
+    void CmdUpdateNumPlayers(int n)
+    {
+        GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
+        numPlayers = n;
+    }
     #endregion
 
     private void Awake()
@@ -66,6 +84,13 @@ public class PolePositionManager : NetworkBehaviour
     public void AddPlayer(PlayerInfo player)
     {
         m_Players.Add(player); // Se añade a la lista el jugador
+        if (isLocalPlayer)
+        {
+            CmdUpdateNumPlayers(m_Players.Count);
+        }
+
+        uiManager.textNumPlayers.text = "P: " + m_Players.Count;
+        gameStartManager.UpdateGameStarted(m_Players.Count, m_Players);
     }
 
     private class PlayerInfoComparer : Comparer<PlayerInfo>

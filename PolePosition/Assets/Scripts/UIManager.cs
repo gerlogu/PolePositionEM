@@ -36,6 +36,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Text textLaps;
     [Tooltip("Posición (o puesto) del vehículo")]
     [SerializeField] private Text textPosition;
+    public Text textNumPlayers;
 
     [Header("Name Selector")]
     [Tooltip("Objeto Name Selector")]
@@ -53,10 +54,9 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Button buttonOrangeCar;
     [SerializeField] private Button buttonGreenCar;
 
-    NameSelectorManager selectorManager;                       // Clase que contiene las funciones necesarias para el selector de nombres
+    NameSelectorManager selectorManager;                   // Clase que contiene las funciones necesarias para el selector de nombres
     [HideInInspector] public string playerName = "player"; // Nombre introducido en el InputField
-
-    public int carType = 0;
+    [HideInInspector] public int carType = 0;
 
     private void Awake()
     {

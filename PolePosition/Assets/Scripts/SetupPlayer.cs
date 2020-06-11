@@ -16,13 +16,15 @@ public class SetupPlayer : NetworkBehaviour
     [SyncVar] private int m_ID; // ID del jugador
     [SyncVar(hook = nameof(SetName))] private string m_Name = "Player"; // Nombre del jugador
     [SyncVar(hook = nameof(SetCarType))] private int m_CarType = 0;     // Color del coche seleccionado
-    SyncListString playerNames = new SyncListString();
+    //[SyncVar(hook = nameof())]
 
     private UIManager m_UIManager;                      // UIManager de la escena
     private NetworkManager m_NetworkManager;            // NetworkManager de la escena
     private PlayerController m_PlayerController;        // PlayerController del personaje (el vehículo)
     private PlayerInfo m_PlayerInfo;                    // Info del jugador
     private PolePositionManager m_PolePositionManager;  // Manager del juego
+
+    //[SyncVar(hook = nameof(SetGameStarted))] bool gameStarted = false;
 
     #region Start & Stop Callbacks
 
@@ -51,6 +53,13 @@ public class SetupPlayer : NetworkBehaviour
         GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
         m_CarType = type;
     }
+
+    //[Command]
+    //void CmdUpdateGameStarted(bool gs)
+    //{
+    //    GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
+    //    gameStarted = gs;
+    //}
     #endregion
 
     #region Funciones Hook
@@ -64,6 +73,11 @@ public class SetupPlayer : NetworkBehaviour
         m_PlayerInfo.SetCarType(nuevo);
         this.GetComponentInChildren<MeshRenderer>().materials = m_UIManager.cars[nuevo].carMaterials;
     }
+
+    //void SetGameStarted(bool anterior, bool nuevo)
+    //{
+    //    gameStarted = nuevo;
+    //}
     #endregion
 
     /// <summary>
@@ -92,6 +106,16 @@ public class SetupPlayer : NetworkBehaviour
         m_PlayerInfo.CurrentLap = 0;                   // Vuelta actual alcanzada por el jugador
 
         m_PolePositionManager.AddPlayer(m_PlayerInfo); // Se añade el jugador a la lista de jugadores del manager de la partida
+
+        //if (isLocalPlayer)
+        //{
+            //if (m_PolePositionManager.numPlayers > 1)
+            //{
+            //    gameStarted = true;
+            //    Debug.Log("LA PARTIDA HA EMPEZADO");
+            //    CmdUpdateGameStarted(gameStarted);
+            //}
+//}
     }
 
     /// <summary>
