@@ -19,7 +19,7 @@ public class DirectionDetector : MonoBehaviour
     #endregion
 
     /// <summary>
-    /// Función Start, que inicializa las siguientes variables
+    /// Función Start, que inicializa las siguientes variables.
     /// </summary>
     void Start()
     {
@@ -47,23 +47,23 @@ public class DirectionDetector : MonoBehaviour
             float actualArcLength = 0f;
 
             // Lock para que no se solape con otros procesos
+            int id = GetComponent<PlayerInfo>().ID;
             lock (ppm.xLock)
             {
-                int id = GetComponent<PlayerInfo>().ID;
                 actualArcLength = ppm.m_arcLengths[id];
             }
 
-            //Si está yendo a hacia atrás
+            // Si está yendo a hacia atrás
             if (actualArcLength < lastArcLength && playerRB.velocity.magnitude > 0.2f)
             {
-                //Si no hemos guardado la posición de la primera dirección hacia atrás, la guardamos
+                // Si no hemos guardado la posición de la primera dirección hacia atrás, la guardamos
                 if (!firstSaved)
                 {
                     firstSaved = true;
                     firstBadArcLength = actualArcLength;
                 }
-
-                //Si estamos 5 "metros" atrás de donde estábamos, estamos yendo en mala dirección
+                
+                // Si estamos 5 "metros" atrás de donde estábamos, estamos yendo en mala dirección
                 if (actualArcLength < firstBadArcLength - 5.0f)
                     buenaDireccion = false;
             }
