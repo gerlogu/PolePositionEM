@@ -79,6 +79,7 @@ GameObject:
   - component: {fileID: 3466774584401487325}
   - component: {fileID: 1137246169109603126}
   - component: {fileID: 7426359134981378254}
+  - component: {fileID: 2833157670882978599}
   - component: {fileID: 6346869062069434778}
   - component: {fileID: 2697569808015383802}
   m_Layer: 0
@@ -205,6 +206,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
+  gameStarted: 0
   axleInfos:
   - leftWheel: {fileID: 7529074410251188952}
     rightWheel: {fileID: 2399590223335585634}
@@ -239,6 +241,18 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 512
   checkRadius: 0.5
+--- !u!114 &2833157670882978599
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1508097745644926054}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f289c6d59feb70f479bd696e6509080a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &6346869062069434778
 MonoBehaviour:
   m_ObjectHideFlags: 0

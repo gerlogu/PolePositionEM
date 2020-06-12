@@ -1,5 +1,4 @@
-﻿using Mirror.Examples.Basic;
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// Clase CrashDetector, que comprueba si el coche ha tenido una colisión.

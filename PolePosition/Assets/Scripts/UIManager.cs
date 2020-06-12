@@ -58,6 +58,9 @@ public class UIManager : MonoBehaviour
     [HideInInspector] public string playerName = "player"; // Nombre introducido en el InputField
     [HideInInspector] public int carType = 0;
 
+    [Header("Wrong Direction")]
+    public GameObject incorrectDirection;
+
     private void Awake()
     {
         m_NetworkManager = FindObjectOfType<NetworkManager>(); // Se busca el network manager en la escena
