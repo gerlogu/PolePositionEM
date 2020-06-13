@@ -94,13 +94,13 @@ public class SetupPlayer : NetworkBehaviour
 
         if (isLocalPlayer)
         {
-            m_Name = m_UIManager.playerName; // Nombre del jugador (variable privada)
-            CmdUpdateName(m_Name);
+            //m_Name = m_UIManager.playerName; // Nombre del jugador (variable privada)
+            CmdUpdateName(m_UIManager.playerName);
 
-            m_CarType = m_UIManager.carType;
-            CmdUpdateColor(m_CarType);
+            //m_CarType = m_UIManager.carType;
+            CmdUpdateColor(m_UIManager.carType);
             
-            m_PlayerInfo.SetCarType(m_UIManager.carType);
+            //m_PlayerInfo.SetCarType(m_UIManager.carType);
         }
 
         // TE HE ARREGLADO LOS COLORES, DENADA
