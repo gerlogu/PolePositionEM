@@ -171,14 +171,14 @@ public class PlayerController : NetworkBehaviour
                 axleInfo.rightWheel.motorTorque -= axleInfo.rightWheel.motorTorque * howMuchSlip * slipLimit;
             }
 
-            //Corrección de la deriva
-            //Se guarda en una curva de fricción la información de la fricción lateral
+            // Corrección de la deriva
+            // Se guarda en una curva de fricción la información de la fricción lateral
             WheelFrictionCurve wheelCurve = axleInfo.leftWheel.sidewaysFriction;
 
-            //Se modifica el límite de fricción dependiendo de si el coche está o no en movimiento
+            // Se modifica el límite de fricción dependiendo de si el coche está o no en movimiento
             wheelCurve.extremumSlip = (m_Rigidbody.velocity.magnitude > 0.2f) ? 0.2f : 0.3f;
 
-            //Asignamos la nueva curva a los valores de fricción lateral
+            // Asignamos la nueva curva a los valores de fricción lateral
             axleInfo.leftWheel.sidewaysFriction = wheelCurve;
             axleInfo.rightWheel.sidewaysFriction = wheelCurve;
         }

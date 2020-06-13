@@ -20,12 +20,15 @@ public class PolePositionManager : NetworkBehaviour
     public UIManager uiManager;
 
     public GameStartManager gameStartManager;
+
+    public object xLock = new object();
     #endregion
 
     #region Variables Privadas
     private readonly List<PlayerInfo> m_Players = new List<PlayerInfo>(4); // Lista de jugadores
-    private CircuitController m_CircuitController; // Controlador del circuito
-    public GameObject[] m_DebuggingSpheres;       // Esferas para depurar
+    private CircuitController m_CircuitController;                         // Controlador del circuito
+    public GameObject[] m_DebuggingSpheres;                                // Esferas para depurar
+    public float[] m_arcLengths;                                           // Longitudes de arco
     #endregion
 
     #region Funciones Hook
@@ -115,24 +118,28 @@ public class PolePositionManager : NetworkBehaviour
 
     public void UpdateRaceProgress()
     {
-        // Update car arc-lengths
-
-        float[] arcLengths = new float[m_Players.Count];
-
-        for (int i = 0; i < m_Players.Count; ++i)
+        // Lock para que esto no se solape con otros procesos
+        lock (xLock)
         {
-            //ComputeCarArcLength calcula la longitud de arco para el coche con id i
-            //arcLengths[i] guarda la longitud de arco ordenados por id
-            arcLengths[i] = ComputeCarArcLength(m_Players[i].ID); //POR ESO TENEMOS QUE HACER COMPUTE POR POSICION, PILLANDO LA ID DEL QUE VA PRIMERO, SEGUNDO...
-        }
+            // Update car arc-lengths
 
-        //Este método la lista de jugadores según las longitudes de arco por posición
-        m_Players.Sort(new PlayerInfoComparer(arcLengths));
+            m_arcLengths = new float[m_Players.Count];
 
-        //Se asigna la posición
-        for (int i = 0; i < m_Players.Count; ++i)
-        {
-            m_Players[i].CurrentPosition = i;
+            for (int i = 0; i < m_Players.Count; ++i)
+            {
+                // ComputeCarArcLength calcula la longitud de arco para el coche con id i
+                // arcLengths[i] guarda la longitud de arco ordenados por id
+                m_arcLengths[i] = ComputeCarArcLength(m_Players[i].ID); // POR ESO TENEMOS QUE HACER COMPUTE POR POSICION, PILLANDO LA ID DEL QUE VA PRIMERO, SEGUNDO...
+            }
+
+            // Este método la lista de jugadores según las longitudes de arco por posición
+            m_Players.Sort(new PlayerInfoComparer(m_arcLengths));
+
+            // Se asigna la posición
+            for (int i = 0; i < m_Players.Count; ++i)
+            {
+                m_Players[i].CurrentPosition = i;
+            }
         }
 
         string myRaceOrder = "";
@@ -141,7 +148,7 @@ public class PolePositionManager : NetworkBehaviour
             myRaceOrder += _player.Name + "\n";
         }
         uiManager.UpdatePlayerNames(myRaceOrder);
-        //Debug.Log("El orden de carrera es: " + myRaceOrder);
+        // Debug.Log("El orden de carrera es: " + myRaceOrder);
     }
 
     float ComputeCarArcLength(int ID)

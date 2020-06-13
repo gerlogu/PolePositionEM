@@ -23,7 +23,8 @@ public class SetupPlayer : NetworkBehaviour
     private PlayerController m_PlayerController;        // PlayerController del personaje (el vehículo)
     private PlayerInfo m_PlayerInfo;                    // Info del jugador
     private PolePositionManager m_PolePositionManager;  // Manager del juego
-    private CrashDetector m_CrashDetector;              //Detector de colisiones
+    private CrashDetector m_CrashDetector;              // Detector de colisiones
+    private DirectionDetector m_DirectionDetector;      // Detector de dirección
 
     //[SyncVar(hook = nameof(SetGameStarted))] bool gameStarted = false;
 
@@ -89,7 +90,6 @@ public class SetupPlayer : NetworkBehaviour
     {
         base.OnStartClient();
         m_PlayerInfo.ID = m_ID; // ID del jugador
-        Debug.Log("ENTRO AL SERVIDOR: " + m_ID);
 
         if (isLocalPlayer)
         {
@@ -102,7 +102,9 @@ public class SetupPlayer : NetworkBehaviour
             //m_PlayerInfo.SetCarType(m_UIManager.carType);
         }
 
-        Debug.Log("COLOR DE COCHE ESCOGIDO: <color=orange>" + m_PlayerInfo.carType + "</color>");
+        // TE HE ARREGLADO LOS COLORES, DENADA
+        string carColor = m_PlayerInfo.carType.ToString();
+        Debug.Log("COLOR DE COCHE ESCOGIDO: <color=" + carColor + ">" + m_PlayerInfo.carType + "</color>");
 
         m_PlayerInfo.CurrentLap = 0;                   // Vuelta actual alcanzada por el jugador
 
@@ -136,6 +138,7 @@ public class SetupPlayer : NetworkBehaviour
         m_PolePositionManager = FindObjectOfType<PolePositionManager>(); // Se busca el Manager del Pole Position
         m_UIManager = FindObjectOfType<UIManager>();                     // Se busca el Manager de la UI
         m_CrashDetector = GetComponent<CrashDetector>();                 // Se busca el componente CrashDetector
+        m_DirectionDetector = GetComponent<DirectionDetector>();         // Se busca el componente DirectionDetector
     }
 
     // Start is called before the first frame update
@@ -145,6 +148,7 @@ public class SetupPlayer : NetworkBehaviour
         {
             m_PlayerController.enabled = true;
             m_CrashDetector.enabled = true;
+            m_DirectionDetector.enabled = true;
             m_PlayerController.OnSpeedChangeEvent += OnSpeedChangeEventHandler;
             ConfigureCamera();
         }
