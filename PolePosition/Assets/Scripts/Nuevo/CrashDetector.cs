@@ -65,7 +65,7 @@ public class CrashDetector : MonoBehaviour
             // Si el coche está en el suelo, pero no puede moverse, también se considera
             float InputAcceleration = Input.GetAxis("Vertical");
 
-            if (playerRB.velocity.magnitude < 0.5f && InputAcceleration != 0 && GetComponent<PlayerInfo>().canMove)
+            if (playerRB.velocity.magnitude < 1f && InputAcceleration != 0 && GetComponent<PlayerInfo>().canMove)
             {
                 if (Time.time >= proximoSegundo)
                 {

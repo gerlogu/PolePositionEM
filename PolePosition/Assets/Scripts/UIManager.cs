@@ -100,6 +100,14 @@ public class UIManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Actualiza las vueltas de los jugadores
+    /// </summary>
+    public void UpdateLaps(int currentLap, int totalLaps)
+    {
+        textLaps.text = "LAP: " + currentLap + "/" + totalLaps; // Se actualiza el texto con la nueva vuelta
+    }
+
+    /// <summary>
     /// Muestra por pantalla el menú principal.
     /// </summary>
     private void ActivateMainMenu()

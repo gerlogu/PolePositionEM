@@ -110,9 +110,9 @@ public class PolePositionManager : NetworkBehaviour
         {
             var diferencia = m_ArcLengths[x.ID] - m_ArcLengths[y.ID];
 
-            if (diferencia < -float.Epsilon)
-                return 1;
-            else return -1;
+            if (diferencia > float.Epsilon)
+                return -1;
+            else return 1;
         }
     }
 
@@ -134,6 +134,9 @@ public class PolePositionManager : NetworkBehaviour
 
             // Este método la lista de jugadores según las longitudes de arco por posición
             m_Players.Sort(new PlayerInfoComparer(m_arcLengths));
+
+            if (m_Players.Count == 2)
+                Debug.Log("Longitudes de arco: [" + m_Players[0].Name + ": " + m_arcLengths[m_Players[0].ID] + "], [" + m_Players[1].Name + ": " + m_arcLengths[m_Players[1].ID] + "]");
 
             // Se asigna la posición
             for (int i = 0; i < m_Players.Count; ++i)

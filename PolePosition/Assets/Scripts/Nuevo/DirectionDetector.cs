@@ -18,6 +18,11 @@ public class DirectionDetector : MonoBehaviour
     private UIManager myUIM;                 // Referencia al UIManager
     #endregion
 
+    #region Variables publicas
+    public bool buenaDireccion = true;       // Booleano para saber si va en buena dirección
+    public bool haCruzadoMeta = false;       // Booleano para saber si acaba de cruzar meta
+    #endregion
+
     /// <summary>
     /// Función Start, que inicializa las siguientes variables.
     /// </summary>
@@ -38,58 +43,68 @@ public class DirectionDetector : MonoBehaviour
     /// </summary>
     void Update()
     {
-        // Booleano para comprobar si va en buena dirección
-        bool buenaDireccion = true;
+        //Booleano para indicar si va bien
+        bool vaBien = true;
 
-        // Cada segundo comprobamos si está avanzando hacia la meta o va en dirección contraria
+        // Cada segundo se comprueba si está avanzando hacia la meta o va en dirección contraria
         if (Time.time >= proximoSegundo)
         {
-            float actualArcLength = 0f;
-
-            // Lock para que no se solape con otros procesos
-            int id = GetComponent<PlayerInfo>().ID;
-            lock (ppm.xLock)
+            //Si no acaba de cruzar meta, se comprueba
+            if (!haCruzadoMeta)
             {
-                actualArcLength = ppm.m_arcLengths[id];
-            }
+                float actualArcLength = 0f;
 
-            // Si está yendo a hacia atrás
-            if (actualArcLength < lastArcLength && playerRB.velocity.magnitude > 0.2f)
-            {
-                // Si no hemos guardado la posición de la primera dirección hacia atrás, la guardamos
-                if (!firstSaved)
+                // Lock para que no se solape con otros procesos
+                int id = GetComponent<PlayerInfo>().ID;
+                lock (ppm.xLock)
                 {
-                    firstSaved = true;
-                    firstBadArcLength = actualArcLength;
+                    actualArcLength = ppm.m_arcLengths[id];
                 }
-                
-                // Si estamos 5 "metros" atrás de donde estábamos, estamos yendo en mala dirección
-                if (actualArcLength < firstBadArcLength - 5.0f)
+
+                // Si está yendo a hacia atrás
+                if (actualArcLength < lastArcLength && playerRB.velocity.magnitude > 0.2f)
+                {
                     buenaDireccion = false;
+
+                    // Si no hemos guardado la posición de la primera dirección hacia atrás, la guardamos
+                    if (!firstSaved)
+                    {
+                        firstSaved = true;
+                        firstBadArcLength = actualArcLength;
+                    }
+
+                    // Si estamos 5 "metros" atrás de donde estábamos, estamos yendo en mala dirección
+                    if (actualArcLength < firstBadArcLength - 5.0f)
+                        vaBien = false;
+                }
+                else
+                {
+                    vaBien = true;
+                    firstSaved = false;
+                    showingInfo = false;
+                    myUIM.incorrectDirection.SetActive(false);
+                }
+
+                // Actualizamos el valor de lastArcLength
+                lastArcLength = actualArcLength;
             }
+            //Si habia cruzado la meta, le decimos que la proxima no
             else
             {
-                buenaDireccion = true;
-                firstSaved = false;
-                showingInfo = false;
-                myUIM.incorrectDirection.SetActive(false);
+                haCruzadoMeta = false;
             }
-
-            // Actualizamos el valor de lastArcLength
-            lastArcLength = actualArcLength;
 
             // Actualizamos el tiempo de la próxima comprobación
             proximoSegundo = Time.time + ratioComprobacion;
         }
 
         // Si el contador llega a 3, se reinicia la posición del coche
-        if (!buenaDireccion)
+        if (!vaBien)
         {
             if (!showingInfo)
             {
                 showingInfo = true;
                 myUIM.incorrectDirection.SetActive(true);
-                Debug.LogWarning("MALA DIRECCIÓN");
             }
         }
     }

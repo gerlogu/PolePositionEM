@@ -25,6 +25,7 @@ public class SetupPlayer : NetworkBehaviour
     private PolePositionManager m_PolePositionManager;  // Manager del juego
     private CrashDetector m_CrashDetector;              // Detector de colisiones
     private DirectionDetector m_DirectionDetector;      // Detector de dirección
+    private LapController m_LapController;              // Controlador de vueltas
 
     //[SyncVar(hook = nameof(SetGameStarted))] bool gameStarted = false;
 
@@ -139,6 +140,7 @@ public class SetupPlayer : NetworkBehaviour
         m_UIManager = FindObjectOfType<UIManager>();                     // Se busca el Manager de la UI
         m_CrashDetector = GetComponent<CrashDetector>();                 // Se busca el componente CrashDetector
         m_DirectionDetector = GetComponent<DirectionDetector>();         // Se busca el componente DirectionDetector
+        m_LapController = GetComponent<LapController>();                 // Se buesca el componente LapController
     }
 
     // Start is called before the first frame update
@@ -149,6 +151,7 @@ public class SetupPlayer : NetworkBehaviour
             m_PlayerController.enabled = true;
             m_CrashDetector.enabled = true;
             m_DirectionDetector.enabled = true;
+            m_LapController.enabled = true;
             m_PlayerController.OnSpeedChangeEvent += OnSpeedChangeEventHandler;
             ConfigureCamera();
         }
