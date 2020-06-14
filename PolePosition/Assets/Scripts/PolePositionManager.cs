@@ -136,7 +136,10 @@ public class PolePositionManager : NetworkBehaviour
             m_Players.Sort(new PlayerInfoComparer(m_arcLengths));
 
             if (m_Players.Count == 2)
+            {
                 Debug.Log("Longitudes de arco: [" + m_Players[0].Name + ": " + m_arcLengths[m_Players[0].ID] + "], [" + m_Players[1].Name + ": " + m_arcLengths[m_Players[1].ID] + "]");
+                Debug.Log("Vueltas: [" + m_Players[0].Name + ": " + m_Players[0].CurrentLap + "], [" + m_Players[1].Name + ": " + m_Players[1].CurrentLap + "]");
+            }
 
             // Se asigna la posición
             for (int i = 0; i < m_Players.Count; ++i)

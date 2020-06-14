@@ -95,11 +95,13 @@ public class SetupPlayer : NetworkBehaviour
         if (isLocalPlayer)
         {
             //m_Name = m_UIManager.playerName; // Nombre del jugador (variable privada)
-            CmdUpdateName(m_UIManager.playerName);
+            CmdUpdateName(m_UIManager.playerName + "_" + m_PlayerInfo.ID);
 
             //m_CarType = m_UIManager.carType;
             CmdUpdateColor(m_UIManager.carType);
-            
+
+           // m_LapController.m_playerInfo = m_PlayerInfo;
+            Debug.Log("Nombre del jugador:" + m_LapController.m_playerInfo.Name);
             //m_PlayerInfo.SetCarType(m_UIManager.carType);
         }
 
@@ -109,8 +111,11 @@ public class SetupPlayer : NetworkBehaviour
 
         m_PlayerInfo.CurrentLap = 0;                   // Vuelta actual alcanzada por el jugador
 
+        
+
         m_PolePositionManager.AddPlayer(m_PlayerInfo); // Se añade el jugador a la lista de jugadores del manager de la partida
 
+        
         //if (isLocalPlayer)
         //{
             //if (m_PolePositionManager.numPlayers > 1)
@@ -119,7 +124,7 @@ public class SetupPlayer : NetworkBehaviour
             //    Debug.Log("LA PARTIDA HA EMPEZADO");
             //    CmdUpdateGameStarted(gameStarted);
             //}
-//}
+        //}
     }
 
     /// <summary>
@@ -152,6 +157,7 @@ public class SetupPlayer : NetworkBehaviour
             m_CrashDetector.enabled = true;
             m_DirectionDetector.enabled = true;
             m_LapController.enabled = true;
+            m_LapController.canLap = true;
             m_PlayerController.OnSpeedChangeEvent += OnSpeedChangeEventHandler;
             ConfigureCamera();
         }

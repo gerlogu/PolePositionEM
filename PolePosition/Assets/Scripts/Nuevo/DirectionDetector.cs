@@ -82,6 +82,7 @@ public class DirectionDetector : MonoBehaviour
                     vaBien = true;
                     firstSaved = false;
                     showingInfo = false;
+                    buenaDireccion = true;
                     myUIM.incorrectDirection.SetActive(false);
                 }
 

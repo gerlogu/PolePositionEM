@@ -1,19 +1,27 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
-public class LapController : MonoBehaviour
+public class LapController : NetworkBehaviour
 {
     #region Variables privadas
-    private PlayerInfo m_playerInfo;                // Referencia al PlayerInfo
+    private int laps = 0;
+    public PlayerInfo m_playerInfo;                 // Referencia al PlayerInfo
     private DirectionDetector m_directionDetector;  // Referencia al DirectionDetector
     private UIManager m_UIManager;                  // Referencia al UIManager
     private bool malaVuelta = false;                // Booleano que indica si la vuelta es mala (marcha atrás)
+    public bool canLap = false;
     #endregion
 
     #region Variables publicas
     [Tooltip("Número total de vueltas")] public int totalLaps = 3; // Por poner algo de momento
     #endregion
+
+    //void UpdateLaps(int anterior, int nuevo)
+    //{
+    //    m_playerInfo.CurrentLap = nuevo;
+    //}
 
     /// <summary>
     /// Función Awake, que inicializa las siguientes variables.
@@ -21,14 +29,20 @@ public class LapController : MonoBehaviour
     void Awake()
     {
         // Se obtiene el PlayerInfo
-        m_playerInfo = GetComponent<PlayerInfo>();
+        m_playerInfo = this.GetComponent<PlayerInfo>();
 
         // Se obtiene el DirectionDetector
-        m_directionDetector = GetComponent<DirectionDetector>();
+        m_directionDetector = this.GetComponent<DirectionDetector>();
 
         // Se obtiene el UIManager y se establece el texto de las vueltas
         m_UIManager = FindObjectOfType<UIManager>();
         m_UIManager.UpdateLaps(1, totalLaps);
+    }
+
+    private void Update()
+    {
+        //m_playerInfo.CurrentLap++;
+        Debug.Log("Vueltas de " + m_playerInfo.Name + ": " + m_playerInfo.CurrentLap);
     }
 
     /// <summary>
@@ -42,7 +56,7 @@ public class LapController : MonoBehaviour
         // La cosa es que el cliente me está modificando las vueltas del host y no debe
 
         // Si toca la meta:
-        if (other.CompareTag("FinishLine"))
+        if (other.CompareTag("FinishLine") && canLap)
         {
             // Si va en buena dirección:
             if (m_directionDetector.buenaDireccion)
