@@ -9,6 +9,10 @@ public class GameStartManager : MonoBehaviour
     [HideInInspector] public bool gameStarted = false;
     // [SerializeField] Text timerText;
     [SerializeField] Animator timerAnim;
+    [SerializeField] GameObject semaphore;
+    [SerializeField] Material[] stateGreen;
+    [SerializeField] Material[] stateOrange;
+    [SerializeField] Material[] stateRed;
     List<PlayerInfo> m_Players;
     float timer = 3;
 
@@ -27,6 +31,18 @@ public class GameStartManager : MonoBehaviour
             {
                 g.canMove = gameStarted;
             }
+            
+        }
+
+        if(timer < 2.55f && timer > 1.65f)
+        {
+            semaphore.GetComponent<MeshRenderer>().materials = stateRed;
+        }else if(timer <= 1.65f && timer > 0.5f)
+        {
+            semaphore.GetComponent<MeshRenderer>().materials = stateOrange;
+        }else if(timer <= 0.5f)
+        {
+            semaphore.GetComponent<MeshRenderer>().materials = stateGreen;
         }
     }
 

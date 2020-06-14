@@ -69,6 +69,7 @@ public class SetupPlayer : NetworkBehaviour
     void SetName(string anterior, string nuevo)
     {
         m_PlayerInfo.Name = nuevo; // Nombre del jugador
+        GetComponentInChildren<TextMesh>().text = nuevo;
     }
 
     void SetCarType(int anterior, int nuevo)

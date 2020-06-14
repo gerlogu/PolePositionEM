@@ -61,6 +61,8 @@ public class UIManager : MonoBehaviour
     [Header("Wrong Direction")]
     public GameObject incorrectDirection;
 
+    private bool mainMenuIsActive = true;
+
     private void Awake()
     {
         m_NetworkManager = FindObjectOfType<NetworkManager>(); // Se busca el network manager en la escena
@@ -79,7 +81,13 @@ public class UIManager : MonoBehaviour
 
     private void Update()
     {
-        playerName = selectorManager.CheckPlayerName(); // Se actualiza el nombre del personaje
+        // Para no actualizar esta variable constantemente y evitar cálculos innecesarios
+        // si no se encuentra el jugador en el menú principal, no se actualiza la variable
+        // que contiene su nombre
+        if (mainMenuIsActive)
+        {
+            playerName = selectorManager.CheckPlayerName(); // Se actualiza el nombre del personaje
+        }
     }
 
     /// <summary>
@@ -184,6 +192,7 @@ public class UIManager : MonoBehaviour
     {
         m_NetworkManager.StartHost(); // Se inicia el Host
         ActivateInGameHUD();          // Se activa el GUI de la partida
+        mainMenuIsActive = false;
     }
 
     /// <summary>
@@ -196,6 +205,7 @@ public class UIManager : MonoBehaviour
         m_NetworkManager.StartClient(); // Se inicia el cliente
         m_NetworkManager.networkAddress = inputFieldIP.text; // Se ajusta la IP
         ActivateInGameHUD(); // Se activa el GUI de la partida
+        mainMenuIsActive = false;
     }
 
     /// <summary>
@@ -205,5 +215,6 @@ public class UIManager : MonoBehaviour
     {
         m_NetworkManager.StartServer(); // Se inicia el servidor
         ActivateInGameHUD();            // Se activa el GUI de la partida
+        mainMenuIsActive = false;
     }
 }
