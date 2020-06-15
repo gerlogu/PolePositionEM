@@ -54,6 +54,10 @@ public class PlayerInfo : MonoBehaviour
 
     public bool canMove { get; set; }
 
+    public int lapSeconds { get; set; }
+    public int lapMinutes { get; set; }
+    public int lapMiliseconds { get; set; }
+
     /// <summary>
     /// Imprime información del jugador.
     /// </summary>

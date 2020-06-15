@@ -13,10 +13,9 @@ using Random = System.Random;
 /// </summary>
 public class SetupPlayer : NetworkBehaviour
 {
-    [SyncVar] private int m_ID; // ID del jugador
+    [SyncVar(hook = nameof(SetID))] private int m_ID;                   // ID del jugador
     [SyncVar(hook = nameof(SetName))] private string m_Name = "Player"; // Nombre del jugador
     [SyncVar(hook = nameof(SetCarType))] private int m_CarType = 0;     // Color del coche seleccionado
-    //[SyncVar(hook = nameof())]
 
     private UIManager m_UIManager;                      // UIManager de la escena
     private NetworkManager m_NetworkManager;            // NetworkManager de la escena
@@ -26,8 +25,6 @@ public class SetupPlayer : NetworkBehaviour
     private CrashDetector m_CrashDetector;              // Detector de colisiones
     private DirectionDetector m_DirectionDetector;      // Detector de dirección
     private LapController m_LapController;              // Controlador de vueltas
-
-    //[SyncVar(hook = nameof(SetGameStarted))] bool gameStarted = false;
 
     #region Start & Stop Callbacks
 
@@ -57,12 +54,29 @@ public class SetupPlayer : NetworkBehaviour
         m_CarType = type;
     }
 
-    //[Command]
-    //void CmdUpdateGameStarted(bool gs)
-    //{
-    //    GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
-    //    gameStarted = gs;
-    //}
+    #region Commands del GameStartManager
+    [Command]
+    public void CmdUpdatePlayers()
+    {
+        GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
+        m_PolePositionManager.gameStartManager.numPlayers++; // Se actualiza el número de jugadores LISTOS tras terminar el timer
+    }
+
+    [Command]
+    public void CmdUpdateTimer()
+    {
+        GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
+        m_PolePositionManager.gameStartManager.timersListos++; // Se actualiza el número de timers listos para iniciarse
+    }
+
+    [Command]
+    public void CmdUpdateGameStarted()
+    {
+        GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
+        m_PolePositionManager.gameStartManager.gameStarted = true; // Se actualiza el estado de la partida para los jugadores
+    }
+    #endregion
+
     #endregion
 
     #region Funciones Hook
@@ -78,10 +92,10 @@ public class SetupPlayer : NetworkBehaviour
         this.GetComponentInChildren<MeshRenderer>().materials = m_UIManager.cars[nuevo].carMaterials;
     }
 
-    //void SetGameStarted(bool anterior, bool nuevo)
-    //{
-    //    gameStarted = nuevo;
-    //}
+    void SetID(int anterior, int nuevo)
+    {
+        m_PlayerInfo.ID = nuevo;
+    }
     #endregion
 
     /// <summary>
@@ -91,41 +105,15 @@ public class SetupPlayer : NetworkBehaviour
     public override void OnStartClient() // IMPORTANTE
     {
         base.OnStartClient();
-        m_PlayerInfo.ID = m_ID; // ID del jugador
-
-        if (isLocalPlayer)
-        {
-            //m_Name = m_UIManager.playerName; // Nombre del jugador (variable privada)
-            CmdUpdateName(m_UIManager.playerName + "_" + m_PlayerInfo.ID);
-
-            //m_CarType = m_UIManager.carType;
-            CmdUpdateColor(m_UIManager.carType);
-
-           // m_LapController.m_playerInfo = m_PlayerInfo;
-            Debug.Log("Nombre del jugador:" + m_LapController.m_playerInfo.Name);
-            //m_PlayerInfo.SetCarType(m_UIManager.carType);
-        }
-
-        // TE HE ARREGLADO LOS COLORES, DENADA
-        string carColor = m_PlayerInfo.carType.ToString();
-        Debug.Log("COLOR DE COCHE ESCOGIDO: <color=" + carColor + ">" + m_PlayerInfo.carType + "</color>");
-
         m_PlayerInfo.CurrentLap = 0;                   // Vuelta actual alcanzada por el jugador
 
-        
-
-        m_PolePositionManager.AddPlayer(m_PlayerInfo); // Se añade el jugador a la lista de jugadores del manager de la partida
-
-        
         //if (isLocalPlayer)
         //{
-            //if (m_PolePositionManager.numPlayers > 1)
-            //{
-            //    gameStarted = true;
-            //    Debug.Log("LA PARTIDA HA EMPEZADO");
-            //    CmdUpdateGameStarted(gameStarted);
-            //}
+        //    GameStartManager gameStartManager = gameObject.AddComponent(typeof(GameStartManager)) as GameStartManager;
+        //    m_PolePositionManager.gameStartManager = gameStartManager;
         //}
+
+        m_PolePositionManager.AddPlayer(m_PlayerInfo); // Se añade el jugador a la lista de jugadores del manager de la partida
     }
 
     /// <summary>
@@ -134,34 +122,41 @@ public class SetupPlayer : NetworkBehaviour
     /// </summary>
     public override void OnStartLocalPlayer()
     {
+        CmdUpdateName(m_UIManager.playerName + "_" + m_PlayerInfo.ID);
+
+        CmdUpdateColor(m_UIManager.carType);
+        Debug.Log("Nombre del jugador:" + m_LapController.m_playerInfo.Name);
+
+        string carColor = m_PlayerInfo.carType.ToString();
+        Debug.Log("COLOR DE COCHE ESCOGIDO: <color=" + carColor + ">" + m_PlayerInfo.carType + "</color>");
+
+        #region Player Components
+        m_PlayerController.enabled  = true;
+        m_CrashDetector.enabled     = true;
+        m_DirectionDetector.enabled = true;
+        m_LapController.enabled     = true;
+        m_LapController.canLap      = true;
+        m_PlayerController.OnSpeedChangeEvent += OnSpeedChangeEventHandler;
+        ConfigureCamera();
+        #endregion
     }
     #endregion
 
     private void Awake()
     {
-        m_PlayerInfo = GetComponent<PlayerInfo>();                       // Se busca el componente PlayerInfo
-        m_PlayerController = GetComponent<PlayerController>();           // Se busca el componente PlayerController
-        m_NetworkManager = FindObjectOfType<NetworkManager>();           // Se busca el NetworkManager
+        m_PlayerInfo          = GetComponent<PlayerInfo>();              // Se busca el componente PlayerInfo
+        m_PlayerController    = GetComponent<PlayerController>();        // Se busca el componente PlayerController
+        m_NetworkManager      = FindObjectOfType<NetworkManager>();      // Se busca el NetworkManager
         m_PolePositionManager = FindObjectOfType<PolePositionManager>(); // Se busca el Manager del Pole Position
-        m_UIManager = FindObjectOfType<UIManager>();                     // Se busca el Manager de la UI
-        m_CrashDetector = GetComponent<CrashDetector>();                 // Se busca el componente CrashDetector
-        m_DirectionDetector = GetComponent<DirectionDetector>();         // Se busca el componente DirectionDetector
-        m_LapController = GetComponent<LapController>();                 // Se buesca el componente LapController
+        m_UIManager           = FindObjectOfType<UIManager>();           // Se busca el Manager de la UI
+        m_CrashDetector       = GetComponent<CrashDetector>();           // Se busca el componente CrashDetector
+        m_DirectionDetector   = GetComponent<DirectionDetector>();       // Se busca el componente DirectionDetector
+        m_LapController       = GetComponent<LapController>();           // Se buesca el componente LapController
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        if (isLocalPlayer)
-        {
-            m_PlayerController.enabled = true;
-            m_CrashDetector.enabled = true;
-            m_DirectionDetector.enabled = true;
-            m_LapController.enabled = true;
-            m_LapController.canLap = true;
-            m_PlayerController.OnSpeedChangeEvent += OnSpeedChangeEventHandler;
-            ConfigureCamera();
-        }
     }
 
     void OnSpeedChangeEventHandler(float speed)

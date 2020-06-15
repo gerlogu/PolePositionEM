@@ -8,6 +8,7 @@ TagManager:
   - Puppet
   - FinishLine
   - LapTimer
+  - InitialTimer
   layers:
   - Default
   - TransparentFX

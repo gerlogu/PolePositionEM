@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
-using System.Diagnostics;
+
 using UnityEngine.UI;
 
 public class LapController : NetworkBehaviour
@@ -12,7 +12,7 @@ public class LapController : NetworkBehaviour
     private DirectionDetector m_directionDetector;  // Referencia al DirectionDetector
     private UIManager m_UIManager;                  // Referencia al UIManager
     private bool malaVuelta = false;                // Booleano que indica si la vuelta es mala (marcha atrás)
-    private Stopwatch timer = new Stopwatch();                        // Timer de la vuelta
+    private LapTimer lapTimer = new LapTimer();
     private Text timerText;
     #endregion
 
@@ -40,12 +40,6 @@ public class LapController : NetworkBehaviour
     private void Start()
     {
         timerText = GameObject.FindGameObjectWithTag("LapTimer").GetComponent<Text>();
-        timer.Start();
-    }
-
-    void StartTimer()
-    {
-        
     }
 
     private void Update()
@@ -53,60 +47,13 @@ public class LapController : NetworkBehaviour
         if (!timerText)
             return;
 
-        int hours       = Mathf.RoundToInt((float)timer.Elapsed.TotalHours);
-        int minutes     = Mathf.RoundToInt((float)timer.Elapsed.Minutes);
-        int seconds     = Mathf.RoundToInt((float)timer.Elapsed.Seconds);
-        int miliseconds = Mathf.RoundToInt((float)timer.Elapsed.Milliseconds);
+        lapTimer.CalculateTime();
 
-        string sHours = "0";
+        timerText.text = "Lap time: " + lapTimer.minutes + ":" + lapTimer.seconds + ":" + lapTimer.miliseconds;
 
-        if (hours < 10)
-        {
-            sHours = "0" + hours;
-        }
-        else
-        {
-            sHours = hours.ToString();
-        }
-
-        string sMinutes = "0";
-
-        if (minutes < 10)
-        {
-            sMinutes = "0" + minutes;
-        }
-        else
-        {
-            sMinutes = minutes.ToString();
-        }
-
-        string sSeconds = "0";
-
-        if (seconds < 10)
-        {
-            sSeconds = "0" + seconds;
-        }
-        else
-        {
-            sSeconds = seconds.ToString();
-        }
-
-        string sMiliseconds = "0";
-
-        if (miliseconds < 10)
-        {
-            sMiliseconds = "00" + miliseconds;
-        }
-        else if(miliseconds < 100)
-        {
-            sMiliseconds = "0" + miliseconds;
-        }
-        else
-        {
-            sMiliseconds = miliseconds.ToString();
-        }
-
-        timerText.text = "Lap time: " + sMinutes + ":" + sSeconds + ":" + sMiliseconds;
+        m_playerInfo.lapMinutes = lapTimer.iMinutes;
+        m_playerInfo.lapSeconds = lapTimer.iSeconds;
+        m_playerInfo.lapMiliseconds = lapTimer.iMiliseconds;
     }
 
     /// <summary>
@@ -129,7 +76,7 @@ public class LapController : NetworkBehaviour
                 if (!malaVuelta)
                 {
                     m_playerInfo.CurrentLap++;
-                    timer.Stop();
+                    lapTimer.RestartTimer();
                     m_UIManager.UpdateLaps(m_playerInfo.CurrentLap, totalLaps);
                     m_directionDetector.haCruzadoMeta = true;
                 }
@@ -137,7 +84,6 @@ public class LapController : NetworkBehaviour
                 else
                 {
                     malaVuelta = false;
-                    timer.Stop();
                     m_playerInfo.CurrentLap++;
                 }
             }

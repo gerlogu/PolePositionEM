@@ -6,6 +6,8 @@ using System.Text;
 using Mirror;
 using UnityEngine;
 
+using System.Threading.Tasks;
+
 /// <summary>
 /// Manager que gestiona el estado de la partida.
 /// </summary>
@@ -22,6 +24,10 @@ public class PolePositionManager : NetworkBehaviour
     public GameStartManager gameStartManager;
 
     public object xLock = new object();
+
+    
+    //Action delegate = new Action<CountdownEvent>;
+    //Task task = new Task(delegate);
     #endregion
 
     #region Variables Privadas
@@ -40,7 +46,7 @@ public class PolePositionManager : NetworkBehaviour
 
     #region Funciones Command
     [Command]
-    void CmdUpdateNumPlayers(int n)
+    void CmdUpdateGameReady(int n)
     {
         GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
         numPlayers = n;
@@ -92,9 +98,11 @@ public class PolePositionManager : NetworkBehaviour
         {
             CmdUpdateNumPlayers(m_Players.Count);
         }*/
-
+        CmdUpdateGameReady(m_Players.Count);
         uiManager.textNumPlayers.text = "P: " + m_Players.Count;
-        gameStartManager.UpdateGameStarted(m_Players.Count, m_Players);
+        //
+        if(gameStartManager)
+            gameStartManager.UpdateGameStarted(m_Players.Count, m_Players);
     }
 
     private class PlayerInfoComparer : Comparer<PlayerInfo>

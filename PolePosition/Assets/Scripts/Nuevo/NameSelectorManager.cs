@@ -6,25 +6,25 @@
 public class NameSelectorManager
 {
     InputField inputFieldPlayerName; // Campo donde el jugador escribe su nombre
-    string currentName = "Player";   // Nombre del jugador
+    string defaultName = "Player";   // Nombre por defecto del jugador
 
     /// <summary>
     /// Constructor de la clase.
     /// </summary>
     /// <param name="_inputFieldPlayerName">Referencia al inputField ubicado en el canvas</param>
-    public NameSelectorManager(InputField _inputFieldPlayerName)
+    public NameSelectorManager(InputField _inputFieldPlayerName, string _defaultName)
     {
         inputFieldPlayerName = _inputFieldPlayerName;
+        defaultName = _defaultName;
     }
 
     /// <summary>
     /// Comprueba el texto del inputField y actualizamos el nombre del jugador.
     /// </summary>
     /// <returns>Nombre nuevo del jugador</returns>
-    public string CheckPlayerName()
+    public void CheckPlayerName(out string currentName)
     {
-        // Si el inputField está seleccionado por el usuario y tiene texto, se actualiza el nombre del jugador
-        currentName = (inputFieldPlayerName.isFocused && inputFieldPlayerName.text != "") ? inputFieldPlayerName.text : currentName;
-        return currentName; // Se devuelve el nombre actual del jugador
+        // Si el inputField tiene texto, se actualiza el nombre del jugador
+        currentName = (inputFieldPlayerName.text != "") ? inputFieldPlayerName.text : defaultName;
     }
 }

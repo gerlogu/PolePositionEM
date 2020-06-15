@@ -61,8 +61,6 @@ public class UIManager : MonoBehaviour
     [Header("Wrong Direction")]
     public GameObject incorrectDirection;
 
-    private bool mainMenuIsActive = true;
-
     private void Awake()
     {
         m_NetworkManager = FindObjectOfType<NetworkManager>(); // Se busca el network manager en la escena
@@ -70,7 +68,7 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
-        selectorManager = new NameSelectorManager(inputFieldName);
+        selectorManager = new NameSelectorManager(inputFieldName, "Player");
 
         // Se asocian los botones a las diferentes funciones
         buttonHost.onClick.AddListener(() => ShowNameSelector(0));   // Name Selector (Host)
@@ -82,11 +80,13 @@ public class UIManager : MonoBehaviour
     private void Update()
     {
         // Para no actualizar esta variable constantemente y evitar cálculos innecesarios
-        // si no se encuentra el jugador en el menú principal, no se actualiza la variable
-        // que contiene su nombre
-        if (mainMenuIsActive)
+        // si no el nameSelector no se encuentra activo, no se actualiza más el nombre del jugador.
+        // *
+        // Dicho de otra forma, el nombre del jugador se encuentra actualizándose durante la pantalla
+        // de selección de nombre.
+        if (nameSelector.activeSelf)
         {
-            playerName = selectorManager.CheckPlayerName(); // Se actualiza el nombre del personaje
+            selectorManager.CheckPlayerName(out playerName); // Se actualiza el nombre del jugador
         }
     }
 
@@ -192,7 +192,6 @@ public class UIManager : MonoBehaviour
     {
         m_NetworkManager.StartHost(); // Se inicia el Host
         ActivateInGameHUD();          // Se activa el GUI de la partida
-        mainMenuIsActive = false;
     }
 
     /// <summary>
@@ -205,7 +204,6 @@ public class UIManager : MonoBehaviour
         m_NetworkManager.StartClient(); // Se inicia el cliente
         m_NetworkManager.networkAddress = inputFieldIP.text; // Se ajusta la IP
         ActivateInGameHUD(); // Se activa el GUI de la partida
-        mainMenuIsActive = false;
     }
 
     /// <summary>
@@ -215,6 +213,5 @@ public class UIManager : MonoBehaviour
     {
         m_NetworkManager.StartServer(); // Se inicia el servidor
         ActivateInGameHUD();            // Se activa el GUI de la partida
-        mainMenuIsActive = false;
     }
 }
