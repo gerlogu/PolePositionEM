@@ -8950,7 +8950,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b48ca7b0b523174da71c6b00f807f7c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  minPlayers: 2
   gameStarted: 0
+  numPlayers: 0
+  timersListos: 0
   timerAnim: {fileID: 2077969759}
   semaphore: {fileID: 9126478173454403769}
   stateGreen:
@@ -8965,6 +8970,7 @@ MonoBehaviour:
   - {fileID: 2100000, guid: 454893665826da14c9360ca16bb29820, type: 2}
   - {fileID: 2100000, guid: 1586ade42fb01a840994e90302e40578, type: 2}
   - {fileID: 2100000, guid: 54e887f906829b2428bfe55d19644635, type: 2}
+  gameTimer: {fileID: 2077969757}
 --- !u!1 &1844359084 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 100000, guid: d88c9840f20fca946a5db0737102ced5,
@@ -10238,11 +10244,11 @@ GameObject:
   - component: {fileID: 2077969760}
   m_Layer: 5
   m_Name: GameTimer
-  m_TagString: Untagged
+  m_TagString: InitialTimer
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2077969758
 RectTransform:
   m_ObjectHideFlags: 0
