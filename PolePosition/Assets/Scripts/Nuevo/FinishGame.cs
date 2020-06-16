@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Mono.CecilX;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,6 +16,7 @@ public class FinishGame : MonoBehaviour
     #region Variables publicas
     public Text[] endTexts;
     public List<PlayerInfo> m_players;
+    public Text endTimerText;
     #endregion
 
     void Awake()
@@ -35,6 +37,12 @@ public class FinishGame : MonoBehaviour
         }
         else
         {
+            int timeTE = Mathf.FloorToInt(FindObjectOfType<LapController>().timeToEnd);
+            if (timeTE >= 10)
+                endTimerText.text = "00:" + timeTE;
+            else
+                endTimerText.text = "00:0" + timeTE;
+
             if (!hasShownFinalGUI)
             {
                 hasShownFinalGUI = true;
@@ -55,7 +63,7 @@ public class FinishGame : MonoBehaviour
                     endTexts[3].text += p.lapBestMinutes + ":" + p.lapBestSeconds + ":" + p.lapBestMiliseconds + "\n";
                 }
 
-                m_UIManager.inGameHUD.SetActive(false);
+                m_UIManager.waitFinishHUD.SetActive(false);
                 m_UIManager.gameFinishHUD.SetActive(true);
             }
         }

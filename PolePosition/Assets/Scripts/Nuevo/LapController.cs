@@ -4,6 +4,7 @@ using UnityEngine;
 using Mirror;
 
 using UnityEngine.UI;
+using System.Threading;
 
 public class LapController : NetworkBehaviour
 {
@@ -13,6 +14,9 @@ public class LapController : NetworkBehaviour
     private UIManager m_UIManager;                  // Referencia al UIManager
     private bool malaVuelta = false;                // Booleano que indica si la vuelta es mala (marcha atrás)
     private GameStartManager m_GSM;
+    public int num_players = 2;
+    private SemaphoreSlim endSemaphore = new SemaphoreSlim(0);
+    [SyncVar] public float timeToEnd;
     #endregion
 
     #region Variables publicas
@@ -48,12 +52,16 @@ public class LapController : NetworkBehaviour
 
     private void Update()
     {
-        if (!m_playerInfo.canMove)
-            return;
-
-        m_playerInfo.lapTotalMinutes = m_GSM.totalTimer.minutes;
-        m_playerInfo.lapTotalSeconds = m_GSM.totalTimer.seconds;
-        m_playerInfo.lapTotalMiliseconds = m_GSM.totalTimer.miliseconds;
+        if (m_playerInfo.canMove)
+        {
+            m_playerInfo.lapTotalMinutes = m_GSM.totalTimer.minutes;
+            m_playerInfo.lapTotalSeconds = m_GSM.totalTimer.seconds;
+            m_playerInfo.lapTotalMiliseconds = m_GSM.totalTimer.miliseconds;
+        }
+        else
+        {
+            timeToEnd -= Time.deltaTime;
+        }
     }
 
     /// <summary>
@@ -112,12 +120,42 @@ public class LapController : NetworkBehaviour
                         }
 
                         m_GSM.lapTimer.RestartTimer();
+
+                        // Si el jugador ha acabado la carrera
                         if (m_playerInfo.CurrentLap > totalLaps)
                         {
+                            // Se paran los timers y avisa de que ha terminado
                             m_GSM.lapTimer.StopTimer();
                             m_GSM.totalTimer.StopTimer();
                             m_playerInfo.hasFinished = true;
-                            FindObjectOfType<PolePositionManager>().gameHasEnded = true;
+                            m_playerInfo.canMove = false;
+                            m_UIManager.waitFinishHUD.SetActive(true);
+                            m_UIManager.inGameHUD.SetActive(false);
+
+                            // Hilo de espera a finalizar la carrera
+                            Thread endGameThread = new Thread(() =>
+                            {
+                                // Si es el primero en llegar, establece el tiempo para acabar y espera
+                                if (m_playerInfo.CurrentPosition == 0)
+                                {
+                                    timeToEnd = 20.0f;
+                                    endSemaphore.Wait(20000);
+                                }
+                                // Si es el último, libera los permisos
+                                else if (m_playerInfo.CurrentPosition == num_players - 1)
+                                {
+                                    endSemaphore.Release(num_players - 1);
+                                }
+                                // Si no, se espera el tiempo que falte
+                                else
+                                {
+                                    endSemaphore.Wait(Mathf.RoundToInt(timeToEnd * 1000));
+                                }
+                                // Al acabar de esperar, acaba la partida
+                                FindObjectOfType<PolePositionManager>().gameHasEnded = true;
+                            });
+
+                            endGameThread.Start();
                         }
                     }
                         

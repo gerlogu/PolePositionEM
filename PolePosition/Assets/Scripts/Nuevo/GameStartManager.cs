@@ -141,14 +141,21 @@ public class GameStartManager : NetworkBehaviour
             }
             else
             {
-                if (!m_PPM.gameHasEnded)
+                foreach (PlayerInfo player in m_Players)
                 {
-                    lapTimer.CalculateTime();
-                    timerText.text = "Lap time: " + lapTimer.minutes + ":" + lapTimer.seconds + ":" + lapTimer.miliseconds;
+                    if (player.GetComponent<NetworkIdentity>().isLocalPlayer)
+                    {
+                        if (!player.hasFinished)
+                        {
+                            lapTimer.CalculateTime();
+                            timerText.text = "Lap time: " + lapTimer.minutes + ":" + lapTimer.seconds + ":" + lapTimer.miliseconds;
 
-                    totalTimer.CalculateTime();
-                    totalTimerText.text = "Total time: " + totalTimer.minutes + ":" + totalTimer.seconds + ":" + totalTimer.miliseconds;
+                            totalTimer.CalculateTime();
+                            totalTimerText.text = "Total time: " + totalTimer.minutes + ":" + totalTimer.seconds + ":" + totalTimer.miliseconds;
+                        }
+                    }
                 }
+                
             }
 
         }

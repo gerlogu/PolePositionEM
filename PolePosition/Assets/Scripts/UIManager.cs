@@ -67,7 +67,9 @@ public class UIManager : MonoBehaviour
     public GameObject incorrectDirection;
 
     [Header("Finish HUD")]
+    public GameObject waitFinishHUD;
     public GameObject gameFinishHUD;
+
 
     [Header("Car Selection Animation")]
     [SerializeField] private Animator anim;
