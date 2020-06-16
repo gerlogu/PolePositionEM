@@ -25,6 +25,7 @@ public class SetupPlayer : NetworkBehaviour
     private CrashDetector m_CrashDetector;              // Detector de colisiones
     private DirectionDetector m_DirectionDetector;      // Detector de dirección
     private LapController m_LapController;              // Controlador de vueltas
+    public LapManager m_LapManager;
 
     #region Start & Stop Callbacks
 
@@ -83,13 +84,68 @@ public class SetupPlayer : NetworkBehaviour
         m_PolePositionManager.gameStartManager.gameStarted = true; // Se actualiza el estado de la partida para los jugadores
     }
 
+    //[Command]
+    //public void CmdUpdatePlayerArcLengthsList(float[] arcs)
+    //{
+    //    GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
+    //    for(int i = 0; i < arcs.Length; i++)
+    //    {
+    //        m_PolePositionManager.playersArcLengths[i] = arcs[i];
+    //    }
+    //}
+
     [Command]
-    public void CmdUpdatePlayerArcLengthsList(float[] arcs)
+    public void CmdLapList(int numPlayers)
     {
         GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
-        for(int i = 0; i < arcs.Length; i++)
+        //for (int i = 0; i < numPlayers; i++)
+        //{
+        //    m_LapManager.laps.Add(0);
+        //}
+        switch (numPlayers)
         {
-            m_PolePositionManager.playersArcLengths[i] = arcs[i];
+            case 1:
+                m_LapManager.player1Laps = 0;
+                break;
+            case 2:
+                m_LapManager.player1Laps = 0;
+                m_LapManager.player2Laps = 0;
+                break;
+            case 3:
+                m_LapManager.player1Laps = 0;
+                m_LapManager.player2Laps = 0;
+                m_LapManager.player3Laps = 0;
+                break;
+            case 4:
+                m_LapManager.player1Laps = 0;
+                m_LapManager.player2Laps = 0;
+                m_LapManager.player3Laps = 0;
+                m_LapManager.player4Laps = 0;
+                break;
+            default:
+                break;
+        }
+    }
+
+    [Command]
+    public void CmdUpdateLaps(int laps, int playerID)
+    {
+        GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
+        //m_LapManager.laps[playerID] = laps;
+        switch (playerID)
+        {
+            case 0:
+                m_LapManager.player1Laps = laps;
+                break;
+            case 1:
+                m_LapManager.player2Laps = laps;
+                break;
+            case 2:
+                m_LapManager.player3Laps = laps;
+                break;
+            case 3:
+                m_LapManager.player4Laps = laps;
+                break;
         }
     }
     #endregion
@@ -153,6 +209,7 @@ public class SetupPlayer : NetworkBehaviour
         m_DirectionDetector.enabled = true;
         m_LapController.enabled     = true;
         m_LapController.canLap      = true;
+        
         m_PlayerController.OnSpeedChangeEvent += OnSpeedChangeEventHandler;
         ConfigureCamera();
         #endregion
@@ -169,6 +226,7 @@ public class SetupPlayer : NetworkBehaviour
         m_CrashDetector       = GetComponent<CrashDetector>();           // Se busca el componente CrashDetector
         m_DirectionDetector   = GetComponent<DirectionDetector>();       // Se busca el componente DirectionDetector
         m_LapController       = GetComponent<LapController>();           // Se buesca el componente LapController
+        m_LapManager          = FindObjectOfType<LapManager>();          // Se busca el Manager de las vueltas
     }
 
     // Start is called before the first frame update

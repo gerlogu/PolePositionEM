@@ -14,6 +14,7 @@ public class LapController : NetworkBehaviour
     private UIManager m_UIManager;                  // Referencia al UIManager
     private bool malaVuelta = false;                // Booleano que indica si la vuelta es mala (marcha atrás)
     private GameStartManager m_GSM;
+    private LapManager m_lapManager;
     public int num_players = 2;
     private SemaphoreSlim endSemaphore = new SemaphoreSlim(0);
     [SyncVar] public float timeToEnd;
@@ -41,6 +42,8 @@ public class LapController : NetworkBehaviour
 
         // Se obtiene el GameStartManager
         m_GSM = FindObjectOfType<GameStartManager>();
+
+        m_lapManager = FindObjectOfType<LapManager>();
     }
 
     private void Start()
@@ -84,6 +87,8 @@ public class LapController : NetworkBehaviour
                 if (!malaVuelta)
                 {
                     m_playerInfo.CurrentLap++;
+                    m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(m_playerInfo.CurrentLap, m_playerInfo.ID);
+
                     if (m_playerInfo.CurrentLap > 1)
                     {
                         if (m_playerInfo.CurrentLap > 2)
@@ -170,6 +175,7 @@ public class LapController : NetworkBehaviour
                 {
                     malaVuelta = false;
                     m_playerInfo.CurrentLap++;
+                    m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(m_playerInfo.CurrentLap, m_playerInfo.ID);
                 }
             }
             // Si entra marcha atrás:
@@ -177,6 +183,7 @@ public class LapController : NetworkBehaviour
             {
                 malaVuelta = true;
                 m_playerInfo.CurrentLap--;
+                m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(m_playerInfo.CurrentLap, m_playerInfo.ID);
             }
         }
     }

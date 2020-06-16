@@ -28,6 +28,8 @@ public class PolePositionManager : NetworkBehaviour
     public bool gameHasEnded;
 
     public SyncListFloat playersArcLengths;
+
+    public LapManager m_LapManager;
     #endregion
 
     #region Variables Privadas
@@ -196,15 +198,60 @@ public class PolePositionManager : NetworkBehaviour
 
         this.m_DebuggingSpheres[ID].transform.position = carProj;
 
-        if (this.m_Players[ID].CurrentLap == 0)
+        if (gameStartManager.gameStarted)
         {
-            minArcL -= m_CircuitController.CircuitLength;
+            switch (ID)
+            {
+                case 0:
+                    if (m_LapManager.player1Laps == 0)
+                    {
+                        minArcL -= m_CircuitController.CircuitLength;
+                    }
+                    else
+                    {
+                        minArcL += m_CircuitController.CircuitLength *
+                                   (m_LapManager.player1Laps - 1);
+                    }
+                    break;
+                case 1:
+                    if (m_LapManager.player2Laps == 0)
+                    {
+                        minArcL -= m_CircuitController.CircuitLength;
+                    }
+                    else
+                    {
+                        minArcL += m_CircuitController.CircuitLength *
+                                   (m_LapManager.player2Laps - 1);
+                    }
+                    break;
+                case 2:
+                    if (m_LapManager.player3Laps == 0)
+                    {
+                        minArcL -= m_CircuitController.CircuitLength;
+                    }
+                    else
+                    {
+                        minArcL += m_CircuitController.CircuitLength *
+                                   (m_LapManager.player3Laps - 1);
+                    }
+                    break;
+                case 3:
+                    if (m_LapManager.player4Laps == 0)
+                    {
+                        minArcL -= m_CircuitController.CircuitLength;
+                    }
+                    else
+                    {
+                        minArcL += m_CircuitController.CircuitLength *
+                                   (m_LapManager.player4Laps - 1);
+                    }
+                    break;
+                default:
+                    break;
+            }
+            
         }
-        else
-        {
-            minArcL += m_CircuitController.CircuitLength *
-                       (m_Players[ID].CurrentLap - 1);
-        }
+        
 
         return minArcL;
     }

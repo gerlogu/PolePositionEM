@@ -51,6 +51,7 @@ public class GameStartManager : NetworkBehaviour
     {
         calledToGameStarted = gs;
         
+        
     }
 
     #region Funciones Hook
@@ -63,7 +64,15 @@ public class GameStartManager : NetworkBehaviour
     {
         gameTimer.SetActive(true);
         timerAnim.SetTrigger("PlayTimer");
-        Debug.Log("NÚMERO DE JUGADORES (TAMAÑO DE LA LISTA): <color=orange>" + m_PolePositionManager.playersArcLengths.Count + "</color>");
+        foreach (PlayerInfo player in m_Players)
+        {
+            if (player.GetComponent<NetworkIdentity>().isLocalPlayer)
+            {
+                player.GetComponent<SetupPlayer>().CmdLapList(minPlayers);
+                //Debug.Log("NÚMERO DE JUGADORES (TAMAÑO DE LA LISTA): <color=orange>" + player.GetComponent<SetupPlayer>().m_LapManager.laps.Count + "</color>");
+            }
+
+        }
     }
 
     /// <summary>
