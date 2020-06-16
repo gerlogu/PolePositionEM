@@ -27,9 +27,7 @@ public class PolePositionManager : NetworkBehaviour
 
     public bool gameHasEnded;
 
-    
-    //Action delegate = new Action<CountdownEvent>;
-    //Task task = new Task(delegate);
+    public SyncListFloat playersArcLengths;
     #endregion
 
     #region Variables Privadas
@@ -96,13 +94,8 @@ public class PolePositionManager : NetworkBehaviour
     public void AddPlayer(PlayerInfo player)
     {
         m_Players.Add(player); // Se añade a la lista el jugador
-        /*if (isLocalPlayer)
-        {
-            CmdUpdateNumPlayers(m_Players.Count);
-        }*/
         CmdUpdateGameReady(m_Players.Count);
         uiManager.textNumPlayers.text = "P: " + m_Players.Count;
-        //
         if(gameStartManager)
             gameStartManager.UpdateGameStarted(m_Players.Count, m_Players);
     }
@@ -128,6 +121,7 @@ public class PolePositionManager : NetworkBehaviour
 
     public void UpdateRaceProgress()
     {
+
         // Lock para que esto no se solape con otros procesos
         lock (xLock)
         {
@@ -140,10 +134,30 @@ public class PolePositionManager : NetworkBehaviour
                 // ComputeCarArcLength calcula la longitud de arco para el coche con id i
                 // arcLengths[i] guarda la longitud de arco ordenados por id
                 m_arcLengths[i] = ComputeCarArcLength(m_Players[i].ID); // POR ESO TENEMOS QUE HACER COMPUTE POR POSICION, PILLANDO LA ID DEL QUE VA PRIMERO, SEGUNDO...
+                
             }
 
-            // Este método la lista de jugadores según las longitudes de arco por posición
-            m_Players.Sort(new PlayerInfoComparer(m_arcLengths));
+            //if (gameStartManager.gameStarted)
+            //{
+            //    //playersArcLengths[i] = m_arcLengths[i];
+            //    foreach (PlayerInfo player in m_Players)
+            //    {
+            //        if (player.GetComponent<NetworkIdentity>().isLocalPlayer)
+            //            player.GetComponent<SetupPlayer>().CmdUpdatePlayerArcLengthsList(m_arcLengths);
+            //    }
+            //}
+
+            //if (gameStartManager.gameStarted)
+            //{
+            //    // Este método la lista de jugadores según las longitudes de arco por posición
+            //    m_Players.Sort(new PlayerInfoComparer(playersArcLengths.ToArray<float>()));
+            //}
+            //else
+            //{
+                // Este método la lista de jugadores según las longitudes de arco por posición
+                m_Players.Sort(new PlayerInfoComparer(m_arcLengths));
+           // }
+            
 
             if (m_Players.Count == 2)
             {
@@ -164,7 +178,6 @@ public class PolePositionManager : NetworkBehaviour
             myRaceOrder += _player.Name + "\n";
         }
         uiManager.UpdatePlayerNames(myRaceOrder);
-        // Debug.Log("El orden de carrera es: " + myRaceOrder);
     }
 
     float ComputeCarArcLength(int ID)

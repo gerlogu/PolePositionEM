@@ -12,7 +12,7 @@ public class GameStartManager : NetworkBehaviour
     public int minPlayers = 2;
     public LapTimer lapTimer = new LapTimer();
     public LapTimer totalTimer = new LapTimer();
-
+    public PolePositionManager m_PolePositionManager;
 
     #region Variables Sincronizadas
     [HideInInspector] [SyncVar(hook = nameof(H_SetGameStarted))] public bool gameStarted = false; // Estado de la partida
@@ -50,6 +50,7 @@ public class GameStartManager : NetworkBehaviour
     void InvokeGameStarted(bool gs)
     {
         calledToGameStarted = gs;
+        
     }
 
     #region Funciones Hook
@@ -62,6 +63,7 @@ public class GameStartManager : NetworkBehaviour
     {
         gameTimer.SetActive(true);
         timerAnim.SetTrigger("PlayTimer");
+        Debug.Log("NÚMERO DE JUGADORES (TAMAÑO DE LA LISTA): <color=orange>" + m_PolePositionManager.playersArcLengths.Count + "</color>");
     }
 
     /// <summary>
@@ -203,6 +205,7 @@ public class GameStartManager : NetworkBehaviour
             {
                 timerListo.Wait();   // Se espera a tener el permiso
                 action.Invoke(true); // Llamada al delegado
+
             });
 
             // Se inicia el hilo
