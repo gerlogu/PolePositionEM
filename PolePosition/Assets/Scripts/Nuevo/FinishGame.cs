@@ -67,9 +67,9 @@ public class FinishGame : MonoBehaviour
     {
         if (timeTE >= 10)
             endTimerText.text = "00:" + timeTE;
-        else
+        else if (timeTE >= 0)
             endTimerText.text = "00:0" + timeTE;
 
-        Debug.LogWarning("ACTUALIZO: " + timeTE);
+        //Debug.LogWarning("ACTUALIZO: " + timeTE);
     }
 }
