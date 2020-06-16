@@ -9,6 +9,7 @@ TagManager:
   - FinishLine
   - LapTimer
   - InitialTimer
+  - TotalTimer
   layers:
   - Default
   - TransparentFX

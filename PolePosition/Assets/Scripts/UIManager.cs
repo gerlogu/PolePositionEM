@@ -29,7 +29,7 @@ public class UIManager : MonoBehaviour
 
     [Header("In-Game HUD")]
     [Tooltip("HUD In Game")]
-    [SerializeField] private GameObject inGameHUD;
+    public GameObject inGameHUD;
     [Tooltip("Velocidad del vehículo")]
     [SerializeField] private Text textSpeed;
     [Tooltip("Vueltas dadas durante la carrera")]
@@ -60,6 +60,9 @@ public class UIManager : MonoBehaviour
 
     [Header("Wrong Direction")]
     public GameObject incorrectDirection;
+
+    [Header("Finish HUD")]
+    public GameObject gameFinishHUD;
 
     private void Awake()
     {

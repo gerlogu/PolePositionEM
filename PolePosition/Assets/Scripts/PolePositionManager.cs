@@ -25,13 +25,15 @@ public class PolePositionManager : NetworkBehaviour
 
     public object xLock = new object();
 
+    public bool gameHasEnded;
+
     
     //Action delegate = new Action<CountdownEvent>;
     //Task task = new Task(delegate);
     #endregion
 
     #region Variables Privadas
-    private readonly List<PlayerInfo> m_Players = new List<PlayerInfo>(4); // Lista de jugadores
+    public List<PlayerInfo> m_Players = new List<PlayerInfo>(4); // Lista de jugadores
     private CircuitController m_CircuitController;                         // Controlador del circuito
     public GameObject[] m_DebuggingSpheres;                                // Esferas para depurar
     public float[] m_arcLengths;                                           // Longitudes de arco

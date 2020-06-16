@@ -12,8 +12,7 @@ public class LapController : NetworkBehaviour
     private DirectionDetector m_directionDetector;  // Referencia al DirectionDetector
     private UIManager m_UIManager;                  // Referencia al UIManager
     private bool malaVuelta = false;                // Booleano que indica si la vuelta es mala (marcha atrás)
-    private LapTimer lapTimer = new LapTimer();
-    private Text timerText;
+    private GameStartManager m_GSM;
     #endregion
 
     #region Variables publicas
@@ -35,25 +34,26 @@ public class LapController : NetworkBehaviour
         // Se obtiene el UIManager y se establece el texto de las vueltas
         m_UIManager = FindObjectOfType<UIManager>();
         m_UIManager.UpdateLaps(1, totalLaps);
+
+        // Se obtiene el GameStartManager
+        m_GSM = FindObjectOfType<GameStartManager>();
     }
 
     private void Start()
     {
-        timerText = GameObject.FindGameObjectWithTag("LapTimer").GetComponent<Text>();
+        m_playerInfo.lapBestMinutes = 0;
+        m_playerInfo.lapBestSeconds = 0;
+        m_playerInfo.lapBestMiliseconds = 0;
     }
 
     private void Update()
     {
-        if (!timerText)
+        if (!m_playerInfo.canMove)
             return;
 
-        lapTimer.CalculateTime();
-
-        timerText.text = "Lap time: " + lapTimer.minutes + ":" + lapTimer.seconds + ":" + lapTimer.miliseconds;
-
-        m_playerInfo.lapMinutes = lapTimer.iMinutes;
-        m_playerInfo.lapSeconds = lapTimer.iSeconds;
-        m_playerInfo.lapMiliseconds = lapTimer.iMiliseconds;
+        m_playerInfo.lapTotalMinutes = m_GSM.totalTimer.minutes;
+        m_playerInfo.lapTotalSeconds = m_GSM.totalTimer.seconds;
+        m_playerInfo.lapTotalMiliseconds = m_GSM.totalTimer.miliseconds;
     }
 
     /// <summary>
@@ -76,9 +76,54 @@ public class LapController : NetworkBehaviour
                 if (!malaVuelta)
                 {
                     m_playerInfo.CurrentLap++;
-                    lapTimer.RestartTimer();
+                    if (m_playerInfo.CurrentLap > 1)
+                    {
+                        if (m_playerInfo.CurrentLap > 2)
+                        {
+                            bool isBetter = false;
+
+                            if (m_playerInfo.lapBestMinutes > m_GSM.lapTimer.iMinutes)
+                            {
+                                isBetter = true;
+                            }
+                            else if (m_playerInfo.lapBestSeconds > m_GSM.lapTimer.iSeconds)
+                            {
+                                isBetter = true;
+                            }
+                            else if(m_playerInfo.lapBestMiliseconds > m_GSM.lapTimer.iMiliseconds)
+                            {
+                                isBetter = true;
+                            }
+
+                            if (isBetter)
+                            {
+                                m_playerInfo.lapBestMinutes = m_GSM.lapTimer.iMinutes;
+                                m_playerInfo.lapBestSeconds = m_GSM.lapTimer.iSeconds;
+                                m_playerInfo.lapBestMiliseconds = m_GSM.lapTimer.iMiliseconds;
+                            }
+                        }
+                        else
+                        {
+                            m_playerInfo.lapBestMinutes = m_GSM.lapTimer.iMinutes;
+                            m_playerInfo.lapBestSeconds = m_GSM.lapTimer.iSeconds;
+                            m_playerInfo.lapBestMiliseconds = m_GSM.lapTimer.iMiliseconds;
+                        }
+
+                        m_GSM.lapTimer.RestartTimer();
+                        if (m_playerInfo.CurrentLap > totalLaps)
+                        {
+                            m_GSM.lapTimer.StopTimer();
+                            m_GSM.totalTimer.StopTimer();
+                            m_playerInfo.hasFinished = true;
+                            FindObjectOfType<PolePositionManager>().gameHasEnded = true;
+                        }
+                    }
+                        
                     m_UIManager.UpdateLaps(m_playerInfo.CurrentLap, totalLaps);
                     m_directionDetector.haCruzadoMeta = true;
+
+                    
+                            
                 }
                 // Si había entrado marcha atrás previamente:
                 else

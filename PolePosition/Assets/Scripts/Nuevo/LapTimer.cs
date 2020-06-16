@@ -105,6 +105,6 @@ public class LapTimer
         iHours = _hours;
         iMinutes = _minutes;
         iSeconds = _seconds;
-        iSeconds = _miliseconds;
+        iMiliseconds = _miliseconds;
     }
 }

@@ -4,11 +4,15 @@ using UnityEngine;
 using System.Threading;
 using Mirror;
 using System;
+using UnityEngine.UI;
 
 public class GameStartManager : NetworkBehaviour
 {
     #region Variables Públicas
     public int minPlayers = 2;
+    public LapTimer lapTimer = new LapTimer();
+    public LapTimer totalTimer = new LapTimer();
+
 
     #region Variables Sincronizadas
     [HideInInspector] [SyncVar(hook = nameof(H_SetGameStarted))] public bool gameStarted = false; // Estado de la partida
@@ -34,6 +38,9 @@ public class GameStartManager : NetworkBehaviour
     private SemaphoreSlim timerListo = new SemaphoreSlim(0);
     private SemaphoreSlim jugadoresListos = new SemaphoreSlim(0);
     private bool calledToGameStarted = false;
+    private Text timerText;
+    private Text totalTimerText;
+    private PolePositionManager m_PPM;
     #endregion
 
     /// <summary>
@@ -83,6 +90,13 @@ public class GameStartManager : NetworkBehaviour
     }
     #endregion
 
+    private void Start()
+    {
+        m_PPM = GetComponent<PolePositionManager>();
+        timerText = GameObject.FindGameObjectWithTag("LapTimer").GetComponent<Text>();
+        totalTimerText = GameObject.FindGameObjectWithTag("TotalTimer").GetComponent<Text>();
+    }
+
     public void Update()
     {
         if (!gameStarted && !calledToGameStarted)
@@ -117,13 +131,26 @@ public class GameStartManager : NetworkBehaviour
                     {
                         jugadoresListos.Wait();
                         player.canMove = gameStarted;
+                        lapTimer.RestartTimer();
+                        totalTimer.RestartTimer();
                     });
                 
                     endTimerThread.Start();
                 }
                 ended = true;
             }
-            
+            else
+            {
+                if (!m_PPM.gameHasEnded)
+                {
+                    lapTimer.CalculateTime();
+                    timerText.text = "Lap time: " + lapTimer.minutes + ":" + lapTimer.seconds + ":" + lapTimer.miliseconds;
+
+                    totalTimer.CalculateTime();
+                    totalTimerText.text = "Total time: " + totalTimer.minutes + ":" + totalTimer.seconds + ":" + totalTimer.miliseconds;
+                }
+            }
+
         }
 
         if (timer < 2.55f && timer > 1.65f)

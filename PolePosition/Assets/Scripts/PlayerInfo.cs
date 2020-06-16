@@ -54,9 +54,19 @@ public class PlayerInfo : MonoBehaviour
 
     public bool canMove { get; set; }
 
-    public int lapSeconds { get; set; }
-    public int lapMinutes { get; set; }
-    public int lapMiliseconds { get; set; }
+    // Tiempo total
+    public string lapTotalMiliseconds { get; set; }
+    public string lapTotalSeconds { get; set; }
+    public string lapTotalMinutes { get; set; }
+
+    // Tiempo mejor vuelta
+    public int lapBestMiliseconds { get; set; }
+    public int lapBestSeconds { get; set; }
+    public int lapBestMinutes { get; set; }
+
+    //Booleano que indica si ha terminado la carrera
+    public bool hasFinished { get; set; }
+
 
     /// <summary>
     /// Imprime información del jugador.
