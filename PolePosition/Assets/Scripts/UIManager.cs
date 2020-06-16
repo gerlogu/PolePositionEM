@@ -49,13 +49,9 @@ public class UIManager : MonoBehaviour
     [Header("Car Selector")]
     public Car[] cars;
     public GameObject carSelector;
-    //[SerializeField] private Button buttonRedCar;
-    //[SerializeField] private Button buttonWhiteCar;
-    //[SerializeField] private Button buttonOrangeCar;
-    //[SerializeField] private Button buttonGreenCar;
-    [SerializeField] private Button leftCar;
-    [SerializeField] private Button rightCar;
-    [SerializeField] private Button selectCar;
+    [SerializeField] private Button buttonLeftCar;
+    [SerializeField] private Button buttonRightCar;
+    [SerializeField] private Button buttonSelectCar;
     [SerializeField] private Text carText;
     public bool canSelect = true;
 
@@ -172,15 +168,11 @@ public class UIManager : MonoBehaviour
     private void ShowCarSelector(int type)
     {
         nameSelector.SetActive(false); // Se muestra el selector de nombres
-        //carSelector.SetActive(true);
         canSelect = false;
         anim.SetTrigger("ShowCarSelector");
-        selectCar.onClick.AddListener(() => SelectCar(currentCar, type));
-        //buttonOrangeCar.onClick.AddListener(() => SelectCar(1, type));
-        //buttonRedCar.onClick.AddListener(() => SelectCar(2, type));
-        //buttonWhiteCar.onClick.AddListener(() => SelectCar(3, type));
-        leftCar.onClick.AddListener(() => UpdateCarLeft());
-        rightCar.onClick.AddListener(() => UpdateCarRight());
+        buttonSelectCar.onClick.AddListener(() => SelectCar(currentCar, type));
+        buttonLeftCar.onClick.AddListener(() => UpdateCarLeft());
+        buttonRightCar.onClick.AddListener(() => UpdateCarRight());
     }
 
     private void UpdateCarRight()
