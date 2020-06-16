@@ -37,12 +37,6 @@ public class FinishGame : MonoBehaviour
         }
         else
         {
-            int timeTE = Mathf.FloorToInt(FindObjectOfType<LapController>().timeToEnd);
-            if (timeTE >= 10)
-                endTimerText.text = "00:" + timeTE;
-            else
-                endTimerText.text = "00:0" + timeTE;
-
             if (!hasShownFinalGUI)
             {
                 hasShownFinalGUI = true;
@@ -67,5 +61,15 @@ public class FinishGame : MonoBehaviour
                 m_UIManager.gameFinishHUD.SetActive(true);
             }
         }
+    }
+
+    public void updateEndTimerText(int timeTE)
+    {
+        if (timeTE >= 10)
+            endTimerText.text = "00:" + timeTE;
+        else
+            endTimerText.text = "00:0" + timeTE;
+
+        Debug.LogWarning("ACTUALIZO: " + timeTE);
     }
 }

@@ -78,6 +78,13 @@ public class PlayerController : NetworkBehaviour
             InputBrake = Input.GetAxis("Jump");
             Speed = m_Rigidbody.velocity.magnitude;
         }
+        else if (m_PlayerInfo.hasFinished)
+        {
+            InputAcceleration = 0;
+            InputSteering = 0;
+            InputBrake = 0;
+            Speed = 0;
+        }
 
         //Debug.LogWarning("ID: " + m_PlayerInfo.ID);
 
@@ -88,61 +95,64 @@ public class PlayerController : NetworkBehaviour
 
     public void FixedUpdate()
     {
-        InputSteering = Mathf.Clamp(InputSteering, -1, 1);
-        InputAcceleration = Mathf.Clamp(InputAcceleration, -1, 1);
-        InputBrake = Mathf.Clamp(InputBrake, 0, 1);
-
-        float steering = maxSteeringAngle * InputSteering;
-
-        foreach (AxleInfo axleInfo in axleInfos)
+        if (!m_PlayerInfo.hasFinished)
         {
-            if (axleInfo.steering)
+            InputSteering = Mathf.Clamp(InputSteering, -1, 1);
+            InputAcceleration = Mathf.Clamp(InputAcceleration, -1, 1);
+            InputBrake = Mathf.Clamp(InputBrake, 0, 1);
+
+            float steering = maxSteeringAngle * InputSteering;
+
+            foreach (AxleInfo axleInfo in axleInfos)
             {
-                axleInfo.leftWheel.steerAngle = steering;
-                axleInfo.rightWheel.steerAngle = steering;
+                if (axleInfo.steering)
+                {
+                    axleInfo.leftWheel.steerAngle = steering;
+                    axleInfo.rightWheel.steerAngle = steering;
+                }
+
+                if (axleInfo.motor)
+                {
+                    if (InputAcceleration > float.Epsilon)
+                    {
+                        axleInfo.leftWheel.motorTorque = forwardMotorTorque;
+                        axleInfo.leftWheel.brakeTorque = 0;
+                        axleInfo.rightWheel.motorTorque = forwardMotorTorque;
+                        axleInfo.rightWheel.brakeTorque = 0;
+                    }
+
+                    if (InputAcceleration < -float.Epsilon)
+                    {
+                        axleInfo.leftWheel.motorTorque = -backwardMotorTorque;
+                        axleInfo.leftWheel.brakeTorque = 0;
+                        axleInfo.rightWheel.motorTorque = -backwardMotorTorque;
+                        axleInfo.rightWheel.brakeTorque = 0;
+                    }
+
+                    if (Math.Abs(InputAcceleration) < float.Epsilon)
+                    {
+                        axleInfo.leftWheel.motorTorque = 0;
+                        axleInfo.leftWheel.brakeTorque = engineBrake;
+                        axleInfo.rightWheel.motorTorque = 0;
+                        axleInfo.rightWheel.brakeTorque = engineBrake;
+                    }
+
+                    if (InputBrake > 0)
+                    {
+                        axleInfo.leftWheel.brakeTorque = footBrake;
+                        axleInfo.rightWheel.brakeTorque = footBrake;
+                    }
+                }
+
+                ApplyLocalPositionToVisuals(axleInfo.leftWheel);
+                ApplyLocalPositionToVisuals(axleInfo.rightWheel);
             }
 
-            if (axleInfo.motor)
-            {
-                if (InputAcceleration > float.Epsilon)
-                {
-                    axleInfo.leftWheel.motorTorque = forwardMotorTorque;
-                    axleInfo.leftWheel.brakeTorque = 0;
-                    axleInfo.rightWheel.motorTorque = forwardMotorTorque;
-                    axleInfo.rightWheel.brakeTorque = 0;
-                }
-
-                if (InputAcceleration < -float.Epsilon)
-                {
-                    axleInfo.leftWheel.motorTorque = -backwardMotorTorque;
-                    axleInfo.leftWheel.brakeTorque = 0;
-                    axleInfo.rightWheel.motorTorque = -backwardMotorTorque;
-                    axleInfo.rightWheel.brakeTorque = 0;
-                }
-
-                if (Math.Abs(InputAcceleration) < float.Epsilon)
-                {
-                    axleInfo.leftWheel.motorTorque = 0;
-                    axleInfo.leftWheel.brakeTorque = engineBrake;
-                    axleInfo.rightWheel.motorTorque = 0;
-                    axleInfo.rightWheel.brakeTorque = engineBrake;
-                }
-
-                if (InputBrake > 0)
-                {
-                    axleInfo.leftWheel.brakeTorque = footBrake;
-                    axleInfo.rightWheel.brakeTorque = footBrake;
-                }
-            }
-
-            ApplyLocalPositionToVisuals(axleInfo.leftWheel);
-            ApplyLocalPositionToVisuals(axleInfo.rightWheel);
+            SteerHelper();
+            SpeedLimiter();
+            AddDownForce();
+            TractionControl();
         }
-
-        SteerHelper();
-        SpeedLimiter();
-        AddDownForce();
-        TractionControl();
     }
 
     #endregion
