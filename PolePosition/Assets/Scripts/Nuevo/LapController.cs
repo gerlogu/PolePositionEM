@@ -82,21 +82,23 @@ public class LapController : NetworkBehaviour
                         {
                             bool isBetter = false;
 
-                            if (m_playerInfo.lapBestMinutes > m_GSM.lapTimer.iMinutes)
+                            if (m_GSM.lapTimer.iMinutes < m_playerInfo.lapBestMinutes)
                             {
                                 isBetter = true;
                             }
-                            else if (m_playerInfo.lapBestSeconds > m_GSM.lapTimer.iSeconds)
+                            else if (m_GSM.lapTimer.iSeconds < m_playerInfo.lapBestSeconds && m_GSM.lapTimer.iMinutes == m_playerInfo.lapBestMinutes)
                             {
                                 isBetter = true;
                             }
-                            else if(m_playerInfo.lapBestMiliseconds > m_GSM.lapTimer.iMiliseconds)
+                            else if (m_GSM.lapTimer.iMiliseconds < m_playerInfo.lapBestMiliseconds && m_GSM.lapTimer.iMinutes == m_playerInfo.lapBestMinutes && m_GSM.lapTimer.iSeconds == m_playerInfo.lapBestSeconds)
                             {
                                 isBetter = true;
                             }
 
                             if (isBetter)
                             {
+                                /*Debug.LogWarning("Vuelta previa: " + m_playerInfo.lapBestMinutes + ":" + m_playerInfo.lapBestSeconds + ":" + m_playerInfo.lapBestMiliseconds
+                                    + " | Vuelta mejor: " + m_GSM.lapTimer.iMinutes + ":" + m_GSM.lapTimer.iSeconds + ":" + m_GSM.lapTimer.iMiliseconds);*/
                                 m_playerInfo.lapBestMinutes = m_GSM.lapTimer.iMinutes;
                                 m_playerInfo.lapBestSeconds = m_GSM.lapTimer.iSeconds;
                                 m_playerInfo.lapBestMiliseconds = m_GSM.lapTimer.iMiliseconds;
