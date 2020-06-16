@@ -48,11 +48,16 @@ public class UIManager : MonoBehaviour
 
     [Header("Car Selector")]
     public Car[] cars;
-    [SerializeField] private GameObject carSelector;
-    [SerializeField] private Button buttonRedCar;
-    [SerializeField] private Button buttonWhiteCar;
-    [SerializeField] private Button buttonOrangeCar;
-    [SerializeField] private Button buttonGreenCar;
+    public GameObject carSelector;
+    //[SerializeField] private Button buttonRedCar;
+    //[SerializeField] private Button buttonWhiteCar;
+    //[SerializeField] private Button buttonOrangeCar;
+    //[SerializeField] private Button buttonGreenCar;
+    [SerializeField] private Button leftCar;
+    [SerializeField] private Button rightCar;
+    [SerializeField] private Button selectCar;
+    [SerializeField] private Text carText;
+    public bool canSelect = true;
 
     NameSelectorManager selectorManager;                   // Clase que contiene las funciones necesarias para el selector de nombres
     [HideInInspector] public string playerName = "player"; // Nombre introducido en el InputField
@@ -64,6 +69,10 @@ public class UIManager : MonoBehaviour
     [Header("Finish HUD")]
     public GameObject gameFinishHUD;
 
+    [Header("Car Selection Animation")]
+    [SerializeField] private Animator anim;
+    [SerializeField] private int currentCar = 0;
+
     private void Awake()
     {
         m_NetworkManager = FindObjectOfType<NetworkManager>(); // Se busca el network manager en la escena
@@ -72,6 +81,7 @@ public class UIManager : MonoBehaviour
     private void Start()
     {
         selectorManager = new NameSelectorManager(inputFieldName, "Player");
+        carSelector.SetActive(false);
 
         // Se asocian los botones a las diferentes funciones
         buttonHost.onClick.AddListener(() => ShowNameSelector(0));   // Name Selector (Host)
@@ -162,11 +172,71 @@ public class UIManager : MonoBehaviour
     private void ShowCarSelector(int type)
     {
         nameSelector.SetActive(false); // Se muestra el selector de nombres
-        carSelector.SetActive(true);
-        buttonGreenCar.onClick.AddListener(() => SelectCar(0, type));
-        buttonOrangeCar.onClick.AddListener(() => SelectCar(1, type));
-        buttonRedCar.onClick.AddListener(() => SelectCar(2, type));
-        buttonWhiteCar.onClick.AddListener(() => SelectCar(3, type));
+        //carSelector.SetActive(true);
+        canSelect = false;
+        anim.SetTrigger("ShowCarSelector");
+        selectCar.onClick.AddListener(() => SelectCar(currentCar, type));
+        //buttonOrangeCar.onClick.AddListener(() => SelectCar(1, type));
+        //buttonRedCar.onClick.AddListener(() => SelectCar(2, type));
+        //buttonWhiteCar.onClick.AddListener(() => SelectCar(3, type));
+        leftCar.onClick.AddListener(() => UpdateCarLeft());
+        rightCar.onClick.AddListener(() => UpdateCarRight());
+    }
+
+    private void UpdateCarRight()
+    {
+        if (!canSelect || currentCar == 3)
+            return;
+
+        canSelect = false;
+        int carBefore = currentCar;
+        currentCar++;
+        switch (carBefore)
+        {
+            case 0:
+                anim.SetTrigger("ShowOrangeCar");
+                carText.text = "ORANGE";
+                break;
+            case 1:
+                anim.SetTrigger("ShowRedCar");
+                carText.text = "RED";
+                break;
+            case 2:
+                anim.SetTrigger("ShowWhiteCar");
+                carText.text = "WHITE";
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void UpdateCarLeft()
+    {
+        if (!canSelect || currentCar == 0)
+            return;
+
+        canSelect = false;
+        int carBefore = currentCar;
+        currentCar--;
+        switch (carBefore)
+        {
+            case 0:
+                break;
+            case 1:
+                anim.SetTrigger("ShowGreenCar");
+                carText.text = "GREEN";
+                break;
+            case 2:
+                anim.SetTrigger("ShowOrangeCar");
+                carText.text = "ORANGE";
+                break;
+            case 3:
+                anim.SetTrigger("ShowRedCar");
+                carText.text = "RED";
+                break;
+            default:
+                break;
+        }
     }
 
     /// <summary>
@@ -177,6 +247,8 @@ public class UIManager : MonoBehaviour
     private void SelectCar(int carType, int type)
     {
         this.carType = carType;
+        anim.SetTrigger("StartRace");
+        anim.enabled = false;
         switch (type)
         {
             case 0:
