@@ -16,6 +16,8 @@ public class LapController : NetworkBehaviour
     private GameStartManager m_GSM;
     public int num_players = 2;
     private SemaphoreSlim endSemaphore = new SemaphoreSlim(0);
+    private PolePositionManager m_PPM;
+    private FinishGame m_FinishGame;
     [SyncVar] public float timeToEnd;
     #endregion
 
@@ -41,6 +43,12 @@ public class LapController : NetworkBehaviour
 
         // Se obtiene el GameStartManager
         m_GSM = FindObjectOfType<GameStartManager>();
+
+        // Se obtiene el PolePositionManager
+        m_PPM = FindObjectOfType<PolePositionManager>();
+
+        // Se obtiene el FinishGame
+        m_FinishGame = FindObjectOfType<FinishGame>();
     }
 
     private void Start()
@@ -58,9 +66,11 @@ public class LapController : NetworkBehaviour
             m_playerInfo.lapTotalSeconds = m_GSM.totalTimer.seconds;
             m_playerInfo.lapTotalMiliseconds = m_GSM.totalTimer.miliseconds;
         }
-        else
+        else if (m_playerInfo.hasFinished)
         {
             timeToEnd -= Time.deltaTime;
+            Debug.LogWarning("TIEMPO: " + timeToEnd);
+            m_FinishGame.updateEndTimerText(Mathf.RoundToInt(timeToEnd));
         }
     }
 
@@ -152,7 +162,8 @@ public class LapController : NetworkBehaviour
                                     endSemaphore.Wait(Mathf.RoundToInt(timeToEnd * 1000));
                                 }
                                 // Al acabar de esperar, acaba la partida
-                                FindObjectOfType<PolePositionManager>().gameHasEnded = true;
+                                
+                                m_PPM.gameHasEnded = true;
                             });
 
                             endGameThread.Start();
@@ -161,9 +172,6 @@ public class LapController : NetworkBehaviour
                         
                     m_UIManager.UpdateLaps(m_playerInfo.CurrentLap, totalLaps);
                     m_directionDetector.haCruzadoMeta = true;
-
-                    
-                            
                 }
                 // Si había entrado marcha atrás previamente:
                 else
