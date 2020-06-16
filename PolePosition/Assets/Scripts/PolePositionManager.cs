@@ -34,6 +34,7 @@ public class PolePositionManager : NetworkBehaviour
 
     #region Variables Privadas
     public List<PlayerInfo> m_Players = new List<PlayerInfo>(4); // Lista de jugadores
+    public List<PlayerInfo> m_PlayersNotOrdered = new List<PlayerInfo>(4); // Lista de jugadores
     private CircuitController m_CircuitController;                         // Controlador del circuito
     public GameObject[] m_DebuggingSpheres;                                // Esferas para depurar
     public float[] m_arcLengths;                                           // Longitudes de arco
@@ -115,9 +116,9 @@ public class PolePositionManager : NetworkBehaviour
         {
             var diferencia = m_ArcLengths[x.ID] - m_ArcLengths[y.ID];
 
-            if (diferencia > float.Epsilon)
-                return -1;
-            else return 1;
+            if (diferencia < -float.Epsilon)
+                return 1;
+            else return -1;
         }
     }
 
@@ -156,7 +157,8 @@ public class PolePositionManager : NetworkBehaviour
             //}
             //else
             //{
-                // Este método la lista de jugadores según las longitudes de arco por posición
+            // Este método la lista de jugadores según las longitudes de arco por posición
+            //m_PlayersNotOrdered = m_Players.ToList<PlayerInfo>();
                 m_Players.Sort(new PlayerInfoComparer(m_arcLengths));
            // }
             
@@ -184,6 +186,7 @@ public class PolePositionManager : NetworkBehaviour
 
     float ComputeCarArcLength(int ID)
     {
+        Debug.LogWarning("INFO " + ID + ": " + m_Players[ID].ToString());
         // Compute the projection of the car position to the closest circuit 
         // path segment and accumulate the arc-length along of the car along
         // the circuit.
@@ -200,7 +203,17 @@ public class PolePositionManager : NetworkBehaviour
 
         if (gameStartManager.gameStarted)
         {
-            switch (ID)
+            if (m_Players[ID].CurrentLap == 0)
+            {
+                minArcL -= m_CircuitController.CircuitLength;
+            }
+            else
+            {
+                minArcL += m_CircuitController.CircuitLength *
+                                   (m_Players[ID].CurrentLap - 1);
+            }
+            
+            /*switch (ID)
             {
                 case 0:
                     if (m_LapManager.player1Laps == 0)
@@ -248,7 +261,7 @@ public class PolePositionManager : NetworkBehaviour
                     break;
                 default:
                     break;
-            }
+            }*/
             
         }
         

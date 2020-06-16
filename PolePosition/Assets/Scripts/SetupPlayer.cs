@@ -1,5 +1,6 @@
 ﻿using System;
 using Mirror;
+using Mirror.Examples.Basic;
 using UnityEngine;
 using Random = System.Random;
 
@@ -128,24 +129,27 @@ public class SetupPlayer : NetworkBehaviour
     }
 
     [Command]
-    public void CmdUpdateLaps(int laps, int playerID)
+    public void CmdUpdateLaps(int pos, int laps, int playerID)
     {
         GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
         //m_LapManager.laps[playerID] = laps;
-        switch (playerID)
+        lock (m_PolePositionManager.xLock)
         {
-            case 0:
-                m_LapManager.player1Laps = laps;
-                break;
-            case 1:
-                m_LapManager.player2Laps = laps;
-                break;
-            case 2:
-                m_LapManager.player3Laps = laps;
-                break;
-            case 3:
-                m_LapManager.player4Laps = laps;
-                break;
+            switch (playerID)
+            {
+                case 0:
+                    m_LapManager.player1Laps = laps;
+                    break;
+                case 1:
+                    m_LapManager.player2Laps = laps;
+                    break;
+                case 2:
+                    m_LapManager.player3Laps = laps;
+                    break;
+                case 3:
+                    m_LapManager.player4Laps = laps;
+                    break;
+            }
         }
     }
     #endregion

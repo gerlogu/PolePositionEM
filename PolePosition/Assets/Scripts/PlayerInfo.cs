@@ -74,6 +74,6 @@ public class PlayerInfo : MonoBehaviour
     /// <returns>Nombre del jugador</returns>
     public override string ToString()
     {
-        return Name;
+        return "Name: " + Name + ", ID: " + ID + ", CurrentPosition: " + CurrentPosition + ", CurrentLap: " + CurrentLap + ", canMove: " + canMove + ", hasFinished: " + hasFinished;
     }
 }

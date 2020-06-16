@@ -71,8 +71,16 @@ public class LapController : NetworkBehaviour
         else if (m_playerInfo.hasFinished)
         {
             timeToEnd -= Time.deltaTime;
-            Debug.LogWarning("TIEMPO: " + timeToEnd);
+            //Debug.LogWarning("TIEMPO: " + timeToEnd);
             m_FinishGame.updateEndTimerText(Mathf.RoundToInt(timeToEnd));
+        }
+
+        int[] playerLaps = {m_lapManager.player1Laps, m_lapManager.player2Laps, m_lapManager.player3Laps, m_lapManager.player4Laps};
+        
+        for (int i = 0; i < num_players; i++)
+        {
+            //m_PPM.m_Players[m_PPM.m_Players[i].CurrentPosition].CurrentLap = playerLaps[i];
+            m_PPM.m_PlayersNotOrdered[i].CurrentLap = playerLaps[i];
         }
     }
 
@@ -92,16 +100,26 @@ public class LapController : NetworkBehaviour
             // Si va en buena dirección:
             if (m_directionDetector.buenaDireccion)
             {
+                Debug.LogWarning("TOCA META BIEN");
                 // Si NO ha entrado marcha atrás previamente:
                 if (!malaVuelta)
                 {
+                    Debug.LogWarning("ENTRA COMO DEBERIA Y LLAMA COMMAND UPDATE LAPS");
                     m_playerInfo.CurrentLap++;
-                    m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(m_playerInfo.CurrentLap, m_playerInfo.ID);
+                    m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(m_playerInfo.CurrentPosition, m_playerInfo.CurrentLap, m_playerInfo.ID);
+                    string st = "LISTA PLAYERS: ";
+                    for (int i = 0; i < num_players; i++)
+                    {
+                        st += m_PPM.m_Players[i].ToString() + ", ";
+                    }
+                    Debug.LogError(st);
 
                     if (m_playerInfo.CurrentLap > 1)
                     {
+                        Debug.LogWarning("VUELTA>1");
                         if (m_playerInfo.CurrentLap > 2)
                         {
+                            Debug.LogWarning("VUELTA>2");
                             bool isBetter = false;
 
                             if (m_GSM.lapTimer.iMinutes < m_playerInfo.lapBestMinutes)
@@ -180,17 +198,19 @@ public class LapController : NetworkBehaviour
                 // Si había entrado marcha atrás previamente:
                 else
                 {
+                    Debug.LogWarning("ANTES ENTRO MAL ASI QUE LLAMA A COMMAND");
                     malaVuelta = false;
                     m_playerInfo.CurrentLap++;
-                    m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(m_playerInfo.CurrentLap, m_playerInfo.ID);
+                    m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(m_playerInfo.CurrentPosition, m_playerInfo.CurrentLap, m_playerInfo.ID);
                 }
             }
             // Si entra marcha atrás:
             else
             {
+                Debug.LogWarning("VA HACIA ATRAS EL GILIPOLLAS LLAMAMOS A COMMAND");
                 malaVuelta = true;
                 m_playerInfo.CurrentLap--;
-                m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(m_playerInfo.CurrentLap, m_playerInfo.ID);
+                m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(m_playerInfo.CurrentPosition, m_playerInfo.CurrentLap, m_playerInfo.ID);
             }
         }
     }
