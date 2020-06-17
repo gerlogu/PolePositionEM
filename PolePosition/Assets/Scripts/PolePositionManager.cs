@@ -133,19 +133,10 @@ public class PolePositionManager : NetworkBehaviour
             // la lista que se está recorriendo con el foreach dentro del mismo foreach
 
             PlayerInfo p = null; // Creamos un objeto auxiliar p
-
-            //foreach(PlayerInfo player in m_Players)
-            //{
-            //    if (player.GetComponent<NetworkIdentity>().isLocalPlayer)
-            //    {
-            //        player.GetComponent<SetupPlayer>().CmdUpdateTimer();
-            //        p = player;
-            //    }
-
-            //}
             bool hayNulo = false ;
-
-
+            int cont = 0;
+            int cont2 = 0;
+            int indice = 0;
             //p = new PlayerInfo(); // p es igual a un objeto genérico
             foreach (PlayerInfo player in m_Players) // Recorremos la lista de jugadores
             {
@@ -155,16 +146,25 @@ public class PolePositionManager : NetworkBehaviour
                     if (!hayNulo)
                     {
                         p = player; // p se iguala al player, es decir, a null porque se desconectó
+                        cont2 = cont;
                     }
                     hayNulo = true;
                 }
-                
+                cont++;
             }
 
             if (p == null && hayNulo) // si p es null significa que hay que eliminarlo de la lista
             {
-                m_Players.Remove(p); // Eliminamos el jugador
-                if(gameStartManager.gameStarted)
+                for (int i = cont2; i < m_Players.Count - 1; i++)
+                {
+                    m_Players[i] = m_Players[i + 1];
+                    m_Players[i].CurrentPosition--;
+                }
+                indice = m_Players.Count - 1;
+                //m_Players.Remove(p); // Eliminamos el jugador
+                
+                m_Players.RemoveAt(indice);
+                if (gameStartManager.gameStarted)
                     return; // Volvemos a empezar el bucle, porque hay que comprobar si hay más players nulos
             }
 

@@ -134,18 +134,22 @@ public class GameStartManager : NetworkBehaviour
             {
                 foreach (PlayerInfo player in m_Players)
                 {
-                    if (player.GetComponent<NetworkIdentity>().isLocalPlayer)
-                        player.GetComponent<SetupPlayer>().CmdUpdatePlayers();
-
-                    Thread endTimerThread = new Thread(() =>
+                    if (player)
                     {
-                        jugadoresListos.Wait();
-                        player.canMove = gameStarted;
-                        lapTimer.RestartTimer();
-                        totalTimer.RestartTimer();
-                    });
-                
-                    endTimerThread.Start();
+                        if (player.GetComponent<NetworkIdentity>().isLocalPlayer)
+                            player.GetComponent<SetupPlayer>().CmdUpdatePlayers();
+
+                        Thread endTimerThread = new Thread(() =>
+                        {
+                            jugadoresListos.Wait();
+                            player.canMove = gameStarted;
+                            lapTimer.RestartTimer();
+                            totalTimer.RestartTimer();
+                        });
+
+                        endTimerThread.Start();
+                    }
+                    
                 }
                 ended = true;
             }
