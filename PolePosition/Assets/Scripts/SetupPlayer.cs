@@ -131,8 +131,7 @@ public class SetupPlayer : NetworkBehaviour
     [Command]
     public void CmdUpdateLaps(int pos, int laps, int playerID)
     {
-        GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
-        //m_LapManager.laps[playerID] = laps;
+        //GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
         lock (m_PolePositionManager.xLock)
         {
             switch (playerID)
@@ -199,7 +198,7 @@ public class SetupPlayer : NetworkBehaviour
     /// </summary>
     public override void OnStartLocalPlayer()
     {
-        CmdUpdateName(m_UIManager.playerName + "_" + m_PlayerInfo.ID);
+        CmdUpdateName(m_UIManager.playerName);
 
         CmdUpdateColor(m_UIManager.carType);
         Debug.Log("Nombre del jugador:" + m_LapController.m_playerInfo.Name);

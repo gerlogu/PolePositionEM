@@ -19,12 +19,52 @@ public class LapController : NetworkBehaviour
     private SemaphoreSlim endSemaphore = new SemaphoreSlim(0);
     private PolePositionManager m_PPM;
     private FinishGame m_FinishGame;
-    [SyncVar] public float timeToEnd;
+    private bool gameThreadFinished;
     #endregion
 
     #region Variables publicas
     [Tooltip("Número total de vueltas")] public int totalLaps = 3; // Por poner algo de momento
     [HideInInspector] public bool canLap = false;                     // Bool que determina si puede sumar vueltas el jugador
+    [SyncVar] public float timeToEnd = 20.0f;
+    #endregion
+
+    #region Command Functions
+    [Command]
+    private void CmdUpdateTimeToEnd()
+    {
+        //GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
+        timeToEnd -= Time.deltaTime;
+        //Debug.LogWarning("TIEMPO: " + timeToEnd);
+        m_FinishGame.RpcUpdateEndTimerText(Mathf.RoundToInt(timeToEnd));
+    }
+
+    [Command]
+    private void CmdUpdatePlayerFinished(int ID)
+    {
+        //GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
+        switch (ID)
+        {
+            case 0:
+                m_lapManager.player1Finished = true;
+                break;
+            case 1:
+                m_lapManager.player2Finished = true;
+                break;
+            case 2:
+                m_lapManager.player3Finished = true;
+                break;
+            case 3:
+                m_lapManager.player4Finished = true;
+                break;
+        }
+    }
+
+    [Command]
+    private void CmdUpdateEndGame()
+    {
+        //GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
+        m_PPM.gameHasEnded = true;
+    }
     #endregion
 
     /// <summary>
@@ -68,19 +108,45 @@ public class LapController : NetworkBehaviour
             m_playerInfo.lapTotalSeconds = m_GSM.totalTimer.seconds;
             m_playerInfo.lapTotalMiliseconds = m_GSM.totalTimer.miliseconds;
         }
-        else if (m_playerInfo.hasFinished)
+
+        bool[] playersFinished = { m_lapManager.player1Finished, m_lapManager.player2Finished, m_lapManager.player2Finished, m_lapManager.player4Finished };
+        bool someoneFinished = false;
+
+        for (int i = 0; i < m_PPM.m_PlayersNotOrdered.Count; i++)
         {
-            timeToEnd -= Time.deltaTime;
-            //Debug.LogWarning("TIEMPO: " + timeToEnd);
-            m_FinishGame.updateEndTimerText(Mathf.RoundToInt(timeToEnd));
+            if (playersFinished[i])
+            {
+                someoneFinished = true;
+            }
         }
 
-        int[] playerLaps = {m_lapManager.player1Laps, m_lapManager.player2Laps, m_lapManager.player3Laps, m_lapManager.player4Laps};
-        
-        for (int i = 0; i < num_players; i++)
+        //Debug.LogWarning("SOMEONE FINISHED: " + someoneFinished);
+
+        if (someoneFinished)
+        {
+            if (m_playerInfo.ID == 0)
+                CmdUpdateTimeToEnd();
+        }
+
+        if (gameThreadFinished)
+        {
+            gameThreadFinished = false;
+            CmdUpdateEndGame();
+        }
+
+        int[] playerLaps = { m_lapManager.player1Laps, m_lapManager.player2Laps, m_lapManager.player3Laps, m_lapManager.player4Laps };
+
+        for (int i = 0; i < m_PPM.m_PlayersNotOrdered.Count; i++)
         {
             //m_PPM.m_Players[m_PPM.m_Players[i].CurrentPosition].CurrentLap = playerLaps[i];
             m_PPM.m_PlayersNotOrdered[i].CurrentLap = playerLaps[i];
+        }
+
+        bool[] playerFinished = { m_lapManager.player1Finished, m_lapManager.player2Finished, m_lapManager.player2Finished, m_lapManager.player4Finished };
+
+        for (int i = 0; i < m_PPM.m_PlayersNotOrdered.Count; i++)
+        {
+            m_PPM.m_PlayersNotOrdered[i].hasFinished = playerFinished[i];
         }
     }
 
@@ -100,26 +166,22 @@ public class LapController : NetworkBehaviour
             // Si va en buena dirección:
             if (m_directionDetector.buenaDireccion)
             {
-                Debug.LogWarning("TOCA META BIEN");
                 // Si NO ha entrado marcha atrás previamente:
                 if (!malaVuelta)
                 {
-                    Debug.LogWarning("ENTRA COMO DEBERIA Y LLAMA COMMAND UPDATE LAPS");
-                    m_playerInfo.CurrentLap++;
-                    m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(m_playerInfo.CurrentPosition, m_playerInfo.CurrentLap, m_playerInfo.ID);
+                    int laps = m_playerInfo.CurrentLap + 1;
+                    m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(m_playerInfo.CurrentPosition, laps, m_playerInfo.ID);
                     string st = "LISTA PLAYERS: ";
                     for (int i = 0; i < num_players; i++)
                     {
                         st += m_PPM.m_Players[i].ToString() + ", ";
                     }
-                    Debug.LogError(st);
+                    Debug.LogWarning(st);
 
-                    if (m_playerInfo.CurrentLap > 1)
+                    if (laps > 1)
                     {
-                        Debug.LogWarning("VUELTA>1");
-                        if (m_playerInfo.CurrentLap > 2)
+                        if (laps > 2)
                         {
-                            Debug.LogWarning("VUELTA>2");
                             bool isBetter = false;
 
                             if (m_GSM.lapTimer.iMinutes < m_playerInfo.lapBestMinutes)
@@ -154,12 +216,13 @@ public class LapController : NetworkBehaviour
                         m_GSM.lapTimer.RestartTimer();
 
                         // Si el jugador ha acabado la carrera
-                        if (m_playerInfo.CurrentLap > totalLaps)
+                        if (laps > totalLaps)
                         {
                             // Se paran los timers y avisa de que ha terminado
                             m_GSM.lapTimer.StopTimer();
                             m_GSM.totalTimer.StopTimer();
                             m_playerInfo.hasFinished = true;
+                            CmdUpdatePlayerFinished(m_playerInfo.ID);
                             m_playerInfo.canMove = false;
                             m_UIManager.waitFinishHUD.SetActive(true);
                             m_UIManager.inGameHUD.SetActive(false);
@@ -167,14 +230,8 @@ public class LapController : NetworkBehaviour
                             // Hilo de espera a finalizar la carrera
                             Thread endGameThread = new Thread(() =>
                             {
-                                // Si es el primero en llegar, establece el tiempo para acabar y espera
-                                if (m_playerInfo.CurrentPosition == 0)
-                                {
-                                    timeToEnd = 20.0f;
-                                    endSemaphore.Wait(20000);
-                                }
                                 // Si es el último, libera los permisos
-                                else if (m_playerInfo.CurrentPosition == num_players - 1)
+                                if (m_playerInfo.CurrentPosition == num_players - 1)
                                 {
                                     endSemaphore.Release(num_players - 1);
                                 }
@@ -184,33 +241,30 @@ public class LapController : NetworkBehaviour
                                     endSemaphore.Wait(Mathf.RoundToInt(timeToEnd * 1000));
                                 }
                                 // Al acabar de esperar, acaba la partida
-                                
-                                m_PPM.gameHasEnded = true;
+                                gameThreadFinished = true;
                             });
 
                             endGameThread.Start();
                         }
                     }
-                        
-                    m_UIManager.UpdateLaps(m_playerInfo.CurrentLap, totalLaps);
+
+                    m_UIManager.UpdateLaps(laps, totalLaps);
                     m_directionDetector.haCruzadoMeta = true;
                 }
                 // Si había entrado marcha atrás previamente:
                 else
                 {
-                    Debug.LogWarning("ANTES ENTRO MAL ASI QUE LLAMA A COMMAND");
                     malaVuelta = false;
-                    m_playerInfo.CurrentLap++;
-                    m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(m_playerInfo.CurrentPosition, m_playerInfo.CurrentLap, m_playerInfo.ID);
+                    int laps = m_playerInfo.CurrentLap + 1;
+                    m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(m_playerInfo.CurrentPosition, laps, m_playerInfo.ID);
                 }
             }
             // Si entra marcha atrás:
             else
             {
-                Debug.LogWarning("VA HACIA ATRAS EL GILIPOLLAS LLAMAMOS A COMMAND");
                 malaVuelta = true;
-                m_playerInfo.CurrentLap--;
-                m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(m_playerInfo.CurrentPosition, m_playerInfo.CurrentLap, m_playerInfo.ID);
+                int laps = m_playerInfo.CurrentLap - 1;
+                m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(m_playerInfo.CurrentPosition, laps, m_playerInfo.ID);
             }
         }
     }

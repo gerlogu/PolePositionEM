@@ -15,6 +15,11 @@ public class LapManager : NetworkBehaviour
     [SyncVar (hook = nameof(updateP1Laps))] public int player3Laps = -1;
     [SyncVar (hook = nameof(updateP1Laps))] public int player4Laps = -1;
 
+    [SyncVar] public bool player1Finished = false;
+    [SyncVar] public bool player2Finished = false;
+    [SyncVar] public bool player3Finished = false;
+    [SyncVar] public bool player4Finished = false;
+
     public List<PlayerInfo> m_players;
     
     public void updateP1Laps(int ant, int nuevo)

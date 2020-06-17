@@ -25,7 +25,7 @@ public class PolePositionManager : NetworkBehaviour
 
     public object xLock = new object();
 
-    public bool gameHasEnded;
+    [SyncVar] public bool gameHasEnded;
 
     public SyncListFloat playersArcLengths;
 
@@ -186,7 +186,7 @@ public class PolePositionManager : NetworkBehaviour
 
     float ComputeCarArcLength(int ID)
     {
-        Debug.LogWarning("INFO " + ID + ": " + m_Players[ID].ToString());
+        // Debug.LogWarning("INFO " + ID + ": " + m_Players[ID].ToString());
         // Compute the projection of the car position to the closest circuit 
         // path segment and accumulate the arc-length along of the car along
         // the circuit.

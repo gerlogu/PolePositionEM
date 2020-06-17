@@ -1,10 +1,13 @@
-﻿using Mono.CecilX;
+﻿using Mirror;
+using Mirror.Examples.Basic;
+using Mono.CecilX;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class FinishGame : MonoBehaviour
+public class FinishGame : NetworkBehaviour
 {
     #region Variables privadas
     private bool endedGame;
@@ -32,7 +35,7 @@ public class FinishGame : MonoBehaviour
             if (m_PPM.gameHasEnded)
             {
                 endedGame = true;
-                m_players = m_PPM.m_Players;
+                m_players = m_PPM.m_Players.ToList<PlayerInfo>();
             }
         }
         else
@@ -57,13 +60,18 @@ public class FinishGame : MonoBehaviour
                     endTexts[3].text += p.lapBestMinutes + ":" + p.lapBestSeconds + ":" + p.lapBestMiliseconds + "\n";
                 }
 
+                foreach (PlayerInfo p in m_players)
+                    p.canMove = false;
+
+                m_UIManager.inGameHUD.SetActive(false);
                 m_UIManager.waitFinishHUD.SetActive(false);
                 m_UIManager.gameFinishHUD.SetActive(true);
             }
         }
     }
 
-    public void updateEndTimerText(int timeTE)
+    [ClientRpc]
+    public void RpcUpdateEndTimerText(int timeTE)
     {
         if (timeTE >= 10)
             endTimerText.text = "00:" + timeTE;
