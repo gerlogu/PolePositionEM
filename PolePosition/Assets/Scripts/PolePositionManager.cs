@@ -114,10 +114,11 @@ public class PolePositionManager : NetworkBehaviour
 
         public override int Compare(PlayerInfo x, PlayerInfo y)
         {
-            var diferencia = m_ArcLengths[x.ID] - m_ArcLengths[y.ID];
-
+            var diferencia = m_ArcLengths[x.CurrentPosition] - m_ArcLengths[y.CurrentPosition];
             if (diferencia < -float.Epsilon)
+            {
                 return 1;
+            }
             else return -1;
         }
     }
@@ -136,8 +137,8 @@ public class PolePositionManager : NetworkBehaviour
             {
                 // ComputeCarArcLength calcula la longitud de arco para el coche con id i
                 // arcLengths[i] guarda la longitud de arco ordenados por id
-                m_arcLengths[i] = ComputeCarArcLength(m_Players[i].ID); // POR ESO TENEMOS QUE HACER COMPUTE POR POSICION, PILLANDO LA ID DEL QUE VA PRIMERO, SEGUNDO...
-                
+                //m_arcLengths[m_Players[i].ID] = ComputeCarArcLength(m_Players[i].ID); // POR ESO TENEMOS QUE HACER COMPUTE POR POSICION, PILLANDO LA ID DEL QUE VA PRIMERO, SEGUNDO...
+                m_arcLengths[i] = ComputeCarArcLength(i);
             }
 
             //if (gameStartManager.gameStarted)
@@ -159,15 +160,9 @@ public class PolePositionManager : NetworkBehaviour
             //{
             // Este método la lista de jugadores según las longitudes de arco por posición
             //m_PlayersNotOrdered = m_Players.ToList<PlayerInfo>();
-                m_Players.Sort(new PlayerInfoComparer(m_arcLengths));
-           // }
-            
 
-            if (m_Players.Count == 2)
-            {
-                Debug.Log("Longitudes de arco: [" + m_Players[0].Name + ": " + m_arcLengths[m_Players[0].ID] + "], [" + m_Players[1].Name + ": " + m_arcLengths[m_Players[1].ID] + "]");
-                Debug.Log("Vueltas: [" + m_Players[0].Name + ": " + m_Players[0].CurrentLap + "], [" + m_Players[1].Name + ": " + m_Players[1].CurrentLap + "]");
-            }
+            m_Players.Sort(new PlayerInfoComparer(m_arcLengths));
+            // }
 
             // Se asigna la posición
             for (int i = 0; i < m_Players.Count; ++i)
