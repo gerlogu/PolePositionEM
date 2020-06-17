@@ -27,7 +27,7 @@ public class PolePositionManager : NetworkBehaviour
 
     [SyncVar] public bool gameHasEnded;
 
-    public SyncListFloat playersArcLengths;
+    //public SyncListFloat playersArcLengths;
 
     public LapManager m_LapManager;
     #endregion
@@ -48,12 +48,12 @@ public class PolePositionManager : NetworkBehaviour
     #endregion
 
     #region Funciones Command
-    [Command]
-    void CmdUpdateGameReady(int n)
-    {
-        GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
-        numPlayers = n;
-    }
+    //[Command]
+    //void CmdUpdateGameReady(int n)
+    //{
+    //    GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
+    //    numPlayers = n;
+    //}
     #endregion
 
     private void Awake()
@@ -97,7 +97,7 @@ public class PolePositionManager : NetworkBehaviour
     public void AddPlayer(PlayerInfo player)
     {
         m_Players.Add(player); // Se añade a la lista el jugador
-        CmdUpdateGameReady(m_Players.Count);
+        //CmdUpdateGameReady(m_Players.Count);
         uiManager.textNumPlayers.text = "P: " + m_Players.Count;
         if(gameStartManager)
             gameStartManager.UpdateGameStarted(m_Players.Count, m_Players);
@@ -128,6 +128,28 @@ public class PolePositionManager : NetworkBehaviour
         // Lock para que esto no se solape con otros procesos
         lock (xLock)
         {
+            // Esto no puede fallar, lo hago así, porque no se puede hacer un remove de
+            // la lista que se está recorriendo con el foreach dentro del mismo foreach
+
+            PlayerInfo p = null; // Creamos un objeto auxiliar p
+            //p = new PlayerInfo(); // p es igual a un objeto genérico
+            foreach (PlayerInfo player in m_Players) // Recorremos la lista de jugadores
+            {
+                if (player == null) // Si el player es null (es decir, si se ha desconectado)
+                {
+                    m_PlayersNotOrdered.Remove(player); // Eliminamos el jugador de la lista sin ordenar
+                    p = player; // p se iguala al player, es decir, a null porque se desconectó
+                }
+            }
+
+            if (p == null) // si p es null significa que hay que eliminarlo de la lista
+            {
+                m_Players.Remove(p); // Eliminamos el jugador
+                //if(gameStartManager.gameStarted)
+                //    return; // Volvemos a empezar el bucle, porque hay que comprobar si hay más players nulos
+            }
+
+
             // Update car arc-lengths
 
             m_arcLengths = new float[m_Players.Count];
@@ -159,14 +181,15 @@ public class PolePositionManager : NetworkBehaviour
             //{
             // Este método la lista de jugadores según las longitudes de arco por posición
             //m_PlayersNotOrdered = m_Players.ToList<PlayerInfo>();
-                m_Players.Sort(new PlayerInfoComparer(m_arcLengths));
+
+            m_Players.Sort(new PlayerInfoComparer(m_arcLengths));
            // }
             
 
             if (m_Players.Count == 2)
             {
-                Debug.Log("Longitudes de arco: [" + m_Players[0].Name + ": " + m_arcLengths[m_Players[0].ID] + "], [" + m_Players[1].Name + ": " + m_arcLengths[m_Players[1].ID] + "]");
-                Debug.Log("Vueltas: [" + m_Players[0].Name + ": " + m_Players[0].CurrentLap + "], [" + m_Players[1].Name + ": " + m_Players[1].CurrentLap + "]");
+                //Debug.Log("Longitudes de arco: [" + m_Players[0].Name + ": " + m_arcLengths[m_Players[0].ID] + "], [" + m_Players[1].Name + ": " + m_arcLengths[m_Players[1].ID] + "]");
+                //Debug.Log("Vueltas: [" + m_Players[0].Name + ": " + m_Players[0].CurrentLap + "], [" + m_Players[1].Name + ": " + m_Players[1].CurrentLap + "]");
             }
 
             // Se asigna la posición
@@ -212,57 +235,6 @@ public class PolePositionManager : NetworkBehaviour
                 minArcL += m_CircuitController.CircuitLength *
                                    (m_Players[ID].CurrentLap - 1);
             }
-            
-            /*switch (ID)
-            {
-                case 0:
-                    if (m_LapManager.player1Laps == 0)
-                    {
-                        minArcL -= m_CircuitController.CircuitLength;
-                    }
-                    else
-                    {
-                        minArcL += m_CircuitController.CircuitLength *
-                                   (m_LapManager.player1Laps - 1);
-                    }
-                    break;
-                case 1:
-                    if (m_LapManager.player2Laps == 0)
-                    {
-                        minArcL -= m_CircuitController.CircuitLength;
-                    }
-                    else
-                    {
-                        minArcL += m_CircuitController.CircuitLength *
-                                   (m_LapManager.player2Laps - 1);
-                    }
-                    break;
-                case 2:
-                    if (m_LapManager.player3Laps == 0)
-                    {
-                        minArcL -= m_CircuitController.CircuitLength;
-                    }
-                    else
-                    {
-                        minArcL += m_CircuitController.CircuitLength *
-                                   (m_LapManager.player3Laps - 1);
-                    }
-                    break;
-                case 3:
-                    if (m_LapManager.player4Laps == 0)
-                    {
-                        minArcL -= m_CircuitController.CircuitLength;
-                    }
-                    else
-                    {
-                        minArcL += m_CircuitController.CircuitLength *
-                                   (m_LapManager.player4Laps - 1);
-                    }
-                    break;
-                default:
-                    break;
-            }*/
-            
         }
         
 

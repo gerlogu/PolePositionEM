@@ -75,13 +75,13 @@ public class SetupPlayer : NetworkBehaviour
     public void CmdUpdateGameStarted()
     {
         GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
-        
-        m_PolePositionManager.playersArcLengths = new SyncListFloat();
 
-        for(int i = 0; i < m_PolePositionManager.gameStartManager.minPlayers; i++)
-        {
-            m_PolePositionManager.playersArcLengths.Add(0);
-        }
+        //m_PolePositionManager.playersArcLengths = new SyncListFloat();
+
+        //for(int i = 0; i < m_PolePositionManager.gameStartManager.minPlayers; i++)
+        //{
+        //    m_PolePositionManager.playersArcLengths.Add(0);
+        //}
         m_PolePositionManager.gameStartManager.gameStarted = true; // Se actualiza el estado de la partida para los jugadores
     }
 

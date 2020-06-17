@@ -151,21 +151,36 @@ public class GameStartManager : NetworkBehaviour
             }
             else
             {
+                PlayerInfo p = null;
+                //p = new PlayerInfo();
                 foreach (PlayerInfo player in m_Players)
                 {
-                    if (player.GetComponent<NetworkIdentity>().isLocalPlayer)
+                    if (player)
                     {
-                        if (!player.hasFinished)
+                        if (player.GetComponent<NetworkIdentity>().isLocalPlayer)
                         {
-                            lapTimer.CalculateTime();
-                            timerText.text = "Lap time: " + lapTimer.minutes + ":" + lapTimer.seconds + ":" + lapTimer.miliseconds;
+                            if (!player.hasFinished)
+                            {
+                                lapTimer.CalculateTime();
+                                timerText.text = "Lap time: " + lapTimer.minutes + ":" + lapTimer.seconds + ":" + lapTimer.miliseconds;
 
-                            totalTimer.CalculateTime();
-                            totalTimerText.text = "Total time: " + totalTimer.minutes + ":" + totalTimer.seconds + ":" + totalTimer.miliseconds;
+                                totalTimer.CalculateTime();
+                                totalTimerText.text = "Total time: " + totalTimer.minutes + ":" + totalTimer.seconds + ":" + totalTimer.miliseconds;
+                            }
                         }
                     }
+                    else
+                    {
+                        p = player;
+                    }
+
                 }
-                
+                if (p == null)
+                {
+                    m_Players.Remove(p);
+                    //return;
+                }
+
             }
 
         }
