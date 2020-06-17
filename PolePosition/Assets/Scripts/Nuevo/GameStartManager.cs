@@ -178,7 +178,8 @@ public class GameStartManager : NetworkBehaviour
                 if (p == null)
                 {
                     m_Players.Remove(p);
-                    //return;
+                    if(gameStarted)
+                        return;
                 }
 
             }

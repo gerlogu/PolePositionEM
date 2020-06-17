@@ -145,8 +145,8 @@ public class PolePositionManager : NetworkBehaviour
             if (p == null) // si p es null significa que hay que eliminarlo de la lista
             {
                 m_Players.Remove(p); // Eliminamos el jugador
-                //if(gameStartManager.gameStarted)
-                //    return; // Volvemos a empezar el bucle, porque hay que comprobar si hay más players nulos
+                if(gameStartManager.gameStarted)
+                    return; // Volvemos a empezar el bucle, porque hay que comprobar si hay más players nulos
             }
 
 
