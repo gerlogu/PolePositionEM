@@ -85,24 +85,10 @@ public class SetupPlayer : NetworkBehaviour
         m_PolePositionManager.gameStartManager.gameStarted = true; // Se actualiza el estado de la partida para los jugadores
     }
 
-    //[Command]
-    //public void CmdUpdatePlayerArcLengthsList(float[] arcs)
-    //{
-    //    GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
-    //    for(int i = 0; i < arcs.Length; i++)
-    //    {
-    //        m_PolePositionManager.playersArcLengths[i] = arcs[i];
-    //    }
-    //}
-
     [Command]
     public void CmdLapList(int numPlayers)
     {
         GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
-        //for (int i = 0; i < numPlayers; i++)
-        //{
-        //    m_LapManager.laps.Add(0);
-        //}
         switch (numPlayers)
         {
             case 1:
@@ -189,6 +175,17 @@ public class SetupPlayer : NetworkBehaviour
         //    m_PolePositionManager.gameStartManager = gameStartManager;
         //}
 
+        if (isLocalPlayer)
+        {
+            CmdUpdateName(m_UIManager.playerName);
+
+            CmdUpdateColor(m_UIManager.carType);
+            Debug.Log("Nombre del jugador:" + m_LapController.m_playerInfo.Name);
+
+            string carColor = m_PlayerInfo.carType.ToString();
+            Debug.Log("COLOR DE COCHE ESCOGIDO: <color=" + carColor + ">" + m_PlayerInfo.carType + "</color>");
+        }
+
         m_PolePositionManager.AddPlayer(m_PlayerInfo); // Se añade el jugador a la lista de jugadores del manager de la partida
     }
 
@@ -198,14 +195,6 @@ public class SetupPlayer : NetworkBehaviour
     /// </summary>
     public override void OnStartLocalPlayer()
     {
-        CmdUpdateName(m_UIManager.playerName);
-
-        CmdUpdateColor(m_UIManager.carType);
-        Debug.Log("Nombre del jugador:" + m_LapController.m_playerInfo.Name);
-
-        string carColor = m_PlayerInfo.carType.ToString();
-        Debug.Log("COLOR DE COCHE ESCOGIDO: <color=" + carColor + ">" + m_PlayerInfo.carType + "</color>");
-
         #region Player Components
         m_PlayerController.enabled  = true;
         m_CrashDetector.enabled     = true;

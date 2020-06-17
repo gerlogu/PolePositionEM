@@ -14,7 +14,7 @@ public class LapController : NetworkBehaviour
     private UIManager m_UIManager;                  // Referencia al UIManager
     private bool malaVuelta = false;                // Booleano que indica si la vuelta es mala (marcha atrás)
     private GameStartManager m_GSM;
-    private LapManager m_lapManager;
+    [SerializeField] private LapManager m_lapManager;
     public int num_players = 2;
     private SemaphoreSlim endSemaphore = new SemaphoreSlim(0);
     private PolePositionManager m_PPM;
@@ -23,7 +23,7 @@ public class LapController : NetworkBehaviour
     #endregion
 
     #region Variables publicas
-    [Tooltip("Número total de vueltas")] public int totalLaps = 3; // Por poner algo de momento
+    
     [HideInInspector] public bool canLap = false;                     // Bool que determina si puede sumar vueltas el jugador
     [SyncVar] public float timeToEnd = 20.0f;
     #endregion
@@ -77,20 +77,6 @@ public class LapController : NetworkBehaviour
 
         // Se obtiene el DirectionDetector
         m_directionDetector = this.GetComponent<DirectionDetector>();
-
-        // Se obtiene el UIManager y se establece el texto de las vueltas
-        m_UIManager = FindObjectOfType<UIManager>();
-        m_UIManager.UpdateLaps(1, totalLaps);
-
-        // Se obtiene el GameStartManager
-        m_GSM = FindObjectOfType<GameStartManager>();
-
-        m_lapManager = FindObjectOfType<LapManager>();
-        // Se obtiene el PolePositionManager
-        m_PPM = FindObjectOfType<PolePositionManager>();
-
-        // Se obtiene el FinishGame
-        m_FinishGame = FindObjectOfType<FinishGame>();
     }
 
     private void Start()
@@ -98,6 +84,16 @@ public class LapController : NetworkBehaviour
         m_playerInfo.lapBestMinutes = 0;
         m_playerInfo.lapBestSeconds = 0;
         m_playerInfo.lapBestMiliseconds = 0;
+        m_lapManager = FindObjectOfType<LapManager>();
+        // Se obtiene el PolePositionManager
+        m_PPM = FindObjectOfType<PolePositionManager>();
+        // Se obtiene el GameStartManager
+        m_GSM = FindObjectOfType<GameStartManager>();
+        // Se obtiene el FinishGame
+        m_FinishGame = FindObjectOfType<FinishGame>();
+        // Se obtiene el UIManager y se establece el texto de las vueltas
+        m_UIManager = FindObjectOfType<UIManager>();
+        m_UIManager.UpdateLaps(1, m_lapManager.totalLaps);
     }
 
     private void Update()
@@ -216,7 +212,7 @@ public class LapController : NetworkBehaviour
                         m_GSM.lapTimer.RestartTimer();
 
                         // Si el jugador ha acabado la carrera
-                        if (laps > totalLaps)
+                        if (laps > m_lapManager.totalLaps)
                         {
                             // Se paran los timers y avisa de que ha terminado
                             m_GSM.lapTimer.StopTimer();
@@ -248,7 +244,7 @@ public class LapController : NetworkBehaviour
                         }
                     }
 
-                    m_UIManager.UpdateLaps(laps, totalLaps);
+                    m_UIManager.UpdateLaps(laps, m_lapManager.totalLaps);
                     m_directionDetector.haCruzadoMeta = true;
                 }
                 // Si había entrado marcha atrás previamente:

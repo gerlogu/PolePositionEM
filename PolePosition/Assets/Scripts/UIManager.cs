@@ -46,6 +46,22 @@ public class UIManager : MonoBehaviour
     [Tooltip("Input Field para el nombre del jugador")]
     [SerializeField] private InputField inputFieldName;
 
+    [Header("Game Configuration Menu")]
+    [SerializeField] private GameObject configMenu;
+    [SerializeField] private Text playersText;
+    [SerializeField] private Button buttonPlayersLeft;
+    [SerializeField] private Button buttonPlayersRight;
+    [SerializeField] private Text lapsText;
+    [SerializeField] private Button buttonLapsLeft;
+    [SerializeField] private Button buttonLapsRight;
+    [SerializeField] private Button buttonSelectConfig;
+    [SerializeField] private GameStartManager m_GameStartManager;
+    [SerializeField] private LapManager m_LapManager;
+
+    public int players = 2;
+    public int laps = 3;
+    
+
     [Header("Car Selector")]
     public Car[] cars;
     public GameObject carSelector;
@@ -82,10 +98,40 @@ public class UIManager : MonoBehaviour
         carSelector.SetActive(false);
 
         // Se asocian los botones a las diferentes funciones
-        buttonHost.onClick.AddListener(() => ShowNameSelector(0));   // Name Selector (Host)
+        buttonHost.onClick.AddListener(() => ShowGameConfig(0));     // Name Selector (Host)
         buttonClient.onClick.AddListener(() => ShowNameSelector(1)); // Name Selector (Cliente)
-        buttonServer.onClick.AddListener(() => StartServer());       // Servidor
+        buttonServer.onClick.AddListener(() => ShowGameConfig(1));   // Servidor
         ActivateMainMenu();                                          // Muestra por pantalla el menú principal
+    }
+
+    private void ShowGameConfig(int type)
+    {
+        mainMenu.SetActive(false);
+        configMenu.SetActive(true);
+        buttonLapsLeft.onClick.AddListener(() => { laps = (laps > 1) ? (laps - 1) : laps; });
+        buttonLapsRight.onClick.AddListener(() => { laps = (laps < 9) ? (laps + 1) : laps; });
+
+        buttonPlayersLeft.onClick.AddListener(() => { players = (players > 2) ? players - 1 : players;});
+        buttonPlayersRight.onClick.AddListener(() => { players = (players < 4) ? players + 1 : players; });
+
+        buttonSelectConfig.onClick.AddListener(() => 
+        {
+            m_GameStartManager.minPlayers = players;
+            m_LapManager.totalLaps = laps;
+            configMenu.SetActive(false);
+            
+            switch (type)
+            {
+                case 0:
+                    ShowNameSelector(0);
+                    break;
+                case 1:
+                    StartServer();
+                    break;
+                default:
+                    break;
+            }
+        });
     }
 
     private void Update()
@@ -98,6 +144,12 @@ public class UIManager : MonoBehaviour
         if (nameSelector.activeSelf)
         {
             selectorManager.CheckPlayerName(out playerName); // Se actualiza el nombre del jugador
+        }
+
+        if (configMenu.activeSelf)
+        {
+            playersText.text = players.ToString();
+            lapsText.text    = laps.ToString();
         }
     }
 

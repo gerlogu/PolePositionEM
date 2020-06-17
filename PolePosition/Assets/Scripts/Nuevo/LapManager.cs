@@ -20,6 +20,8 @@ public class LapManager : NetworkBehaviour
     [SyncVar] public bool player3Finished = false;
     [SyncVar] public bool player4Finished = false;
 
+    [Tooltip("Número total de vueltas")] [SyncVar] public int totalLaps; // Por poner algo de momento
+
     public List<PlayerInfo> m_players;
     
     public void updateP1Laps(int ant, int nuevo)

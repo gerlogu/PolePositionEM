@@ -9,7 +9,7 @@ using UnityEngine.UI;
 public class GameStartManager : NetworkBehaviour
 {
     #region Variables Públicas
-    public int minPlayers = 2;
+    [SyncVar] public int minPlayers;
     public LapTimer lapTimer = new LapTimer();
     public LapTimer totalTimer = new LapTimer();
     public PolePositionManager m_PolePositionManager;
@@ -50,8 +50,6 @@ public class GameStartManager : NetworkBehaviour
     void InvokeGameStarted(bool gs)
     {
         calledToGameStarted = gs;
-        
-        
     }
 
     #region Funciones Hook
@@ -69,8 +67,8 @@ public class GameStartManager : NetworkBehaviour
         {
             if (player.GetComponent<NetworkIdentity>().isLocalPlayer)
             {
-                player.GetComponent<SetupPlayer>().CmdLapList(minPlayers);
-                //Debug.Log("NÚMERO DE JUGADORES (TAMAÑO DE LA LISTA): <color=orange>" + player.GetComponent<SetupPlayer>().m_LapManager.laps.Count + "</color>");
+                int numPlayers = minPlayers;
+                player.GetComponent<SetupPlayer>().CmdLapList(numPlayers);
             }
 
         }
