@@ -133,17 +133,35 @@ public class PolePositionManager : NetworkBehaviour
             // la lista que se está recorriendo con el foreach dentro del mismo foreach
 
             PlayerInfo p = null; // Creamos un objeto auxiliar p
+
+            //foreach(PlayerInfo player in m_Players)
+            //{
+            //    if (player.GetComponent<NetworkIdentity>().isLocalPlayer)
+            //    {
+            //        player.GetComponent<SetupPlayer>().CmdUpdateTimer();
+            //        p = player;
+            //    }
+
+            //}
+            bool hayNulo = false ;
+
+
             //p = new PlayerInfo(); // p es igual a un objeto genérico
             foreach (PlayerInfo player in m_Players) // Recorremos la lista de jugadores
             {
                 if (player == null) // Si el player es null (es decir, si se ha desconectado)
                 {
                     m_PlayersNotOrdered.Remove(player); // Eliminamos el jugador de la lista sin ordenar
-                    p = player; // p se iguala al player, es decir, a null porque se desconectó
+                    if (!hayNulo)
+                    {
+                        p = player; // p se iguala al player, es decir, a null porque se desconectó
+                    }
+                    hayNulo = true;
                 }
+                
             }
 
-            if (p == null) // si p es null significa que hay que eliminarlo de la lista
+            if (p == null && hayNulo) // si p es null significa que hay que eliminarlo de la lista
             {
                 m_Players.Remove(p); // Eliminamos el jugador
                 if(gameStartManager.gameStarted)
