@@ -168,7 +168,7 @@ public class LapController : NetworkBehaviour
                     int laps = m_playerInfo.CurrentLap + 1;
                     m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(m_playerInfo.CurrentPosition, laps, m_playerInfo.ID);
                     string st = "LISTA PLAYERS: ";
-                    for (int i = 0; i < num_players; i++)
+                    for (int i = 0; i < m_PPM.m_Players.Count; i++) // Sincronizar numPlayers
                     {
                         st += m_PPM.m_Players[i].ToString() + ", ";
                     }
