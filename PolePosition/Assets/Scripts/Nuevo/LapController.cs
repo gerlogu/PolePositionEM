@@ -22,6 +22,7 @@ public class LapController : NetworkBehaviour
     private FinishGame m_FinishGame;
     private bool gameThreadFinished;
     private bool timeEnded = false;
+    private float enterArcLength;
     #endregion
 
     #region Variables publicas
@@ -261,19 +262,27 @@ public class LapController : NetworkBehaviour
     /// <param name="other">El trigger en el que entra el coche</param>
     private void OnTriggerEnter(Collider other)
     {
-        // (Vale a ver esto es un problema a ver si tu sabes arreglarlo)
-        // El host funciona perfecto, pero el cliente no porque tiene el lapController desactivado
-        // La cosa es que el cliente me está modificando las vueltas del host y no debe
+        enterArcLength = m_PPM.m_arcLengths[m_playerInfo.CurrentPosition];
+    }
+
+    /// <summary>
+    /// Comprueba si el coche sale de un trigger
+    /// </summary>
+    /// <param name="other">El trigger del que sale el coche</param>
+    private void OnTriggerExit(Collider other)
+    {
 
         // Si toca la meta:
         if (other.CompareTag("FinishLine") && canLap)
         {
             // Si va en buena dirección:
-            if (m_directionDetector.buenaDireccion)
+            Debug.Log("ENTER: " + enterArcLength + " | EXIT: " + m_PPM.m_arcLengths[m_playerInfo.CurrentPosition]);
+            if (enterArcLength > m_PPM.m_arcLengths[m_playerInfo.CurrentPosition] + 9.9f)
             {
                 // Si NO ha entrado marcha atrás previamente:
                 if (!malaVuelta)
                 {
+                    Debug.LogWarning("VUELTA CORRECTA");
                     int laps = m_playerInfo.CurrentLap + 1;
                     m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(m_playerInfo.CurrentPosition, laps, m_playerInfo.ID);
                     /*string st = "LISTA PLAYERS: ";
@@ -362,14 +371,26 @@ public class LapController : NetworkBehaviour
                 // Si había entrado marcha atrás previamente:
                 else
                 {
+                    Debug.LogWarning("RECUPERAMOS VUELTA");
                     malaVuelta = false;
                     int laps = m_playerInfo.CurrentLap + 1;
                     m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(m_playerInfo.CurrentPosition, laps, m_playerInfo.ID);
                 }
             }
+            //Entrar bien y salir mal
+            else if (enterArcLength > m_PPM.m_arcLengths[m_playerInfo.CurrentPosition])
+            {
+                Debug.LogWarning("Me QUEDO IGUAL 1");
+            }
+            //Entrar mal y salir bien
+            else if (enterArcLength < m_PPM.m_arcLengths[m_playerInfo.CurrentPosition] && enterArcLength + 9.9f > m_PPM.m_arcLengths[m_playerInfo.CurrentPosition])
+            {
+                Debug.LogWarning("Me QUEDO IGUAL 2");
+            }
             // Si entra marcha atrás:
             else
             {
+                Debug.LogWarning("MALA VUELTA");
                 malaVuelta = true;
                 int laps = m_playerInfo.CurrentLap - 1;
                 m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(m_playerInfo.CurrentPosition, laps, m_playerInfo.ID);
