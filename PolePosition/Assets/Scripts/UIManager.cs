@@ -60,7 +60,10 @@ public class UIManager : MonoBehaviour
 
     public int players = 2;
     public int laps = 3;
-    
+
+    [SerializeField] private GameObject connectionError;
+    [SerializeField] private Button buttonReturn;
+
 
     [Header("Car Selector")]
     public Car[] cars;
@@ -87,6 +90,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Animator anim;
     [SerializeField] private int currentCar = 0;
 
+
     private void Awake()
     {
         m_NetworkManager = FindObjectOfType<NetworkManager>(); // Se busca el network manager en la escena
@@ -96,12 +100,30 @@ public class UIManager : MonoBehaviour
     {
         selectorManager = new NameSelectorManager(inputFieldName, "Player");
         carSelector.SetActive(false);
+        connectionError.SetActive(false);
 
         // Se asocian los botones a las diferentes funciones
         buttonHost.onClick.AddListener(() => ShowGameConfig(0));     // Name Selector (Host)
         buttonClient.onClick.AddListener(() => ShowNameSelector(1)); // Name Selector (Cliente)
         buttonServer.onClick.AddListener(() => ShowGameConfig(1));   // Servidor
         ActivateMainMenu();                                          // Muestra por pantalla el menú principal
+    }
+
+    public void ShowConnectionErrorMessage()
+    {
+        connectionError.SetActive(true);
+        buttonReturn.onClick.AddListener(() => RestartMenu());
+    }
+
+    void RestartMenu()
+    {
+        connectionError.SetActive(false);
+        inGameHUD.SetActive(false); // Se oculta la interfaz In Game
+        carType = 0;
+        currentCar = 0;
+        mainMenu.SetActive(true);
+        anim.enabled = true;
+        anim.Play("Idle");
     }
 
     private void ShowGameConfig(int type)

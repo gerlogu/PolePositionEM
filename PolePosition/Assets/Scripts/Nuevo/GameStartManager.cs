@@ -182,7 +182,6 @@ public class GameStartManager : NetworkBehaviour
                         m_Players[i].CurrentPosition--;
                     }
                     indice = m_Players.Count - 1;
-                    //m_Players.Remove(p); // Eliminamos el jugador
 
                     m_Players.RemoveAt(indice);
                     if (gameStarted)
@@ -218,8 +217,6 @@ public class GameStartManager : NetworkBehaviour
                 if (p == null)
                 {
                     m_Players.Remove(p);
-                    //if(gameStarted)
-                    //    return;
                 }
 
             }
@@ -233,10 +230,6 @@ public class GameStartManager : NetworkBehaviour
         else if (timer <= 1.65f && timer > 0.5f)
         {
             semaphore.GetComponent<MeshRenderer>().materials = stateOrange;
-        }
-        else if (timer <= 0.5f)
-        {
-            
         }
         #endregion
     }

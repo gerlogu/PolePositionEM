@@ -89,6 +89,8 @@ public class LapController : NetworkBehaviour
     [Command]
     public void CmdUpdateReadyToShow()
     {
+        if(!m_lapManager)
+            m_lapManager = FindObjectOfType<LapManager>();
         m_lapManager.readyToShowFinalScreen = true;
     }
 
@@ -145,8 +147,13 @@ public class LapController : NetworkBehaviour
                 break;
         }
         
-        if (m_GSM.m_PolePositionManager.m_PlayersNotOrdered[ID].CurrentPosition == num_players - 1)
-            m_lapManager.readyToShowFinalScreen = true;
+        if(ID > -1 && m_GSM.m_PolePositionManager.m_PlayersNotOrdered.Count > 0)
+        {
+            Debug.Log("El puto ID que da error es: " + ID);
+            if (m_GSM.m_PolePositionManager.m_PlayersNotOrdered[ID].CurrentPosition == num_players - 1)
+                m_lapManager.readyToShowFinalScreen = true;
+        }
+        
     }
 
     [Command]

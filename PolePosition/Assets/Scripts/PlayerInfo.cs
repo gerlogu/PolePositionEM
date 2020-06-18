@@ -12,7 +12,7 @@ public class PlayerInfo : MonoBehaviour
     public string Name { get; set; }
 
     // ID del jugador
-    public int ID { get; set; }
+    public int ID;
 
     // Posición actual del jugador
     public int CurrentPosition { get; set; }
