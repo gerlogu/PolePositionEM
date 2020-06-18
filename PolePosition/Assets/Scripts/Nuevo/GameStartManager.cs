@@ -83,6 +83,7 @@ public class GameStartManager : NetworkBehaviour
     {
         if (nuevo == minPlayers)
         {
+            semaphore.GetComponent<MeshRenderer>().materials = stateGreen;
             jugadoresListos.Release(minPlayers);
         }
     }
@@ -235,7 +236,7 @@ public class GameStartManager : NetworkBehaviour
         }
         else if (timer <= 0.5f)
         {
-            semaphore.GetComponent<MeshRenderer>().materials = stateGreen;
+            
         }
         #endregion
     }
