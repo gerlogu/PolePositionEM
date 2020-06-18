@@ -64,7 +64,7 @@ public class FinishGame : NetworkBehaviour
                 for (int i = 0; i < m_players.Count; i++)
                 {
                     endTexts[0].text += m_players[finalPositions[i]].Name + "\n";
-                    endTexts[1].text += (finalPositions[i]+ 1) + "\n";
+                    endTexts[1].text += (i + 1) + "\n";
                     if (m_players[finalPositions[i]].hasFinished)
                         endTexts[2].text += totalTimers[m_players[finalPositions[i]].ID] + "\n";
                     else
