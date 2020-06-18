@@ -14,6 +14,7 @@ public class FinishGame : NetworkBehaviour
     private bool hasShownFinalGUI;
     private UIManager m_UIManager;
     private PolePositionManager m_PPM;
+    private LapManager m_lapManager;
     #endregion
 
     #region Variables publicas
@@ -28,6 +29,11 @@ public class FinishGame : NetworkBehaviour
         m_PPM = FindObjectOfType<PolePositionManager>();
     }
 
+    private void Start()
+    {
+        m_lapManager = FindObjectOfType<LapManager>();
+    }
+
     void Update()
     {
         if (!endedGame)
@@ -35,7 +41,8 @@ public class FinishGame : NetworkBehaviour
             if (m_PPM.gameHasEnded)
             {
                 endedGame = true;
-                m_players = m_PPM.m_Players.ToList<PlayerInfo>();
+                //CmdUpdateTimers();
+                m_players = m_PPM.m_PlayersNotOrdered.ToList<PlayerInfo>();
             }
         }
         else
@@ -49,16 +56,32 @@ public class FinishGame : NetworkBehaviour
                 endTexts[2].text = "Total time\n\n";
                 endTexts[3].text = "Best lap\n\n";
 
-                foreach (PlayerInfo p in m_players)
+                string[] totalTimers = { m_lapManager.player1TotalTimer, m_lapManager.player2TotalTimer, m_lapManager.player3TotalTimer, m_lapManager.player4TotalTimer };
+                string[] bestTimers = { m_lapManager.player1BestTimer, m_lapManager.player2BestTimer, m_lapManager.player3BestTimer, m_lapManager.player4BestTimer };
+
+                int[] finalPositions = { m_lapManager.endPos1, m_lapManager.endPos2, m_lapManager.endPos3, m_lapManager.endPos4 };
+
+                for (int i = 0; i < m_players.Count; i++)
+                {
+                    endTexts[0].text += m_players[finalPositions[i]].Name + "\n";
+                    endTexts[1].text += (finalPositions[i]+ 1) + "\n";
+                    if (m_players[finalPositions[i]].hasFinished)
+                        endTexts[2].text += totalTimers[m_players[finalPositions[i]].ID] + "\n";
+                    else
+                        endTexts[2].text += "NF\n";
+                    endTexts[3].text += bestTimers[m_players[finalPositions[i]].ID] + "\n";
+                }
+
+                /*foreach (PlayerInfo p in m_players)
                 {
                     endTexts[0].text += p.Name + "\n";
                     endTexts[1].text += (p.CurrentPosition + 1) + "\n";
                     if (p.hasFinished)
-                        endTexts[2].text += p.lapTotalMinutes + ":" + p.lapTotalSeconds + ":" + p.lapTotalMiliseconds + "\n";
+                        endTexts[2].text += totalTimers[p.ID] + "\n";
                     else
                         endTexts[2].text += "NF\n";
-                    endTexts[3].text += p.lapBestMinutes + ":" + p.lapBestSeconds + ":" + p.lapBestMiliseconds + "\n";
-                }
+                    endTexts[3].text += bestTimers[p.ID] + "\n";
+                }*/
 
                 foreach (PlayerInfo p in m_players)
                     p.canMove = false;

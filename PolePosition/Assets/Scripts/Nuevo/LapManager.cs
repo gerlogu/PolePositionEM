@@ -10,39 +10,38 @@ public class LapManager : NetworkBehaviour
 {
     //public SyncListInt laps;
 
-    [SyncVar (hook = nameof(updateP1Laps))] public int player1Laps = -1;
-    [SyncVar (hook = nameof(updateP1Laps))] public int player2Laps = -1;
-    [SyncVar (hook = nameof(updateP1Laps))] public int player3Laps = -1;
-    [SyncVar (hook = nameof(updateP1Laps))] public int player4Laps = -1;
+    [SyncVar] public int player1Laps = -1;
+    [SyncVar] public int player2Laps = -1;
+    [SyncVar] public int player3Laps = -1;
+    [SyncVar] public int player4Laps = -1;
 
     [SyncVar] public bool player1Finished = false;
     [SyncVar] public bool player2Finished = false;
     [SyncVar] public bool player3Finished = false;
     [SyncVar] public bool player4Finished = false;
 
+    // Cada una guarda la string del timer (quería usar SyncList pero son un infierno)
+    [SyncVar] public string player1TotalTimer = "";
+    [SyncVar] public string player2TotalTimer = "";
+    [SyncVar] public string player3TotalTimer = "";
+    [SyncVar] public string player4TotalTimer = "";
+
+    [SyncVar] public string player1BestTimer = "";
+    [SyncVar] public string player2BestTimer = "";
+    [SyncVar] public string player3BestTimer = "";
+    [SyncVar] public string player4BestTimer = "";
+
+    [SyncVar] public int endPos1;
+    [SyncVar] public int endPos2;
+    [SyncVar] public int endPos3;
+    [SyncVar] public int endPos4;
+    [SyncVar] public int nextPos = 0;
+
+    [SyncVar] public bool readyToShowFinalScreen = false;
+
     [Tooltip("Número total de vueltas")] [SyncVar] public int totalLaps; // Por poner algo de momento
 
     public List<PlayerInfo> m_players;
-    
-    public void updateP1Laps(int ant, int nuevo)
-    {
-
-    }
-
-    public void updateP2Laps(int ant, int nuevo)
-    {
-
-    }
-
-    public void updateP3Laps(int ant, int nuevo)
-    {
-
-    }
-
-    public void updateP4Laps(int ant, int nuevo)
-    {
-
-    }
 
     private void Awake()
     {
@@ -59,6 +58,6 @@ public class LapManager : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 }

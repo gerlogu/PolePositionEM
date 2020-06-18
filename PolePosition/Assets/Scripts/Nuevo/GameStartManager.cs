@@ -81,7 +81,7 @@ public class GameStartManager : NetworkBehaviour
     /// <param name="nuevo">Valor Nuevo</param>
     void H_UpdatePlayers(int anterior, int nuevo)
     {
-        if(nuevo == minPlayers)
+        if (nuevo == minPlayers)
         {
             jugadoresListos.Release(minPlayers);
         }
@@ -95,7 +95,7 @@ public class GameStartManager : NetworkBehaviour
     void H_UpdateTimer(int anterior, int nuevo)
     {
         // if timersListos == numJugadores
-        if(nuevo == minPlayers)
+        if (nuevo == minPlayers)
             timerListo.Release(1);
     }
     #endregion
@@ -129,7 +129,7 @@ public class GameStartManager : NetworkBehaviour
         }
         else
         {
-            
+
             if (!ended)
             {
                 foreach (PlayerInfo player in m_Players)
@@ -149,7 +149,7 @@ public class GameStartManager : NetworkBehaviour
 
                         endTimerThread.Start();
                     }
-                    
+
                 }
                 ended = true;
             }
@@ -163,14 +163,11 @@ public class GameStartManager : NetworkBehaviour
                     {
                         if (player.GetComponent<NetworkIdentity>().isLocalPlayer)
                         {
-                            if (!player.hasFinished)
-                            {
-                                lapTimer.CalculateTime();
-                                timerText.text = "Lap time: " + lapTimer.minutes + ":" + lapTimer.seconds + ":" + lapTimer.miliseconds;
+                            lapTimer.CalculateTime();
+                            timerText.text = "Lap time: " + lapTimer.minutes + ":" + lapTimer.seconds + ":" + lapTimer.miliseconds;
 
-                                totalTimer.CalculateTime();
-                                totalTimerText.text = "Total time: " + totalTimer.minutes + ":" + totalTimer.seconds + ":" + totalTimer.miliseconds;
-                            }
+                            totalTimer.CalculateTime();
+                            totalTimerText.text = "Total time: " + totalTimer.minutes + ":" + totalTimer.seconds + ":" + totalTimer.miliseconds;
                         }
                     }
                     else
@@ -229,7 +226,7 @@ public class GameStartManager : NetworkBehaviour
             }
 
             // Se inicializa un hilo que congelamos
-            Thread timerThread = new Thread(() => 
+            Thread timerThread = new Thread(() =>
             {
                 timerListo.Wait();   // Se espera a tener el permiso
                 action.Invoke(true); // Llamada al delegado

@@ -5,6 +5,7 @@ using Mirror;
 
 using UnityEngine.UI;
 using System.Threading;
+using Ninja.WebSockets.Exceptions;
 
 public class LapController : NetworkBehaviour
 {
@@ -42,28 +43,104 @@ public class LapController : NetworkBehaviour
     private void CmdUpdatePlayerFinished(int ID)
     {
         //GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
+        LapManager lm = FindObjectOfType<LapManager>();
+
+        switch(lm.nextPos)
+        {
+            case 0:
+                lm.endPos1 = ID;
+                break;
+            case 1:
+                lm.endPos2 = ID;
+                break;
+            case 2:
+                lm.endPos3 = ID;
+                break;
+            case 3:
+                lm.endPos4 = ID;
+                break;
+        }
+
+        lm.nextPos++;
+
         switch (ID)
         {
             case 0:
-                m_lapManager.player1Finished = true;
+                lm.player1Finished = true;
                 break;
             case 1:
-                m_lapManager.player2Finished = true;
+                lm.player2Finished = true;
                 break;
             case 2:
-                m_lapManager.player3Finished = true;
+                lm.player3Finished = true;
                 break;
             case 3:
-                m_lapManager.player4Finished = true;
+                lm.player4Finished = true;
                 break;
         }
+    }
+
+    [Command]
+    public void CmdUpdateBestLap(int ID, int m, int s, int ms)
+    {
+        m_lapManager = FindObjectOfType<LapManager>();
+        m_GSM = FindObjectOfType<GameStartManager>();
+        m_PPM = FindObjectOfType<PolePositionManager>();
+
+        string st = m + ":" + s + ":" + ms;
+
+        switch (ID)
+        {
+            case 0:
+                m_lapManager.player1BestTimer = st;
+                break;
+            case 1:
+                m_lapManager.player2BestTimer = st;
+                break;
+            case 2:
+                m_lapManager.player3BestTimer = st;
+                break;
+            case 3:
+                m_lapManager.player4BestTimer = st;
+                break;
+        }
+    }
+
+    [Command]
+    public void CmdUpdateTimers(int ID)
+    {
+        //GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
+        //m_PPM = FindObjectOfType<PolePositionManager>();
+        m_lapManager = FindObjectOfType<LapManager>();
+        m_GSM = FindObjectOfType<GameStartManager>();
+
+        string st = m_GSM.totalTimer.minutes + ":" + m_GSM.totalTimer.seconds + ":" + m_GSM.totalTimer.miliseconds;
+
+        switch (ID)
+        {
+            case 0:
+                m_lapManager.player1TotalTimer = st;
+                break;
+            case 1:
+                m_lapManager.player2TotalTimer = st;
+                break;
+            case 2:
+                m_lapManager.player3TotalTimer = st;
+                break;
+            case 3:
+                m_lapManager.player4TotalTimer = st;
+                break;
+        }
+        
+        if (m_GSM.m_PolePositionManager.m_PlayersNotOrdered[ID].CurrentPosition == num_players - 1)
+            m_lapManager.readyToShowFinalScreen = true;
     }
 
     [Command]
     private void CmdUpdateEndGame()
     {
         //GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
-        m_PPM.gameHasEnded = true;
+        FindObjectOfType<PolePositionManager>().gameHasEnded = true;
     }
     #endregion
 
@@ -126,6 +203,8 @@ public class LapController : NetworkBehaviour
 
         if (gameThreadFinished)
         {
+            if (!m_lapManager.readyToShowFinalScreen)
+                return;
             gameThreadFinished = false;
             CmdUpdateEndGame();
         }
@@ -167,12 +246,12 @@ public class LapController : NetworkBehaviour
                 {
                     int laps = m_playerInfo.CurrentLap + 1;
                     m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(m_playerInfo.CurrentPosition, laps, m_playerInfo.ID);
-                    string st = "LISTA PLAYERS: ";
+                    /*string st = "LISTA PLAYERS: ";
                     for (int i = 0; i < m_PPM.m_Players.Count; i++) // Sincronizar numPlayers
                     {
                         st += m_PPM.m_Players[i].ToString() + ", ";
                     }
-                    Debug.LogWarning(st);
+                    Debug.LogWarning(st);*/
 
                     if (laps > 1)
                     {
@@ -200,6 +279,7 @@ public class LapController : NetworkBehaviour
                                 m_playerInfo.lapBestMinutes = m_GSM.lapTimer.iMinutes;
                                 m_playerInfo.lapBestSeconds = m_GSM.lapTimer.iSeconds;
                                 m_playerInfo.lapBestMiliseconds = m_GSM.lapTimer.iMiliseconds;
+                                CmdUpdateBestLap(m_playerInfo.ID, m_GSM.lapTimer.iMinutes, m_GSM.lapTimer.iSeconds, m_GSM.lapTimer.iMiliseconds);
                             }
                         }
                         else
@@ -207,6 +287,7 @@ public class LapController : NetworkBehaviour
                             m_playerInfo.lapBestMinutes = m_GSM.lapTimer.iMinutes;
                             m_playerInfo.lapBestSeconds = m_GSM.lapTimer.iSeconds;
                             m_playerInfo.lapBestMiliseconds = m_GSM.lapTimer.iMiliseconds;
+                            CmdUpdateBestLap(m_playerInfo.ID, m_GSM.lapTimer.iMinutes, m_GSM.lapTimer.iSeconds, m_GSM.lapTimer.iMiliseconds);
                         }
 
                         m_GSM.lapTimer.RestartTimer();
@@ -216,8 +297,9 @@ public class LapController : NetworkBehaviour
                         {
                             // Se paran los timers y avisa de que ha terminado
                             m_GSM.lapTimer.StopTimer();
-                            m_GSM.totalTimer.StopTimer();
+                            //m_GSM.totalTimer.StopTimer();
                             m_playerInfo.hasFinished = true;
+                            CmdUpdateTimers(m_playerInfo.ID);
                             CmdUpdatePlayerFinished(m_playerInfo.ID);
                             m_playerInfo.canMove = false;
                             m_UIManager.waitFinishHUD.SetActive(true);
