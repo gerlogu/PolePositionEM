@@ -19,6 +19,7 @@ public class FinishGame : NetworkBehaviour
 
     #region Variables publicas
     public Text[] endTexts;
+    public List<PlayerInfo> m_playersNotOrdered;
     public List<PlayerInfo> m_players;
     public Text endTimerText;
     #endregion
@@ -41,8 +42,8 @@ public class FinishGame : NetworkBehaviour
             if (m_PPM.gameHasEnded)
             {
                 endedGame = true;
-                //CmdUpdateTimers();
-                m_players = m_PPM.m_PlayersNotOrdered.ToList<PlayerInfo>();
+                m_playersNotOrdered = m_PPM.m_PlayersNotOrdered.ToList<PlayerInfo>();
+                m_players = m_PPM.m_Players.ToList<PlayerInfo>();
             }
         }
         else
@@ -61,29 +62,29 @@ public class FinishGame : NetworkBehaviour
 
                 int[] finalPositions = { m_lapManager.endPos1, m_lapManager.endPos2, m_lapManager.endPos3, m_lapManager.endPos4 };
 
-                for (int i = 0; i < m_players.Count; i++)
+                for (int i = 0; i < m_playersNotOrdered.Count; i++)
                 {
-                    endTexts[0].text += m_players[finalPositions[i]].Name + "\n";
+                    if (finalPositions[i] == -1)
+                    {
+                        finalPositions[i] = m_players[i].ID;
+                    }
+
+                    endTexts[0].text += m_playersNotOrdered[finalPositions[i]].Name + "\n";
                     endTexts[1].text += (i + 1) + "\n";
-                    if (m_players[finalPositions[i]].hasFinished)
-                        endTexts[2].text += totalTimers[m_players[finalPositions[i]].ID] + "\n";
+                    if (m_playersNotOrdered[finalPositions[i]].hasFinished)
+                        endTexts[2].text += totalTimers[m_playersNotOrdered[finalPositions[i]].ID] + "\n";
                     else
                         endTexts[2].text += "NF\n";
-                    endTexts[3].text += bestTimers[m_players[finalPositions[i]].ID] + "\n";
+
+                    if (bestTimers[m_playersNotOrdered[finalPositions[i]].ID] != "")
+                        endTexts[3].text += bestTimers[m_playersNotOrdered[finalPositions[i]].ID] + "\n";
+                    else
+                    {
+                        endTexts[3].text += "---\n";
+                    }
                 }
 
-                /*foreach (PlayerInfo p in m_players)
-                {
-                    endTexts[0].text += p.Name + "\n";
-                    endTexts[1].text += (p.CurrentPosition + 1) + "\n";
-                    if (p.hasFinished)
-                        endTexts[2].text += totalTimers[p.ID] + "\n";
-                    else
-                        endTexts[2].text += "NF\n";
-                    endTexts[3].text += bestTimers[p.ID] + "\n";
-                }*/
-
-                foreach (PlayerInfo p in m_players)
+                foreach (PlayerInfo p in m_playersNotOrdered)
                     p.canMove = false;
 
                 m_UIManager.inGameHUD.SetActive(false);

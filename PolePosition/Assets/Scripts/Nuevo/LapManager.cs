@@ -31,25 +31,16 @@ public class LapManager : NetworkBehaviour
     [SyncVar] public string player3BestTimer = "";
     [SyncVar] public string player4BestTimer = "";
 
-
-    public List<PlayerInfo> m_players;
-
-    [SyncVar] public int endPos1;
-    [SyncVar] public int endPos2;
-    [SyncVar] public int endPos3;
-    [SyncVar] public int endPos4;
+    [SyncVar] public int endPos1 = -1;
+    [SyncVar] public int endPos2 = -1;
+    [SyncVar] public int endPos3 = -1;
+    [SyncVar] public int endPos4 = -1;
     [SyncVar] public int nextPos = 0;
 
     [SyncVar] public bool readyToShowFinalScreen = false;
 
     [Tooltip("Número total de vueltas")] [SyncVar] public int totalLaps; // Por poner algo de momento
 
-
-    private void Awake()
-    {
-        //laps = new SyncListInt();
-        m_players = GetComponent<PolePositionManager>().m_Players;
-    }
 
     // Start is called before the first frame update
     void Start()

@@ -21,6 +21,7 @@ public class LapController : NetworkBehaviour
     private PolePositionManager m_PPM;
     private FinishGame m_FinishGame;
     private bool gameThreadFinished;
+    private bool timeEnded = false;
     #endregion
 
     #region Variables publicas
@@ -83,6 +84,12 @@ public class LapController : NetworkBehaviour
                 lm.player4Finished = true;
                 break;
         }
+    }
+
+    [Command]
+    public void CmdUpdateReadyToShow()
+    {
+        m_lapManager.readyToShowFinalScreen = true;
     }
 
     [Command]
@@ -207,7 +214,13 @@ public class LapController : NetworkBehaviour
             {
                 timeToEnd -= Time.fixedDeltaTime;
                 CmdUpdateTimeToEnd();
-                
+            }
+
+            if (timeToEnd <= 0 && !timeEnded)
+            {
+                timeEnded = true;
+                gameThreadFinished = true;
+                CmdUpdateReadyToShow();
             }
         }
 

@@ -12694,6 +12694,7 @@ MonoBehaviour:
   - {fileID: 450298093}
   - {fileID: 292194480}
   - {fileID: 1612916738}
+  m_playersNotOrdered: []
   m_players: []
   endTimerText: {fileID: 1769278310}
 --- !u!114 &1839589618
@@ -12726,11 +12727,10 @@ MonoBehaviour:
   player2BestTimer: 
   player3BestTimer: 
   player4BestTimer: 
-  m_players: []
-  endPos1: 0
-  endPos2: 0
-  endPos3: 0
-  endPos4: 0
+  endPos1: -1
+  endPos2: -1
+  endPos3: -1
+  endPos4: -1
   nextPos: 0
   readyToShowFinalScreen: 0
   totalLaps: 0
