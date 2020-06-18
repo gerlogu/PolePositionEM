@@ -16,6 +16,7 @@ public class CrashDetector : MonoBehaviour
     #region Variables publicas
     [Tooltip("Layer \"Road\"")] public LayerMask whatIsRoad; // Capa que indica qué es carretera
     [Tooltip("Radio de detección de la carretera")] public float checkRadius = 0.5f; // Radio de detección de la carretera
+    public bool isGrounded = true;
     #endregion
 
     /// <summary>
@@ -39,7 +40,7 @@ public class CrashDetector : MonoBehaviour
     void Update()
     {
         // Variable booleana para saber si el coche está tocando el suelo
-        bool isGrounded = true;
+        isGrounded = true;
 
         // Para cada rueda se comprueba si colisiona con la carretera
         for (int i = 0; i < ruedas.Length; i++)
