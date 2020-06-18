@@ -84,6 +84,7 @@ public class PlayerController : NetworkBehaviour
             InputSteering = 0;
             InputBrake = 0;
             Speed = 0;
+            m_Rigidbody.Sleep();
         }
 
         //Debug.LogWarning("ID: " + m_PlayerInfo.ID);
