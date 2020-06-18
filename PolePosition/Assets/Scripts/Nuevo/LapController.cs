@@ -24,24 +24,32 @@ public class LapController : NetworkBehaviour
 
     #region Variables publicas
     
-    [HideInInspector] public bool canLap = false;                     // Bool que determina si puede sumar vueltas el jugador
-    [SyncVar] public float timeToEnd = 20.0f;
+    [HideInInspector] public bool canLap = false;                    // Bool que determina si puede sumar vueltas el jugador
+    [SyncVar(hook = nameof(UpdateTimerVisually))] public float timeToEnd = 20.0f;
     #endregion
+
+    void UpdateTimerVisually(float before, float after)
+    {
+        
+    }
 
     #region Command Functions
     [Command]
     private void CmdUpdateTimeToEnd()
     {
-        //GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
-        timeToEnd -= Time.deltaTime;
-        //Debug.LogWarning("TIEMPO: " + timeToEnd);
+
+        if (!m_FinishGame)
+            m_FinishGame = FindObjectOfType<FinishGame>();
+
         m_FinishGame.RpcUpdateEndTimerText(Mathf.RoundToInt(timeToEnd));
     }
 
     [Command]
     private void CmdUpdatePlayerFinished(int ID)
     {
-        //GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
+        if(!m_lapManager)
+            m_lapManager = FindObjectOfType<LapManager>();
+
         switch (ID)
         {
             case 0:
@@ -62,7 +70,8 @@ public class LapController : NetworkBehaviour
     [Command]
     private void CmdUpdateEndGame()
     {
-        //GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
+        if(!m_PPM)
+            m_PPM = FindObjectOfType<PolePositionManager>();
         m_PPM.gameHasEnded = true;
     }
     #endregion
@@ -116,12 +125,14 @@ public class LapController : NetworkBehaviour
             }
         }
 
-        //Debug.LogWarning("SOMEONE FINISHED: " + someoneFinished);
-
         if (someoneFinished)
         {
             if (m_playerInfo.ID == 0)
+            {
+                timeToEnd -= Time.fixedDeltaTime;
                 CmdUpdateTimeToEnd();
+                
+            }
         }
 
         if (gameThreadFinished)
