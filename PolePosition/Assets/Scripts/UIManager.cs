@@ -321,9 +321,8 @@ public class UIManager : MonoBehaviour
     /// </summary>
     private void StartClient()
     {
-
-        m_NetworkManager.StartClient(); // Se inicia el cliente
         m_NetworkManager.networkAddress = inputFieldIP.text; // Se ajusta la IP
+        m_NetworkManager.StartClient(); // Se inicia el cliente
         ActivateInGameHUD(); // Se activa el GUI de la partida
     }
 
