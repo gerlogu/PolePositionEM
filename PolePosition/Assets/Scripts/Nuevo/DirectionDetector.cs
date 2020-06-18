@@ -47,8 +47,8 @@ public class DirectionDetector : MonoBehaviour
         bool vaBien = true;
 
         // Cada segundo se comprueba si está avanzando hacia la meta o va en dirección contraria
-        if (Time.time >= proximoSegundo)
-        {
+        //if (Time.time >= proximoSegundo)
+        //{
             //Si no acaba de cruzar meta, se comprueba
             if (!haCruzadoMeta)
             {
@@ -59,10 +59,11 @@ public class DirectionDetector : MonoBehaviour
                 lock (ppm.xLock)
                 {
                     actualArcLength = ppm.m_arcLengths[id];
+                    //Debug.Log("Longitud de arco: " + actualArcLength);
                 }
 
                 // Si está yendo a hacia atrás
-                if (actualArcLength < lastArcLength && playerRB.velocity.magnitude > 0.2f)
+                if (actualArcLength < lastArcLength)
                 {
                     buenaDireccion = false;
 
@@ -73,7 +74,7 @@ public class DirectionDetector : MonoBehaviour
                         firstBadArcLength = actualArcLength;
                     }
 
-                    // Si estamos 5 "metros" atrás de donde estábamos, estamos yendo en mala dirección
+                    // Si estamos 5 "metros" atrás de donde estábamos, estamos yendo mal
                     if (actualArcLength < firstBadArcLength - 5.0f)
                         vaBien = false;
                 }
@@ -96,8 +97,8 @@ public class DirectionDetector : MonoBehaviour
             }
 
             // Actualizamos el tiempo de la próxima comprobación
-            proximoSegundo = Time.time + ratioComprobacion;
-        }
+            //proximoSegundo = Time.time + ratioComprobacion;
+        //}
 
         // Si el contador llega a 3, se reinicia la posición del coche
         if (!vaBien)
