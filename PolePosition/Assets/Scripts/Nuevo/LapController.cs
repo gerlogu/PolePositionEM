@@ -23,7 +23,6 @@ public class LapController : NetworkBehaviour
     #endregion
 
     #region Variables publicas
-    
     [HideInInspector] public bool canLap = false;                    // Bool que determina si puede sumar vueltas el jugador
     [SyncVar(hook = nameof(UpdateTimerVisually))] public float timeToEnd = 20.0f;
     #endregion

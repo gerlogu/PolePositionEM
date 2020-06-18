@@ -22,6 +22,8 @@ public class LapManager : NetworkBehaviour
 
     [Tooltip("Número total de vueltas")] [SyncVar] public int totalLaps; // Por poner algo de momento
 
+
+
     public List<PlayerInfo> m_players;
     
     public void updateP1Laps(int ant, int nuevo)
