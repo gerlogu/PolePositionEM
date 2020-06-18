@@ -17,6 +17,7 @@ public class SetupPlayer : NetworkBehaviour
     [SyncVar(hook = nameof(SetID))] private int m_ID;                   // ID del jugador
     [SyncVar(hook = nameof(SetName))] private string m_Name = "Player"; // Nombre del jugador
     [SyncVar(hook = nameof(SetCarType))] private int m_CarType = 0;     // Color del coche seleccionado
+    [SyncVar] private bool thereIsServerOnly = true;
 
     private UIManager m_UIManager;                      // UIManager de la escena
     private NetworkManager m_NetworkManager;            // NetworkManager de la escena
@@ -38,7 +39,18 @@ public class SetupPlayer : NetworkBehaviour
     public override void OnStartServer()
     {
         base.OnStartServer();
-        m_ID = connectionToClient.connectionId;
+        if (!isServerOnly)
+        {
+            m_ID = connectionToClient.connectionId;
+            thereIsServerOnly = false;
+        }else if (!thereIsServerOnly)
+        {
+            m_ID = connectionToClient.connectionId;
+        }
+        else if (thereIsServerOnly)
+        {
+            m_ID = connectionToClient.connectionId - 1;
+        }
     }
 
     #region Commands
@@ -167,26 +179,32 @@ public class SetupPlayer : NetworkBehaviour
     public override void OnStartClient() // IMPORTANTE
     {
         base.OnStartClient();
-        m_PlayerInfo.CurrentLap = 0;                   // Vuelta actual alcanzada por el jugador
-
-        //if (isLocalPlayer)
-        //{
-        //    GameStartManager gameStartManager = gameObject.AddComponent(typeof(GameStartManager)) as GameStartManager;
-        //    m_PolePositionManager.gameStartManager = gameStartManager;
-        //}
-
-        if (isLocalPlayer)
+        if (!isServerOnly)
         {
-            CmdUpdateName(m_UIManager.playerName);
+            m_PlayerInfo.CurrentLap = 0;                   // Vuelta actual alcanzada por el jugador
 
-            CmdUpdateColor(m_UIManager.carType);
-            Debug.Log("Nombre del jugador:" + m_LapController.m_playerInfo.Name);
+            //if (isLocalPlayer)
+            //{
+            //    GameStartManager gameStartManager = gameObject.AddComponent(typeof(GameStartManager)) as GameStartManager;
+            //    m_PolePositionManager.gameStartManager = gameStartManager;
+            //}
 
-            string carColor = m_PlayerInfo.carType.ToString();
-            Debug.Log("COLOR DE COCHE ESCOGIDO: <color=" + carColor + ">" + m_PlayerInfo.carType + "</color>");
+            if (isLocalPlayer)
+            {
+                CmdUpdateName(m_UIManager.playerName);
+
+                CmdUpdateColor(m_UIManager.carType);
+                Debug.Log("Nombre del jugador:" + m_LapController.m_playerInfo.Name);
+
+                string carColor = m_PlayerInfo.carType.ToString();
+                Debug.Log("COLOR DE COCHE ESCOGIDO: <color=" + carColor + ">" + m_PlayerInfo.carType + "</color>");
+            }
+
+            Debug.Log("ID del coche: " + m_PlayerInfo.ID);
+
+            m_PolePositionManager.AddPlayer(m_PlayerInfo); // Se añade el jugador a la lista de jugadores del manager de la partida
         }
-
-        m_PolePositionManager.AddPlayer(m_PlayerInfo); // Se añade el jugador a la lista de jugadores del manager de la partida
+        
     }
 
     /// <summary>

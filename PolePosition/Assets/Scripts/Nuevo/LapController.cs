@@ -24,18 +24,23 @@ public class LapController : NetworkBehaviour
     #endregion
 
     #region Variables publicas
-    
-    [HideInInspector] public bool canLap = false;                     // Bool que determina si puede sumar vueltas el jugador
-    [SyncVar] public float timeToEnd = 20.0f;
+    [HideInInspector] public bool canLap = false;                    // Bool que determina si puede sumar vueltas el jugador
+    [SyncVar(hook = nameof(UpdateTimerVisually))] public float timeToEnd = 20.0f;
     #endregion
+
+    void UpdateTimerVisually(float before, float after)
+    {
+        
+    }
 
     #region Command Functions
     [Command]
     private void CmdUpdateTimeToEnd()
     {
-        //GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
-        timeToEnd -= Time.deltaTime;
-        //Debug.LogWarning("TIEMPO: " + timeToEnd);
+
+        if (!m_FinishGame)
+            m_FinishGame = FindObjectOfType<FinishGame>();
+
         m_FinishGame.RpcUpdateEndTimerText(Mathf.RoundToInt(timeToEnd));
     }
 
@@ -111,10 +116,11 @@ public class LapController : NetworkBehaviour
     {
         //GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
         //m_PPM = FindObjectOfType<PolePositionManager>();
-        m_lapManager = FindObjectOfType<LapManager>();
         m_GSM = FindObjectOfType<GameStartManager>();
 
         string st = m_GSM.totalTimer.minutes + ":" + m_GSM.totalTimer.seconds + ":" + m_GSM.totalTimer.miliseconds;
+        if(!m_lapManager)
+            m_lapManager = FindObjectOfType<LapManager>();
 
         switch (ID)
         {
@@ -140,7 +146,9 @@ public class LapController : NetworkBehaviour
     private void CmdUpdateEndGame()
     {
         //GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
-        FindObjectOfType<PolePositionManager>().gameHasEnded = true;
+        if(!m_PPM)
+            m_PPM = FindObjectOfType<PolePositionManager>();
+        m_PPM.gameHasEnded = true;
     }
     #endregion
 
@@ -193,12 +201,14 @@ public class LapController : NetworkBehaviour
             }
         }
 
-        //Debug.LogWarning("SOMEONE FINISHED: " + someoneFinished);
-
         if (someoneFinished)
         {
             if (m_playerInfo.ID == 0)
+            {
+                timeToEnd -= Time.fixedDeltaTime;
                 CmdUpdateTimeToEnd();
+                
+            }
         }
 
         if (gameThreadFinished)

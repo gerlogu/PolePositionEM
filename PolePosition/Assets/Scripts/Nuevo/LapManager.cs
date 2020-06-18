@@ -31,6 +31,9 @@ public class LapManager : NetworkBehaviour
     [SyncVar] public string player3BestTimer = "";
     [SyncVar] public string player4BestTimer = "";
 
+
+    public List<PlayerInfo> m_players;
+
     [SyncVar] public int endPos1;
     [SyncVar] public int endPos2;
     [SyncVar] public int endPos3;
@@ -41,7 +44,6 @@ public class LapManager : NetworkBehaviour
 
     [Tooltip("Número total de vueltas")] [SyncVar] public int totalLaps; // Por poner algo de momento
 
-    public List<PlayerInfo> m_players;
 
     private void Awake()
     {

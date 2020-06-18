@@ -132,6 +132,18 @@ public class GameStartManager : NetworkBehaviour
 
             if (!ended)
             {
+
+                PlayerInfo p = null; // Creamos un objeto auxiliar p
+                int cont = 0;
+                int cont2 = 0;
+                int indice = 0;
+                bool hayNulo = false;
+
+                if (m_Players == null)
+                {
+                    m_Players = m_PolePositionManager.m_Players;
+                }
+
                 foreach (PlayerInfo player in m_Players)
                 {
                     if (player)
@@ -149,8 +161,34 @@ public class GameStartManager : NetworkBehaviour
 
                         endTimerThread.Start();
                     }
+                    else
+                    {
+                        if (!hayNulo)
+                        {
+                            p = player; // p se iguala al player, es decir, a null porque se desconectó
+                            cont2 = cont;
+                        }
+                        hayNulo = true;
+                    }
+                    cont++;
+                }
+
+                if (p == null && hayNulo) // si p es null significa que hay que eliminarlo de la lista
+                {
+                    for (int i = cont2; i < m_Players.Count - 1; i++)
+                    {
+                        m_Players[i] = m_Players[i + 1];
+                        m_Players[i].CurrentPosition--;
+                    }
+                    indice = m_Players.Count - 1;
+                    //m_Players.Remove(p); // Eliminamos el jugador
+
+                    m_Players.RemoveAt(indice);
+                    if (gameStarted)
+                        return; // Volvemos a empezar el bucle, porque hay que comprobar si hay más players nulos
 
                 }
+
                 ended = true;
             }
             else
