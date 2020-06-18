@@ -175,31 +175,16 @@ public class PolePositionManager : NetworkBehaviour
 
             for (int i = 0; i < m_Players.Count; ++i)
             {
-                // ComputeCarArcLength calcula la longitud de arco para el coche con id i
-                // arcLengths[i] guarda la longitud de arco ordenados por id
-                //m_arcLengths[m_Players[i].ID] = ComputeCarArcLength(m_Players[i].ID); // POR ESO TENEMOS QUE HACER COMPUTE POR POSICION, PILLANDO LA ID DEL QUE VA PRIMERO, SEGUNDO...
-                m_arcLengths[i] = ComputeCarArcLength(i);
+                // Se actualiza la posición de la esfera si el personaje se encuentra dentro del camino a seguir
+                if (m_Players[i].GetComponent<CrashDetector>().isGrounded)
+                {
+                    // ComputeCarArcLength calcula la longitud de arco para el coche con id i
+                    // arcLengths[i] guarda la longitud de arco ordenados por id
+                    //m_arcLengths[m_Players[i].ID] = ComputeCarArcLength(m_Players[i].ID); // POR ESO TENEMOS QUE HACER COMPUTE POR POSICION, PILLANDO LA ID DEL QUE VA PRIMERO, SEGUNDO...
+                    m_arcLengths[i] = ComputeCarArcLength(i);
+                }
+                
             }
-
-            //if (gameStartManager.gameStarted)
-            //{
-            //    //playersArcLengths[i] = m_arcLengths[i];
-            //    foreach (PlayerInfo player in m_Players)
-            //    {
-            //        if (player.GetComponent<NetworkIdentity>().isLocalPlayer)
-            //            player.GetComponent<SetupPlayer>().CmdUpdatePlayerArcLengthsList(m_arcLengths);
-            //    }
-            //}
-
-            //if (gameStartManager.gameStarted)
-            //{
-            //    // Este método la lista de jugadores según las longitudes de arco por posición
-            //    m_Players.Sort(new PlayerInfoComparer(playersArcLengths.ToArray<float>()));
-            //}
-            //else
-            //{
-            // Este método la lista de jugadores según las longitudes de arco por posición
-            //m_PlayersNotOrdered = m_Players.ToList<PlayerInfo>();
 
             m_Players.Sort(new PlayerInfoComparer(m_arcLengths));
 
@@ -220,6 +205,7 @@ public class PolePositionManager : NetworkBehaviour
 
     float ComputeCarArcLength(int ID)
     {
+        
         // Debug.LogWarning("INFO " + ID + ": " + m_Players[ID].ToString());
         // Compute the projection of the car position to the closest circuit 
         // path segment and accumulate the arc-length along of the car along
