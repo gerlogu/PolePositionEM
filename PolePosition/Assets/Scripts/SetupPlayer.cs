@@ -51,6 +51,7 @@ public class SetupPlayer : NetworkBehaviour
 
             m_PlayerInfo.CurrentLap = 0;                   // Vuelta actual alcanzada por el jugador
 
+            // No sense pero lo dejamos a modo de comentario
             if (isLocalPlayer)
             {
                 CmdUpdateName(m_UIManager.playerName);

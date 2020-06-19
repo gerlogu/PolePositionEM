@@ -31,6 +31,8 @@ public class LapManager : NetworkBehaviour
     [SyncVar] public string player3BestTimer = "";
     [SyncVar] public string player4BestTimer = "";
 
+    [SyncVar] public float timeToEnd = 20.0f;
+
     [SyncVar] public int endPos1 = -1;
     [SyncVar] public int endPos2 = -1;
     [SyncVar] public int endPos3 = -1;

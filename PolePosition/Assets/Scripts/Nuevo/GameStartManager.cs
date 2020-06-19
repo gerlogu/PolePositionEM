@@ -41,6 +41,8 @@ public class GameStartManager : NetworkBehaviour
     private Text timerText;
     private Text totalTimerText;
     private PolePositionManager m_PPM;
+    private bool didStart = false;
+    private bool auxBool = false;
     #endregion
 
     /// <summary>
@@ -61,7 +63,7 @@ public class GameStartManager : NetworkBehaviour
     void H_SetGameStarted(bool anterior, bool nuevo)
     {
         //m_PPM.m_PlayersNotOrdered = m_Players.ToList<PlayerInfo>();
-        m_PPM.m_PlayersNotOrdered  = m_Players.OrderBy(go => go.ID).ToList<PlayerInfo>(); //.OrderBy(go => go.ID);
+        m_PPM.m_PlayersNotOrdered = m_Players.OrderBy(go => go.ID).ToList<PlayerInfo>(); //.OrderBy(go => go.ID);
         gameTimer.SetActive(true);
         timerAnim.SetTrigger("PlayTimer");
         foreach (PlayerInfo player in m_Players)
@@ -131,7 +133,6 @@ public class GameStartManager : NetworkBehaviour
         }
         else
         {
-
             if (!ended)
             {
 
@@ -144,6 +145,18 @@ public class GameStartManager : NetworkBehaviour
                 if (m_Players == null)
                 {
                     m_Players = m_PolePositionManager.m_Players;
+                }
+
+                // Solo servidor
+                if (isServerOnly)
+                {
+                    didStart = gameStarted;
+
+                    if (didStart && !auxBool)
+                    {
+                        auxBool = true;
+                        totalTimer.RestartTimer();
+                    }
                 }
 
                 foreach (PlayerInfo player in m_Players)
@@ -194,6 +207,11 @@ public class GameStartManager : NetworkBehaviour
             }
             else
             {
+                if (isServerOnly)
+                {
+                    totalTimer.CalculateTime();
+                }
+
                 PlayerInfo p = null;
                 //p = new PlayerInfo();
                 foreach (PlayerInfo player in m_Players)

@@ -27,13 +27,7 @@ public class LapController : NetworkBehaviour
 
     #region Variables publicas
     [HideInInspector] public bool canLap = false;                    // Bool que determina si puede sumar vueltas el jugador
-    [SyncVar(hook = nameof(UpdateTimerVisually))] public float timeToEnd = 20.0f;
     #endregion
-
-    void UpdateTimerVisually(float before, float after)
-    {
-        
-    }
 
     #region Command Functions
     [Command]
@@ -42,7 +36,7 @@ public class LapController : NetworkBehaviour
         if (!m_FinishGame)
             m_FinishGame = FindObjectOfType<FinishGame>();
 
-        m_FinishGame.RpcUpdateEndTimerText(Mathf.RoundToInt(timeToEnd));
+        m_FinishGame.RpcUpdateEndTimerText(Mathf.RoundToInt(m_lapManager.timeToEnd));
     }
 
     [Command]
@@ -229,8 +223,8 @@ public class LapController : NetworkBehaviour
 
     private void Update()
     {
-        if (timeToEnd < 20)
-            Debug.Log("TimeToEnd: " + timeToEnd);
+        /*if (m_LapManager.timeToEnd < 20)
+            Debug.Log("TimeToEnd: " + timeToEnd);*/
 
         if (m_playerInfo.canMove)
         {
@@ -252,13 +246,13 @@ public class LapController : NetworkBehaviour
 
         if (someoneFinished)
         {
-            if (m_playerInfo.ID == 0)
+            if (isServer)
             {
-                timeToEnd -= Time.deltaTime;
+                m_lapManager.timeToEnd -= Time.deltaTime;
                 CmdUpdateTimeToEnd();
             }
 
-            if (timeToEnd <= 0 && !timeEnded)
+            if (m_lapManager.timeToEnd <= 0 && !timeEnded)
             {
                 timeEnded = true;
                 gameThreadFinished = true;
@@ -389,7 +383,7 @@ public class LapController : NetworkBehaviour
                                 // Si no, se espera el tiempo que falte
                                 else
                                 {
-                                    endSemaphore.Wait(Mathf.RoundToInt(timeToEnd * 1000));
+                                    endSemaphore.Wait(Mathf.RoundToInt(m_lapManager.timeToEnd * 1000));
                                 }
                                 // Al acabar de esperar, acaba la partida
                                 gameThreadFinished = true;

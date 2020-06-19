@@ -40,6 +40,9 @@ public class PolePositionManager : NetworkBehaviour
     private CircuitController m_CircuitController;                         // Controlador del circuito
     public GameObject[] m_DebuggingSpheres;                                // Esferas para depurar
     public float[] m_arcLengths;                                           // Longitudes de arco
+    private bool someoneFinished = false;
+    private bool timeEnded = false;
+    private float timeToEnd = 20.0f;
     #endregion
 
     #region Funciones Hook
@@ -78,6 +81,9 @@ public class PolePositionManager : NetworkBehaviour
             m_DebuggingSpheres[i] = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             m_DebuggingSpheres[i].GetComponent<SphereCollider>().enabled = false;
         }
+
+        // Se inicializa a 20 segundos
+        timeToEnd = 20.0f;
     }
 
     private void Update()
@@ -212,6 +218,87 @@ public class PolePositionManager : NetworkBehaviour
                 st += "[" + m_Players[i].ToString() + "]";
             }
             Debug.Log(st);
+
+            // Cálculos del servidor
+            if (isServerOnly)
+            {
+                LapManager m_lapManager = FindObjectOfType<LapManager>();
+
+                int[] playerLaps = { m_lapManager.player1Laps, m_lapManager.player2Laps, m_lapManager.player3Laps, m_lapManager.player4Laps };
+
+                for (int i = 0; i < m_PlayersNotOrdered.Count; i++)
+                {
+                    m_PlayersNotOrdered[i].CurrentLap = playerLaps[i];
+                    switch (i)
+                    {
+                        case 0:
+                            m_PlayersNotOrdered[i].hasFinished = m_LapManager.player1Finished;
+                            break;
+                        case 1:
+                            m_PlayersNotOrdered[i].hasFinished = m_LapManager.player2Finished;
+                            break;
+                        case 2:
+                            m_PlayersNotOrdered[i].hasFinished = m_LapManager.player3Finished;
+                            break;
+                        case 3:
+                            m_PlayersNotOrdered[i].hasFinished = m_LapManager.player4Finished;
+                            break;
+                    }
+
+                    if (m_PlayersNotOrdered[i].hasFinished)
+                    {
+                        someoneFinished = true;
+                    }
+                }
+
+                if (someoneFinished)
+                {
+                    foreach (PlayerInfo player in m_Players)
+                    {
+                        if (player.hasFinished)
+                        {
+                            string[] totalTimes = new string[3];
+
+                            switch (player.ID)
+                            {
+                                case 0:
+                                    totalTimes = m_lapManager.player1TotalTimer.Split(':');
+                                    break;
+                                case 1:
+                                    totalTimes = m_lapManager.player2TotalTimer.Split(':');
+                                    break;
+                                case 2:
+                                    totalTimes = m_lapManager.player3TotalTimer.Split(':');
+                                    break;
+                                case 3:
+                                    totalTimes = m_lapManager.player4TotalTimer.Split(':');
+                                    break;
+                            }
+
+                            /*for (int i = 0; i < totalTimes.Length; i++)
+                            {
+                                Debug.LogWarning("TotalTimes " + i + ": " + totalTimes[i]);
+                            }*/
+
+                            player.lapTotalMinutes = totalTimes[0];
+                            player.lapTotalSeconds = totalTimes[1];
+                            player.lapTotalMiliseconds = totalTimes[2];
+                        }
+                    }
+
+                    timeToEnd -= Time.deltaTime;
+                    m_lapManager.timeToEnd = timeToEnd;
+                    //GetComponent<FinishGame>().CmdUpdateEndTime(timeToEnd);
+                    GetComponent<FinishGame>().RpcUpdateEndTimerText(Mathf.RoundToInt(m_lapManager.timeToEnd));
+
+                    if (m_LapManager.timeToEnd <= 0 && !timeEnded)
+                    {
+                        timeEnded = true;
+                        GetComponent<FinishGame>().RpcUpdateReadyToShow();
+                        //CmdUpdateReadyToShow(); -> m_lapManager.readyToShowFinalScreen = true;
+                    }
+                }
+            }
         }
 
         string myRaceOrder = "";

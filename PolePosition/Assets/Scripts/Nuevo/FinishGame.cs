@@ -146,4 +146,20 @@ public class FinishGame : NetworkBehaviour
 
         //Debug.LogWarning("ACTUALIZO: " + timeTE);
     }
+
+    [ClientRpc]
+    public void RpcUpdateReadyToShow()
+    {
+        if (!m_lapManager)
+            m_lapManager = FindObjectOfType<LapManager>();
+        m_lapManager.readyToShowFinalScreen = true;
+    }
+
+    [Command]
+    public void CmdUpdateEndTime(float tte)
+    {
+        if (!m_lapManager)
+            m_lapManager = FindObjectOfType<LapManager>();
+        m_lapManager.timeToEnd = tte;
+    }
 }
