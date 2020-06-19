@@ -105,7 +105,28 @@ public class LapController : NetworkBehaviour
         m_GSM = FindObjectOfType<GameStartManager>();
         m_PPM = FindObjectOfType<PolePositionManager>();
 
-        string st = m + ":" + s + ":" + ms;
+        string st = "";
+
+        //Corrección string
+        //Minutos
+        if (m < 10)
+            st += "0" + m + ":";
+        else
+            st += m + ":";
+
+        //Segundos
+        if (s < 10)
+            st += "0" + s + ":";
+        else
+            st += s + ":";
+
+        //Milisegundos
+        if (ms < 10)
+            st += "00" + ms;
+        else if (ms < 100)
+            st += "0" + ms;
+        else
+            st += ms;
 
         switch (ID)
         {
@@ -265,6 +286,7 @@ public class LapController : NetworkBehaviour
     /// <param name="other">El trigger en el que entra el coche</param>
     private void OnTriggerEnter(Collider other)
     {
+        m_PPM = FindObjectOfType<PolePositionManager>();
         enterArcLength = m_PPM.m_arcLengths[m_playerInfo.CurrentPosition];
     }
 
@@ -279,7 +301,6 @@ public class LapController : NetworkBehaviour
         if (other.CompareTag("FinishLine") && canLap)
         {
             // Si va en buena dirección:
-            Debug.Log("ENTER: " + enterArcLength + " | EXIT: " + m_PPM.m_arcLengths[m_playerInfo.CurrentPosition]);
             if (enterArcLength > m_PPM.m_arcLengths[m_playerInfo.CurrentPosition] + 9.9f)
             {
                 // Si NO ha entrado marcha atrás previamente:
@@ -369,7 +390,6 @@ public class LapController : NetworkBehaviour
                     }
 
                     m_UIManager.UpdateLaps(laps, m_lapManager.totalLaps);
-                    m_directionDetector.haCruzadoMeta = true;
                 }
                 // Si había entrado marcha atrás previamente:
                 else

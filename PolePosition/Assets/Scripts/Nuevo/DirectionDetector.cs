@@ -13,14 +13,8 @@ public class DirectionDetector : MonoBehaviour
     private bool firstSaved = false;         // Booleano que guarda si ya se tiene la primera longitud de arco mala
     private float ratioComprobacion = 0.5f;  // Ratio de comprobación de dirección
     private PolePositionManager ppm;         // Referencia al PolePositionManager
-    private Rigidbody playerRB;              // Rigidbody del coche
     private bool showingInfo = false;        // Booleano para indicar si se está mostrando al jugador que va en mala dirección
     private UIManager myUIM;                 // Referencia al UIManager
-    #endregion
-
-    #region Variables publicas
-    public bool buenaDireccion = true;       // Booleano para saber si va en buena dirección
-    public bool haCruzadoMeta = false;       // Booleano para saber si acaba de cruzar meta
     #endregion
 
     /// <summary>
@@ -30,9 +24,6 @@ public class DirectionDetector : MonoBehaviour
     {
         // Se obtiene el PolePositionManager
         ppm = FindObjectOfType<PolePositionManager>();
-
-        // Se obtiene el rigidbody del coche
-        playerRB = GetComponent<Rigidbody>();
 
         // Se obtiene el UIManager
         myUIM = FindObjectOfType<UIManager>();
@@ -47,58 +38,61 @@ public class DirectionDetector : MonoBehaviour
         bool vaBien = true;
 
         // Cada segundo se comprueba si está avanzando hacia la meta o va en dirección contraria
-        //if (Time.time >= proximoSegundo)
-        //{
-            //Si no acaba de cruzar meta, se comprueba
-            if (!haCruzadoMeta)
+        if (Time.time >= proximoSegundo)
+        {
+            float actualArcLength = 0f;
+
+            // Lock para que no se solape con otros procesos
+            int pos = GetComponent<PlayerInfo>().CurrentPosition;
+            lock (ppm.xLock)
             {
-                float actualArcLength = 0f;
-
-                // Lock para que no se solape con otros procesos
-                int id = GetComponent<PlayerInfo>().ID;
-                lock (ppm.xLock)
-                {
-                    actualArcLength = ppm.m_arcLengths[id];
-                    //Debug.Log("Longitud de arco: " + actualArcLength);
-                }
-
-                // Si está yendo a hacia atrás
-                if (actualArcLength < lastArcLength)
-                {
-                    buenaDireccion = false;
-
-                    // Si no hemos guardado la posición de la primera dirección hacia atrás, la guardamos
-                    if (!firstSaved)
-                    {
-                        firstSaved = true;
-                        firstBadArcLength = actualArcLength;
-                    }
-
-                    // Si estamos 5 "metros" atrás de donde estábamos, estamos yendo mal
-                    if (actualArcLength < firstBadArcLength - 5.0f)
-                        vaBien = false;
-                }
-                else
-                {
-                    vaBien = true;
-                    firstSaved = false;
-                    showingInfo = false;
-                    buenaDireccion = true;
-                    myUIM.incorrectDirection.SetActive(false);
-                }
-
-                // Actualizamos el valor de lastArcLength
-                lastArcLength = actualArcLength;
+                actualArcLength = ppm.m_arcLengths[pos];
+                //Debug.Log("Longitud de arco: " + actualArcLength);
             }
-            //Si habia cruzado la meta, le decimos que la proxima no
+
+            Debug.Log("First: " + firstBadArcLength + " | Last: " + lastArcLength + " | Actual: " + actualArcLength);
+
+            // Si acaba de cruzar la meta
+            if (actualArcLength < lastArcLength && actualArcLength + 400.0f < lastArcLength && actualArcLength + 460.0f > lastArcLength)
+            {
+                //Esto es por si pasa meta
+                Debug.LogWarning("CASO ESPECIAL 1");
+            }
+            // Si está yendo a hacia atrás
+            else if (actualArcLength < lastArcLength && lastArcLength != 0)
+            {
+                Debug.LogWarning("VA MAL");
+                // Si no hemos guardado la posición de la primera dirección hacia atrás, la guardamos
+                if (!firstSaved)
+                {
+                    firstSaved = true;
+                    firstBadArcLength = actualArcLength;
+                }
+
+                // Si estamos 5 "metros" atrás de donde estábamos, estamos yendo mal
+                if (actualArcLength < firstBadArcLength - 8.0f || actualArcLength > firstBadArcLength + 400.0f)
+                    vaBien = false;
+            }
+            else if (lastArcLength > actualArcLength && firstBadArcLength < actualArcLength)
+            {
+                // Esto es por si pasa meta al revés
+                Debug.LogWarning("CASO ESPECIAL 2");
+            }
             else
             {
-                haCruzadoMeta = false;
+                Debug.LogWarning("VA BIEN");
+                vaBien = true;
+                firstSaved = false;
+                showingInfo = false;
+                myUIM.incorrectDirection.SetActive(false);
             }
 
+            // Actualizamos el valor de lastArcLength
+            lastArcLength = actualArcLength;
+
             // Actualizamos el tiempo de la próxima comprobación
-            //proximoSegundo = Time.time + ratioComprobacion;
-        //}
+            proximoSegundo = Time.time + ratioComprobacion;
+        }
 
         // Si el contador llega a 3, se reinicia la posición del coche
         if (!vaBien)
