@@ -79,9 +79,7 @@ public class FinishGame : NetworkBehaviour
                     if (bestTimers[m_playersNotOrdered[finalPositions[i]].ID] != "")
                         endTexts[3].text += bestTimers[m_playersNotOrdered[finalPositions[i]].ID] + "\n";
                     else
-                    {
                         endTexts[3].text += "---\n";
-                    }
                 }
 
                 foreach (PlayerInfo p in m_playersNotOrdered)
