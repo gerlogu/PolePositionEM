@@ -52,16 +52,16 @@ public class SetupPlayer : NetworkBehaviour
             m_PlayerInfo.CurrentLap = 0;                   // Vuelta actual alcanzada por el jugador
 
             // No sense pero lo dejamos a modo de comentario
-            if (isLocalPlayer)
-            {
-                CmdUpdateName(m_UIManager.playerName);
+            //if (isLocalPlayer)
+            //{
+            //    CmdUpdateName(m_UIManager.playerName);
 
-                CmdUpdateColor(m_UIManager.carType);
-                Debug.Log("Nombre del jugador:" + m_LapController.m_playerInfo.Name);
+            //    CmdUpdateColor(m_UIManager.carType);
+            //    Debug.Log("Nombre del jugador:" + m_LapController.m_playerInfo.Name);
 
-                string carColor = m_PlayerInfo.carType.ToString();
-                Debug.Log("COLOR DE COCHE ESCOGIDO: <color=" + carColor + ">" + m_PlayerInfo.carType + "</color>");
-            }
+            //    string carColor = m_PlayerInfo.carType.ToString();
+            //    Debug.Log("COLOR DE COCHE ESCOGIDO: <color=" + carColor + ">" + m_PlayerInfo.carType + "</color>");
+            //}
 
             Debug.Log("ID del coche: " + m_PlayerInfo.ID);
 
@@ -269,6 +269,10 @@ public class SetupPlayer : NetworkBehaviour
             Debug.Log("ID del coche: " + m_PlayerInfo.ID);
 
             m_PolePositionManager.AddPlayer(m_PlayerInfo); // Se añade el jugador a la lista de jugadores del manager de la partida
+        }
+        else
+        {
+
         }
         
     }

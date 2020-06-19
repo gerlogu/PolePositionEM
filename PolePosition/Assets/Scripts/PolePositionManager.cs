@@ -177,8 +177,15 @@ public class PolePositionManager : NetworkBehaviour
                 {
                     if (pj.GetComponent<SetupPlayer>().isServer)
                     {
-                        Debug.LogError("JUGADOR DESCONECTADO");
-                        pj.GetComponent<SetupPlayer>().CmdUpdateNumDisconnections();
+                        if (NetworkClient.active)
+                        {
+                            Debug.LogError("JUGADOR DESCONECTADO");
+                            pj.GetComponent<SetupPlayer>().CmdUpdateNumDisconnections();
+                        }
+                        else
+                        {
+                            Debug.Log("Intento de desconexión interrumpido por finalización de la partida, el servidor será desconectado.");
+                        }
                     }
                 }
 
