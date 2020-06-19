@@ -179,7 +179,6 @@ public class LapController : NetworkBehaviour
                     m_lapManager.readyToShowFinalScreen = true;
                 break;
         }
-        
     }
 
     [Command]
@@ -268,19 +267,19 @@ public class LapController : NetworkBehaviour
             m_PPM.m_PlayersNotOrdered[i].CurrentLap = playerLaps[i];
         }
 
-        bool[] playerFinished = { m_lapManager.player1Finished, m_lapManager.player2Finished, m_lapManager.player2Finished, m_lapManager.player4Finished };
-
-        for (int i = 0; i < m_PPM.m_PlayersNotOrdered.Count; i++)
-        {
-            m_PPM.m_PlayersNotOrdered[i].hasFinished = playerFinished[i];
-        }
-
         if (gameThreadFinished)
         {
             if (!m_lapManager.readyToShowFinalScreen)
                 return;
             gameThreadFinished = false;
             CmdUpdateEndGame();
+        }
+
+        bool[] playerFinished = { m_lapManager.player1Finished, m_lapManager.player2Finished, m_lapManager.player2Finished, m_lapManager.player4Finished };
+
+        for (int i = 0; i < m_PPM.m_PlayersNotOrdered.Count; i++)
+        {
+            m_PPM.m_PlayersNotOrdered[i].hasFinished = playerFinished[i];
         }
     }
 
@@ -300,127 +299,130 @@ public class LapController : NetworkBehaviour
     /// <param name="other">El trigger del que sale el coche</param>
     private void OnTriggerExit(Collider other)
     {
-
-        // Si toca la meta:
-        if (other.CompareTag("FinishLine") && canLap)
+        // Si la partida no ha acabado
+        if (!m_PPM.gameHasEnded)
         {
-            // Si va en buena dirección:
-            if (enterArcLength > m_PPM.m_arcLengths[m_playerInfo.CurrentPosition] + 4.9f)
+            // Si toca la meta:
+            if (other.CompareTag("FinishLine") && canLap)
             {
-                // Si NO ha entrado marcha atrás previamente:
-                if (!malaVuelta)
+                // Si va en buena dirección:
+                if (enterArcLength > m_PPM.m_arcLengths[m_playerInfo.CurrentPosition] + 4.9f)
                 {
-                    Debug.LogWarning("VUELTA CORRECTA");
-                    int laps = m_playerInfo.CurrentLap + 1;
-                    m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(m_playerInfo.CurrentPosition, laps, m_playerInfo.ID);
-                    /*string st = "LISTA PLAYERS: ";
-                    for (int i = 0; i < m_PPM.m_Players.Count; i++) // Sincronizar numPlayers
+                    // Si NO ha entrado marcha atrás previamente:
+                    if (!malaVuelta)
                     {
-                        st += m_PPM.m_Players[i].ToString() + ", ";
-                    }
-                    Debug.LogWarning(st);*/
-
-                    if (laps > 1)
-                    {
-                        if (laps > 2)
+                        Debug.LogWarning("VUELTA CORRECTA");
+                        int laps = m_playerInfo.CurrentLap + 1;
+                        m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(m_playerInfo.CurrentPosition, laps, m_playerInfo.ID);
+                        /*string st = "LISTA PLAYERS: ";
+                        for (int i = 0; i < m_PPM.m_Players.Count; i++) // Sincronizar numPlayers
                         {
-                            bool isBetter = false;
+                            st += m_PPM.m_Players[i].ToString() + ", ";
+                        }
+                        Debug.LogWarning(st);*/
 
-                            if (m_GSM.lapTimer.iMinutes < m_playerInfo.lapBestMinutes)
+                        if (laps > 1)
+                        {
+                            if (laps > 2)
                             {
-                                isBetter = true;
-                            }
-                            else if (m_GSM.lapTimer.iSeconds < m_playerInfo.lapBestSeconds && m_GSM.lapTimer.iMinutes == m_playerInfo.lapBestMinutes)
-                            {
-                                isBetter = true;
-                            }
-                            else if (m_GSM.lapTimer.iMiliseconds < m_playerInfo.lapBestMiliseconds && m_GSM.lapTimer.iMinutes == m_playerInfo.lapBestMinutes && m_GSM.lapTimer.iSeconds == m_playerInfo.lapBestSeconds)
-                            {
-                                isBetter = true;
-                            }
+                                bool isBetter = false;
 
-                            if (isBetter)
+                                if (m_GSM.lapTimer.iMinutes < m_playerInfo.lapBestMinutes)
+                                {
+                                    isBetter = true;
+                                }
+                                else if (m_GSM.lapTimer.iSeconds < m_playerInfo.lapBestSeconds && m_GSM.lapTimer.iMinutes == m_playerInfo.lapBestMinutes)
+                                {
+                                    isBetter = true;
+                                }
+                                else if (m_GSM.lapTimer.iMiliseconds < m_playerInfo.lapBestMiliseconds && m_GSM.lapTimer.iMinutes == m_playerInfo.lapBestMinutes && m_GSM.lapTimer.iSeconds == m_playerInfo.lapBestSeconds)
+                                {
+                                    isBetter = true;
+                                }
+
+                                if (isBetter)
+                                {
+                                    /*Debug.LogWarning("Vuelta previa: " + m_playerInfo.lapBestMinutes + ":" + m_playerInfo.lapBestSeconds + ":" + m_playerInfo.lapBestMiliseconds
+                                        + " | Vuelta mejor: " + m_GSM.lapTimer.iMinutes + ":" + m_GSM.lapTimer.iSeconds + ":" + m_GSM.lapTimer.iMiliseconds);*/
+                                    m_playerInfo.lapBestMinutes = m_GSM.lapTimer.iMinutes;
+                                    m_playerInfo.lapBestSeconds = m_GSM.lapTimer.iSeconds;
+                                    m_playerInfo.lapBestMiliseconds = m_GSM.lapTimer.iMiliseconds;
+                                    CmdUpdateBestLap(m_playerInfo.ID, m_GSM.lapTimer.iMinutes, m_GSM.lapTimer.iSeconds, m_GSM.lapTimer.iMiliseconds);
+                                }
+                            }
+                            else
                             {
-                                /*Debug.LogWarning("Vuelta previa: " + m_playerInfo.lapBestMinutes + ":" + m_playerInfo.lapBestSeconds + ":" + m_playerInfo.lapBestMiliseconds
-                                    + " | Vuelta mejor: " + m_GSM.lapTimer.iMinutes + ":" + m_GSM.lapTimer.iSeconds + ":" + m_GSM.lapTimer.iMiliseconds);*/
                                 m_playerInfo.lapBestMinutes = m_GSM.lapTimer.iMinutes;
                                 m_playerInfo.lapBestSeconds = m_GSM.lapTimer.iSeconds;
                                 m_playerInfo.lapBestMiliseconds = m_GSM.lapTimer.iMiliseconds;
                                 CmdUpdateBestLap(m_playerInfo.ID, m_GSM.lapTimer.iMinutes, m_GSM.lapTimer.iSeconds, m_GSM.lapTimer.iMiliseconds);
                             }
-                        }
-                        else
-                        {
-                            m_playerInfo.lapBestMinutes = m_GSM.lapTimer.iMinutes;
-                            m_playerInfo.lapBestSeconds = m_GSM.lapTimer.iSeconds;
-                            m_playerInfo.lapBestMiliseconds = m_GSM.lapTimer.iMiliseconds;
-                            CmdUpdateBestLap(m_playerInfo.ID, m_GSM.lapTimer.iMinutes, m_GSM.lapTimer.iSeconds, m_GSM.lapTimer.iMiliseconds);
-                        }
 
-                        m_GSM.lapTimer.RestartTimer();
+                            m_GSM.lapTimer.RestartTimer();
 
-                        // Si el jugador ha acabado la carrera
-                        if (laps > m_lapManager.totalLaps)
-                        {
-                            // Se paran los timers y avisa de que ha terminado
-                            m_GSM.lapTimer.StopTimer();
-                            //m_GSM.totalTimer.StopTimer();
-                            m_playerInfo.hasFinished = true;
-                            CmdUpdatePlayerFinished(m_playerInfo.ID);
-                            CmdUpdateTimers(m_playerInfo.ID);
-                            m_playerInfo.canMove = false;
-                            m_UIManager.waitFinishHUD.SetActive(true);
-                            m_UIManager.inGameHUD.SetActive(false);
-
-                            // Hilo de espera a finalizar la carrera
-                            Thread endGameThread = new Thread(() =>
+                            // Si el jugador ha acabado la carrera
+                            if (laps > m_lapManager.totalLaps)
                             {
+                                // Se paran los timers y avisa de que ha terminado
+                                m_GSM.lapTimer.StopTimer();
+                                //m_GSM.totalTimer.StopTimer();
+                                m_playerInfo.hasFinished = true;
+                                CmdUpdatePlayerFinished(m_playerInfo.ID);
+                                CmdUpdateTimers(m_playerInfo.ID);
+                                m_playerInfo.canMove = false;
+                                m_UIManager.waitFinishHUD.SetActive(true);
+                                m_UIManager.inGameHUD.SetActive(false);
+
+                                // Hilo de espera a finalizar la carrera
+                                Thread endGameThread = new Thread(() =>
+                                {
                                 // Si es el último, libera los permisos
                                 if (m_playerInfo.CurrentPosition == num_players - 1)
-                                {
-                                    endSemaphore.Release(num_players - 1);
-                                }
+                                    {
+                                        endSemaphore.Release(num_players - 1);
+                                    }
                                 // Si no, se espera el tiempo que falte
                                 else
-                                {
-                                    endSemaphore.Wait(Mathf.RoundToInt(m_lapManager.timeToEnd * 1000));
-                                }
+                                    {
+                                        endSemaphore.Wait(Mathf.RoundToInt(m_lapManager.timeToEnd * 1000));
+                                    }
                                 // Al acabar de esperar, acaba la partida
                                 gameThreadFinished = true;
-                            });
+                                });
 
-                            endGameThread.Start();
+                                endGameThread.Start();
+                            }
                         }
-                    }
 
-                    m_UIManager.UpdateLaps(laps, m_lapManager.totalLaps);
+                        m_UIManager.UpdateLaps(laps, m_lapManager.totalLaps);
+                    }
+                    // Si había entrado marcha atrás previamente:
+                    else
+                    {
+                        Debug.LogWarning("RECUPERAMOS VUELTA");
+                        malaVuelta = false;
+                        int laps = m_playerInfo.CurrentLap + 1;
+                        m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(m_playerInfo.CurrentPosition, laps, m_playerInfo.ID);
+                    }
                 }
-                // Si había entrado marcha atrás previamente:
+                //Entrar bien y salir mal
+                else if (enterArcLength > m_PPM.m_arcLengths[m_playerInfo.CurrentPosition])
+                {
+                    Debug.LogWarning("Me QUEDO IGUAL 1");
+                }
+                //Entrar mal y salir bien
+                else if (enterArcLength < m_PPM.m_arcLengths[m_playerInfo.CurrentPosition] && enterArcLength + 4.9f > m_PPM.m_arcLengths[m_playerInfo.CurrentPosition])
+                {
+                    Debug.LogWarning("Me QUEDO IGUAL 2");
+                }
+                // Si entra marcha atrás:
                 else
                 {
-                    Debug.LogWarning("RECUPERAMOS VUELTA");
-                    malaVuelta = false;
-                    int laps = m_playerInfo.CurrentLap + 1;
+                    Debug.LogWarning("MALA VUELTA");
+                    malaVuelta = true;
+                    int laps = m_playerInfo.CurrentLap - 1;
                     m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(m_playerInfo.CurrentPosition, laps, m_playerInfo.ID);
                 }
-            }
-            //Entrar bien y salir mal
-            else if (enterArcLength > m_PPM.m_arcLengths[m_playerInfo.CurrentPosition])
-            {
-                Debug.LogWarning("Me QUEDO IGUAL 1");
-            }
-            //Entrar mal y salir bien
-            else if (enterArcLength < m_PPM.m_arcLengths[m_playerInfo.CurrentPosition] && enterArcLength + 4.9f > m_PPM.m_arcLengths[m_playerInfo.CurrentPosition])
-            {
-                Debug.LogWarning("Me QUEDO IGUAL 2");
-            }
-            // Si entra marcha atrás:
-            else
-            {
-                Debug.LogWarning("MALA VUELTA");
-                malaVuelta = true;
-                int laps = m_playerInfo.CurrentLap - 1;
-                m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(m_playerInfo.CurrentPosition, laps, m_playerInfo.ID);
             }
         }
     }
