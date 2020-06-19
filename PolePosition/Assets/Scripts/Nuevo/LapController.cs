@@ -10,12 +10,12 @@ using Ninja.WebSockets.Exceptions;
 public class LapController : NetworkBehaviour
 {
     #region Variables privadas
-    public PlayerInfo m_playerInfo;                 // Referencia al PlayerInfo
-    private DirectionDetector m_directionDetector;  // Referencia al DirectionDetector
-    private UIManager m_UIManager;                  // Referencia al UIManager
-    private bool malaVuelta = false;                // Booleano que indica si la vuelta es mala (marcha atrás)
-    private GameStartManager m_GSM;
-    [SerializeField] private LapManager m_lapManager;
+    public PlayerInfo m_playerInfo;                   // Referencia al PlayerInfo
+    private DirectionDetector m_directionDetector;    // Referencia al DirectionDetector
+    private UIManager m_UIManager;                    // Referencia al UIManager
+    private bool malaVuelta = false;                  // Booleano que indica si la vuelta es mala (marcha atrás)
+    private GameStartManager m_GSM;                   
+    [SerializeField] private LapManager m_lapManager; 
     public int num_players = 2;
     private SemaphoreSlim endSemaphore = new SemaphoreSlim(0);
     private PolePositionManager m_PPM;

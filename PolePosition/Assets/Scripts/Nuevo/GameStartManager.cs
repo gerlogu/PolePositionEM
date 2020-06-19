@@ -6,6 +6,9 @@ using Mirror;
 using System;
 using UnityEngine.UI;
 
+/// <summary>
+/// Clase que gestiona el inicio de la carrera y sincroniza a los jugadores para que comiencen a la vez.
+/// </summary>
 public class GameStartManager : NetworkBehaviour
 {
     #region Variables Públicas
@@ -71,16 +74,15 @@ public class GameStartManager : NetworkBehaviour
     /// <param name="nuevo">Valor nuevo</param>
     void H_SetGameStarted(bool anterior, bool nuevo)
     {
-        //m_PPM.m_PlayersNotOrdered = m_Players.ToList<PlayerInfo>();
-        m_PPM.m_PlayersNotOrdered = m_Players.OrderBy(go => go.ID).ToList<PlayerInfo>(); //.OrderBy(go => go.ID);
-        gameTimer.SetActive(true);
-        timerAnim.SetTrigger("PlayTimer");
+        m_PPM.m_PlayersNotOrdered = m_Players.OrderBy(go => go.ID).ToList<PlayerInfo>(); // Lista de players ordenados por ID
+        gameTimer.SetActive(true);         // Se activa el timer que se muestra por pantalla
+        timerAnim.SetTrigger("PlayTimer"); // Se activa la animación del timer inicial
         foreach (PlayerInfo player in m_Players)
         {
             if (player.GetComponent<NetworkIdentity>().isLocalPlayer)
             {
-                int numPlayers = minPlayers;
-                player.GetComponent<SetupPlayer>().CmdLapList(numPlayers);
+                int numPlayers = minPlayers; 
+                player.GetComponent<SetupPlayer>().CmdLapList(numPlayers); // Se actualiza el número de jugadores listos para comenzar
             }
 
         }
@@ -95,7 +97,7 @@ public class GameStartManager : NetworkBehaviour
     {
         if (nuevo == minPlayers)
         {
-            semaphore.GetComponent<MeshRenderer>().materials = stateGreen;
+            semaphore.GetComponent<MeshRenderer>().materials = stateGreen; // Las luces del semáforo de salida se hacen verdes
             jugadoresListos.Release(minPlayers);
         }
     }
@@ -113,17 +115,25 @@ public class GameStartManager : NetworkBehaviour
     }
     #endregion
 
+    /// <summary>
+    /// Función Start que se ejecuta al inicio
+    /// </summary>
     private void Start()
     {
-        m_PPM = GetComponent<PolePositionManager>();
-        timerText = GameObject.FindGameObjectWithTag("LapTimer").GetComponent<Text>();
-        totalTimerText = GameObject.FindGameObjectWithTag("TotalTimer").GetComponent<Text>();
+        m_PPM = GetComponent<PolePositionManager>();                                          // Se adquiere la referencia 
+        timerText = GameObject.FindGameObjectWithTag("LapTimer").GetComponent<Text>();        // Se adquiere el texto del timer de la vuelta actual
+        totalTimerText = GameObject.FindGameObjectWithTag("TotalTimer").GetComponent<Text>(); // Se adquiere el texto del timer total de la partida
     }
 
+    /// <summary>
+    /// Función Update que se ejecuta cada frame
+    /// </summary>
     public void Update()
     {
+        // Si no ha empezado la carrera y no se ha solicitado que empiece no se ejecuta el resto del Update
         if (!gameStarted && !calledToGameStarted)
             return;
+        // Si se ha solicitado que empiece la carrera, cada cliente solicita que empiece
         else if (!gameStarted && calledToGameStarted)
         {
             foreach (PlayerInfo player in m_Players)
@@ -138,19 +148,20 @@ public class GameStartManager : NetworkBehaviour
         #region Temporizador Inicial
         if (initialTime > 0)
         {
-            initialTime -= Time.deltaTime;
+            initialTime -= Time.deltaTime; // Se actualiza el valor del timer restando el tiempo del frame
         }
         else
         {
             if (!ended)
             {
 
-                PlayerInfo p = null; // Creamos un objeto auxiliar p
-                int cont = 0;
-                int cont2 = 0;
-                int indice = 0;
-                bool hayNulo = false;
+                PlayerInfo p = null;             // Creamos un objeto auxiliar p
+                int cont = 0;                    // Contador 1
+                int disconnectedPlayerIndex = 0; // Indice el player que se ha desconectado
+                int indice = 0;                  // Indice del player que se desea eliminar
+                bool hayNulo = false;            // Bool que determina que hay un player de la lista nulo
 
+                // Si no se ha adquirido la lista se busca en el pole position manager
                 if (m_Players == null)
                 {
                     m_Players = m_PolePositionManager.m_Players;
@@ -166,8 +177,10 @@ public class GameStartManager : NetworkBehaviour
                     }
                 }
 
+                // Se recorre la lista de jugadores
                 foreach (PlayerInfo player in m_Players)
                 {
+                    // Si existe el jugador no hay problema
                     if (player)
                     {
                         if (player.GetComponent<NetworkIdentity>().isLocalPlayer)
@@ -183,21 +196,23 @@ public class GameStartManager : NetworkBehaviour
 
                         endTimerThread.Start();
                     }
+                    // Si no existe, actualizamos la lista
                     else
                     {
                         if (!hayNulo)
                         {
                             p = player; // p se iguala al player, es decir, a null porque se desconectó
-                            cont2 = cont;
+                            disconnectedPlayerIndex = cont; // índice del jugador que se ha desconectado
                         }
-                        hayNulo = true;
+                        hayNulo = true; // Hay un jugador que se ha marchado
                     }
-                    cont++;
+                    cont++; // Se incrementa el contador
                 }
 
-                if (p == null && hayNulo) // si p es null significa que hay que eliminarlo de la lista
+                // Actualizamos las posiciones de la lista a raiz de la posición del jugador que se ha marchado
+                if (p == null && hayNulo) // Si p es null significa que hay que eliminarlo de la lista
                 {
-                    for (int i = cont2; i < m_Players.Count - 1; i++)
+                    for (int i = disconnectedPlayerIndex; i < m_Players.Count - 1; i++)
                     {
                         m_Players[i] = m_Players[i + 1];
                         m_Players[i].CurrentPosition--;
@@ -214,22 +229,25 @@ public class GameStartManager : NetworkBehaviour
             }
             else
             {
+                // Si es el servidor (no host)
                 if (isServerOnly)
                 {
-                    totalTimer.CalculateTime();
+                    totalTimer.CalculateTime(); // Se calcula el tiempo total que está transcurriendo
                 }
 
+                
                 PlayerInfo p = null;
-                //p = new PlayerInfo();
                 foreach (PlayerInfo player in m_Players)
                 {
                     if (player)
                     {
                         if (player.GetComponent<NetworkIdentity>().isLocalPlayer)
                         {
+                            // Se calcula el tiempo transcurrido en la vuelta y se muestra en pantalla
                             lapTimer.CalculateTime();
                             timerText.text = "Lap time: " + lapTimer.minutes + ":" + lapTimer.seconds + ":" + lapTimer.miliseconds;
 
+                            // Se calcula el tiempo transcurrido en total y se muestra en pantalla
                             totalTimer.CalculateTime();
                             totalTimerText.text = "Total time: " + totalTimer.minutes + ":" + totalTimer.seconds + ":" + totalTimer.miliseconds;
                         }
@@ -240,6 +258,7 @@ public class GameStartManager : NetworkBehaviour
                     }
 
                 }
+                // Limpieza del jugador sobrante simplificado (no necesaria la reorganización de la lista)
                 if (p == null)
                 {
                     m_Players.Remove(p);
@@ -249,10 +268,12 @@ public class GameStartManager : NetworkBehaviour
 
         }
 
+        // El semáforo se enciende y se inicia en color rojo cuando inicia el temporizador inicial (con un delay aposta)
         if (initialTime < 2.55f && initialTime > 1.65f)
         {
             semaphore.GetComponent<MeshRenderer>().materials = stateRed;
         }
+        // Las lueces se vuelven naranja
         else if (initialTime <= 1.65f && initialTime > 0.5f)
         {
             semaphore.GetComponent<MeshRenderer>().materials = stateOrange;

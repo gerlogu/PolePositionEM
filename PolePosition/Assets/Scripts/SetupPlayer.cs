@@ -153,17 +153,13 @@ public class SetupPlayer : NetworkBehaviour
         m_PolePositionManager.gameStartManager.timersListos++; // Se actualiza el número de timers listos para iniciarse
     }
 
+    /// <summary>
+    /// Se actualiza el estado de la partida a empezada.
+    /// </summary>
     [Command]
     public void CmdUpdateGameStarted()
     {
         GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
-
-        //m_PolePositionManager.playersArcLengths = new SyncListFloat();
-
-        //for(int i = 0; i < m_PolePositionManager.gameStartManager.minPlayers; i++)
-        //{
-        //    m_PolePositionManager.playersArcLengths.Add(0);
-        //}
         m_PolePositionManager.gameStartManager.gameStarted = true; // Se actualiza el estado de la partida para los jugadores
     }
 

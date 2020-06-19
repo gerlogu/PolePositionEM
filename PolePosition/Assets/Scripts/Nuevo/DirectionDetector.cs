@@ -1,5 +1,4 @@
-﻿using Mirror.Examples.Basic;
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// Clase DirectionDetector, que comprueba si el coche va en dirección contraria.
