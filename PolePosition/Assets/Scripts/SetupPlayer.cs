@@ -94,10 +94,27 @@ public class SetupPlayer : NetworkBehaviour
 
     #region Commands
     [Command]
-    void CmdUpdateName(string name)
+    void CmdUpdateName(string name, int ID)
     {
         GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
         m_Name = name;
+        PolePositionManager ppm = FindObjectOfType<PolePositionManager>();
+
+        switch (ID)
+        {
+            case 0:
+                ppm.player1Name = name;
+                break;
+            case 1:
+                ppm.player2Name = name;
+                break;
+            case 2:
+                ppm.player3Name = name;
+                break;
+            case 3:
+                ppm.player4Name = name;
+                break;
+        }
     }
 
     [Command]
@@ -257,7 +274,7 @@ public class SetupPlayer : NetworkBehaviour
 
             if (isLocalPlayer)
             {
-                CmdUpdateName(m_UIManager.playerName);
+                CmdUpdateName(m_UIManager.playerName, m_ID);
 
                 CmdUpdateColor(m_UIManager.carType);
                 Debug.Log("Nombre del jugador:" + m_LapController.m_playerInfo.Name);
