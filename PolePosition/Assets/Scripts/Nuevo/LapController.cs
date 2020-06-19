@@ -268,7 +268,7 @@ public class LapController : NetworkBehaviour
             m_PPM.m_PlayersNotOrdered[i].CurrentLap = playerLaps[i];
         }
 
-        bool[] playerFinished = { m_lapManager.player1Finished, m_lapManager.player2Finished, m_lapManager.player2Finished, m_lapManager.player4Finished };
+        bool[] playerFinished = { m_lapManager.player1Finished, m_lapManager.player2Finished, m_lapManager.player3Finished, m_lapManager.player4Finished };
 
         for (int i = 0; i < m_PPM.m_PlayersNotOrdered.Count; i++)
         {
