@@ -60,7 +60,8 @@ public class GameStartManager : NetworkBehaviour
     /// <param name="nuevo">Valor nuevo</param>
     void H_SetGameStarted(bool anterior, bool nuevo)
     {
-        m_PPM.m_PlayersNotOrdered = m_Players.ToList<PlayerInfo>();
+        //m_PPM.m_PlayersNotOrdered = m_Players.ToList<PlayerInfo>();
+        m_PPM.m_PlayersNotOrdered.OrderBy(go => go.ID);
         gameTimer.SetActive(true);
         timerAnim.SetTrigger("PlayTimer");
         foreach (PlayerInfo player in m_Players)

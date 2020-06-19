@@ -30,9 +30,6 @@ public class LapController : NetworkBehaviour
     [SyncVar(hook = nameof(UpdateTimerVisually))] public float timeToEnd = 20.0f;
     #endregion
 
-
-    
-
     void UpdateTimerVisually(float before, float after)
     {
         

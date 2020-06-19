@@ -19,6 +19,8 @@ public class PolePositionManager : NetworkBehaviour
     [Tooltip("Network Manager")]
     public NetworkManager networkManager;
 
+    [SyncVar] public int numDesconexiones;
+
     public UIManager uiManager;
 
     public GameStartManager gameStartManager;
@@ -33,7 +35,7 @@ public class PolePositionManager : NetworkBehaviour
     #endregion
 
     #region Variables Privadas
-    public List<PlayerInfo> m_Players = new List<PlayerInfo>(4); // Lista de jugadores
+    public List<PlayerInfo> m_Players = new List<PlayerInfo>(4);           // Lista de jugadores
     public List<PlayerInfo> m_PlayersNotOrdered = new List<PlayerInfo>(4); // Lista de jugadores
     private CircuitController m_CircuitController;                         // Controlador del circuito
     public GameObject[] m_DebuggingSpheres;                                // Esferas para depurar
@@ -45,15 +47,6 @@ public class PolePositionManager : NetworkBehaviour
     {
         numPlayers = nuevo;
     }
-    #endregion
-
-    #region Funciones Command
-    //[Command]
-    //void CmdUpdateGameReady(int n)
-    //{
-    //    GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
-    //    numPlayers = n;
-    //}
     #endregion
 
 
@@ -103,6 +96,7 @@ public class PolePositionManager : NetworkBehaviour
     public void AddPlayer(PlayerInfo player)
     {
         m_Players.Add(player); // Se añade a la lista el jugador
+        m_PlayersNotOrdered.Add(player);
         //CmdUpdateGameReady(m_Players.Count);
         uiManager.textNumPlayers.text = "P: " + m_Players.Count;
         if(gameStartManager)
@@ -161,15 +155,27 @@ public class PolePositionManager : NetworkBehaviour
 
             if (p == null && hayNulo) // si p es null significa que hay que eliminarlo de la lista
             {
+                //NetworkServer.RemoveConnection(cont2);
                 for (int i = cont2; i < m_Players.Count - 1; i++)
                 {
                     m_Players[i] = m_Players[i + 1];
                     m_Players[i].CurrentPosition--;
+                    //m_Players[i].ID--;
                 }
                 indice = m_Players.Count - 1;
                 //m_Players.Remove(p); // Eliminamos el jugador
                 
                 m_Players.RemoveAt(indice);
+
+                foreach (PlayerInfo pj in m_Players)
+                {
+                    if (pj.GetComponent<SetupPlayer>().isLocalPlayer)
+                    {
+                        Debug.LogError("JUGADOR DESCONECTADO");
+                        pj.GetComponent<SetupPlayer>().CmdUpdateNumDisconnections();
+                    }
+                }
+
                 if (gameStartManager.gameStarted)
                     return; // Volvemos a empezar el bucle, porque hay que comprobar si hay más players nulos
             }

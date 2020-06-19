@@ -18,6 +18,7 @@ public class SetupPlayer : NetworkBehaviour
     [SyncVar(hook = nameof(SetName))] private string m_Name = "Player"; // Nombre del jugador
     [SyncVar(hook = nameof(SetCarType))] private int m_CarType = 0;     // Color del coche seleccionado
     [SyncVar] private bool thereIsServerOnly = false;
+    
 
     private UIManager m_UIManager;                      // UIManager de la escena
     private NetworkManager m_NetworkManager;            // NetworkManager de la escena
@@ -39,13 +40,14 @@ public class SetupPlayer : NetworkBehaviour
     public override void OnStartServer()
     {
         base.OnStartServer();
+
         if (!isServerOnly)
         {
-            m_ID = connectionToClient.connectionId;
+            m_ID = connectionToClient.connectionId - m_PolePositionManager.numDesconexiones;
         }
         else
         {
-            m_ID = connectionToClient.connectionId - 1;
+            m_ID = connectionToClient.connectionId - 1 - m_PolePositionManager.numDesconexiones;
         }
 
         if (!isServerOnly)
@@ -66,6 +68,11 @@ public class SetupPlayer : NetworkBehaviour
         }
     }
 
+    void H_UpdateNumDisconnections(int before, int after)
+    {
+        m_PolePositionManager.numDesconexiones = after;
+    }
+
     #region Commands
     [Command]
     void CmdUpdateName(string name)
@@ -79,6 +86,20 @@ public class SetupPlayer : NetworkBehaviour
     {
         GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
         m_CarType = type;
+    }
+
+    //[Command]
+    //public void CmdGetNumDisconnections()
+    //{
+    //    GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
+    //    numDesconexiones = numDesconexiones;
+    //}
+
+    [Command]
+    public void CmdUpdateNumDisconnections()
+    {
+        GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
+        m_PolePositionManager.numDesconexiones++;
     }
 
     #region Commands del GameStartManager
@@ -171,6 +192,7 @@ public class SetupPlayer : NetworkBehaviour
     {
         m_PlayerInfo.Name = nuevo; // Nombre del jugador
         GetComponentInChildren<TextMesh>().text = nuevo;
+        this.name = nuevo;
     }
 
     void SetCarType(int anterior, int nuevo)
@@ -193,14 +215,19 @@ public class SetupPlayer : NetworkBehaviour
     {
         base.OnStartClient();
 
-        if (m_ID > m_PolePositionManager.gameStartManager.minPlayers - 1)
+        //numDesconexiones = CmdGetNumDisconnections();
+
+        if ((m_ID - m_PolePositionManager.numDesconexiones)> m_PolePositionManager.gameStartManager.minPlayers - 1)
         {
+            //numDesconexiones++;
+            CmdUpdateNumDisconnections();
             Debug.Log("Capacidad superada, desconectando al jugador");
             if (isLocalPlayer)
             {
                 m_UIManager = FindObjectOfType<UIManager>();
                 m_UIManager.ShowConnectionErrorMessage();
             }
+            //connectionToClient.Dispose();
             connectionToClient.Disconnect();
             return;
         }
