@@ -169,7 +169,7 @@ public class PolePositionManager : NetworkBehaviour
 
                 foreach (PlayerInfo pj in m_Players)
                 {
-                    if (pj.GetComponent<SetupPlayer>().isLocalPlayer)
+                    if (pj.GetComponent<SetupPlayer>().isServer)
                     {
                         Debug.LogError("JUGADOR DESCONECTADO");
                         pj.GetComponent<SetupPlayer>().CmdUpdateNumDisconnections();
@@ -205,6 +205,13 @@ public class PolePositionManager : NetworkBehaviour
             {
                 m_Players[i].CurrentPosition = i;
             }
+
+            string st = "Players: ";
+            for (int i = 0; i < m_Players.Count; ++i)
+            {
+                st += "[" + m_Players[i].ToString() + "]";
+            }
+            Debug.Log(st);
         }
 
         string myRaceOrder = "";
