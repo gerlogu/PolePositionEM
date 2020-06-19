@@ -56,12 +56,10 @@ public class DirectionDetector : MonoBehaviour
             if (actualArcLength < lastArcLength && actualArcLength + 400.0f < lastArcLength && actualArcLength + 460.0f > lastArcLength)
             {
                 //Esto es por si pasa meta
-                Debug.LogWarning("CASO ESPECIAL 1");
             }
             // Si está yendo a hacia atrás
             else if (actualArcLength < lastArcLength && lastArcLength != 0)
             {
-                Debug.LogWarning("VA MAL");
                 // Si no hemos guardado la posición de la primera dirección hacia atrás, la guardamos
                 if (!firstSaved)
                 {
@@ -76,11 +74,9 @@ public class DirectionDetector : MonoBehaviour
             else if (lastArcLength > actualArcLength && firstBadArcLength < actualArcLength)
             {
                 // Esto es por si pasa meta al revés
-                Debug.LogWarning("CASO ESPECIAL 2");
             }
             else
             {
-                Debug.LogWarning("VA BIEN");
                 vaBien = true;
                 firstSaved = false;
                 showingInfo = false;

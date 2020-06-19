@@ -42,7 +42,6 @@ public class LapController : NetworkBehaviour
     [Command]
     private void CmdUpdateTimeToEnd()
     {
-
         if (!m_FinishGame)
             m_FinishGame = FindObjectOfType<FinishGame>();
 
@@ -172,11 +171,22 @@ public class LapController : NetworkBehaviour
                 break;
         }
         
-        if(ID > -1 && m_GSM.m_PolePositionManager.m_PlayersNotOrdered.Count > 0)
+        // Ya que daba problemas con la lista de m_PlayersNotOrdered,
+        // lo he hecho con las endPos que son sincronizadas y funciona
+        switch (num_players)
         {
-            Debug.Log("El puto ID que da error es: " + ID);
-            if (m_GSM.m_PolePositionManager.m_PlayersNotOrdered[ID].CurrentPosition == num_players - 1)
-                m_lapManager.readyToShowFinalScreen = true;
+            case 2:
+                if (m_lapManager.endPos2 == ID)
+                    m_lapManager.readyToShowFinalScreen = true;
+                break;
+            case 3:
+                if (m_lapManager.endPos3 == ID)
+                    m_lapManager.readyToShowFinalScreen = true;
+                break;
+            case 4:
+                if (m_lapManager.endPos4 == ID)
+                    m_lapManager.readyToShowFinalScreen = true;
+                break;
         }
         
     }
@@ -222,6 +232,9 @@ public class LapController : NetworkBehaviour
 
     private void Update()
     {
+        if (timeToEnd < 20)
+            Debug.Log("TimeToEnd: " + timeToEnd);
+
         if (m_playerInfo.canMove)
         {
             m_playerInfo.lapTotalMinutes = m_GSM.totalTimer.minutes;
@@ -244,7 +257,7 @@ public class LapController : NetworkBehaviour
         {
             if (m_playerInfo.ID == 0)
             {
-                timeToEnd -= Time.fixedDeltaTime;
+                timeToEnd -= Time.deltaTime;
                 CmdUpdateTimeToEnd();
             }
 
@@ -254,14 +267,6 @@ public class LapController : NetworkBehaviour
                 gameThreadFinished = true;
                 CmdUpdateReadyToShow();
             }
-        }
-
-        if (gameThreadFinished)
-        {
-            if (!m_lapManager.readyToShowFinalScreen)
-                return;
-            gameThreadFinished = false;
-            CmdUpdateEndGame();
         }
 
         int[] playerLaps = { m_lapManager.player1Laps, m_lapManager.player2Laps, m_lapManager.player3Laps, m_lapManager.player4Laps };
@@ -277,6 +282,14 @@ public class LapController : NetworkBehaviour
         for (int i = 0; i < m_PPM.m_PlayersNotOrdered.Count; i++)
         {
             m_PPM.m_PlayersNotOrdered[i].hasFinished = playerFinished[i];
+        }
+
+        if (gameThreadFinished)
+        {
+            if (!m_lapManager.readyToShowFinalScreen)
+                return;
+            gameThreadFinished = false;
+            CmdUpdateEndGame();
         }
     }
 
@@ -301,7 +314,7 @@ public class LapController : NetworkBehaviour
         if (other.CompareTag("FinishLine") && canLap)
         {
             // Si va en buena dirección:
-            if (enterArcLength > m_PPM.m_arcLengths[m_playerInfo.CurrentPosition] + 9.9f)
+            if (enterArcLength > m_PPM.m_arcLengths[m_playerInfo.CurrentPosition] + 4.9f)
             {
                 // Si NO ha entrado marcha atrás previamente:
                 if (!malaVuelta)
@@ -362,8 +375,8 @@ public class LapController : NetworkBehaviour
                             m_GSM.lapTimer.StopTimer();
                             //m_GSM.totalTimer.StopTimer();
                             m_playerInfo.hasFinished = true;
-                            CmdUpdateTimers(m_playerInfo.ID);
                             CmdUpdatePlayerFinished(m_playerInfo.ID);
+                            CmdUpdateTimers(m_playerInfo.ID);
                             m_playerInfo.canMove = false;
                             m_UIManager.waitFinishHUD.SetActive(true);
                             m_UIManager.inGameHUD.SetActive(false);
@@ -406,7 +419,7 @@ public class LapController : NetworkBehaviour
                 Debug.LogWarning("Me QUEDO IGUAL 1");
             }
             //Entrar mal y salir bien
-            else if (enterArcLength < m_PPM.m_arcLengths[m_playerInfo.CurrentPosition] && enterArcLength + 9.9f > m_PPM.m_arcLengths[m_playerInfo.CurrentPosition])
+            else if (enterArcLength < m_PPM.m_arcLengths[m_playerInfo.CurrentPosition] && enterArcLength + 4.9f > m_PPM.m_arcLengths[m_playerInfo.CurrentPosition])
             {
                 Debug.LogWarning("Me QUEDO IGUAL 2");
             }
