@@ -51,7 +51,6 @@ public class GameStartManager : NetworkBehaviour
     private Text timerText;                                       // Texto del timer de la vuelta
     private Text totalTimerText;                                  // Texto del timer de la partida
     private PolePositionManager m_PPM;                            // Referencia al pole position manager
-    private bool didStart = false;                                // Determina si comenzó la partida
     private bool auxBoolForServerOnly = false;                    // Determina si es Server Only
     #endregion
 
@@ -160,9 +159,7 @@ public class GameStartManager : NetworkBehaviour
                 // Solo servidor
                 if (isServerOnly)
                 {
-                    didStart = gameStarted;
-
-                    if (didStart && !auxBoolForServerOnly)
+                    if (gameStarted && !auxBoolForServerOnly)
                     {
                         auxBoolForServerOnly = true;
                         totalTimer.RestartTimer();

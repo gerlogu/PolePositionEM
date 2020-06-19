@@ -135,7 +135,7 @@ public class UIManager : MonoBehaviour
         buttonLapsLeft.onClick.AddListener(() => { laps = (laps > 1) ? (laps - 1) : laps; });
         buttonLapsRight.onClick.AddListener(() => { laps = (laps < 9) ? (laps + 1) : laps; });
 
-        buttonPlayersLeft.onClick.AddListener(() => { players = (players > 1) ? players - 1 : players;});
+        buttonPlayersLeft.onClick.AddListener(() => { players = (players > 2) ? players - 1 : players;});
         buttonPlayersRight.onClick.AddListener(() => { players = (players < 4) ? players + 1 : players; });
 
         buttonSelectConfig.onClick.AddListener(() => 

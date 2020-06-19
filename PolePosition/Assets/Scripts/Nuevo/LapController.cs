@@ -179,6 +179,9 @@ public class LapController : NetworkBehaviour
                     m_lapManager.readyToShowFinalScreen = true;
                 break;
         }
+
+        if (FindObjectOfType<NetworkManager>().numPlayers == 1)
+            m_lapManager.readyToShowFinalScreen = true;
     }
 
     [Command]
@@ -224,6 +227,14 @@ public class LapController : NetworkBehaviour
     {
         /*if (m_LapManager.timeToEnd < 20)
             Debug.Log("TimeToEnd: " + timeToEnd);*/
+
+        if (FindObjectOfType<NetworkManager>().numPlayers == 1 && m_GSM.gameStarted)
+        {
+            m_playerInfo.hasFinished = true;
+            CmdUpdatePlayerFinished(m_playerInfo.ID);
+            CmdUpdateTimers(m_playerInfo.ID);
+            gameThreadFinished = true;
+        }
 
         if (m_playerInfo.canMove)
         {
