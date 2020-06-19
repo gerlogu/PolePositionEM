@@ -17,7 +17,7 @@ public class SetupPlayer : NetworkBehaviour
     [SyncVar(hook = nameof(SetID))] private int m_ID;                   // ID del jugador
     [SyncVar(hook = nameof(SetName))] private string m_Name = "Player"; // Nombre del jugador
     [SyncVar(hook = nameof(SetCarType))] private int m_CarType = 0;     // Color del coche seleccionado
-    [SyncVar] private bool thereIsServerOnly = true;
+    [SyncVar] private bool thereIsServerOnly = false;
 
     private UIManager m_UIManager;                      // UIManager de la escena
     private NetworkManager m_NetworkManager;            // NetworkManager de la escena
@@ -42,14 +42,27 @@ public class SetupPlayer : NetworkBehaviour
         if (!isServerOnly)
         {
             m_ID = connectionToClient.connectionId;
-            thereIsServerOnly = false;
-        }else if (!thereIsServerOnly)
+        }
+        else
         {
-            m_ID = connectionToClient.connectionId;
+            m_ID = connectionToClient.connectionId - 1;
+        }
+
+        if (!isServerOnly)
+        {
+            m_PlayerInfo.ID = m_ID;
+            //m_ID = connectionToClient.connectionId;
+            thereIsServerOnly = false;
+        }
+        else if (!thereIsServerOnly)
+        {
+            m_PlayerInfo.ID = m_ID;
+            //m_ID = connectionToClient.connectionId;
         }
         else if (thereIsServerOnly)
         {
-            m_ID = connectionToClient.connectionId - 1;
+            m_PlayerInfo.ID = m_ID - 1;
+            //m_ID = connectionToClient.connectionId - 1;
         }
     }
 
@@ -179,15 +192,22 @@ public class SetupPlayer : NetworkBehaviour
     public override void OnStartClient() // IMPORTANTE
     {
         base.OnStartClient();
+
+        if (m_ID > m_PolePositionManager.gameStartManager.minPlayers - 1)
+        {
+            Debug.Log("Capacidad superada, desconectando al jugador");
+            if (isLocalPlayer)
+            {
+                m_UIManager = FindObjectOfType<UIManager>();
+                m_UIManager.ShowConnectionErrorMessage();
+            }
+            connectionToClient.Disconnect();
+            return;
+        }
+
         if (!isServerOnly)
         {
             m_PlayerInfo.CurrentLap = 0;                   // Vuelta actual alcanzada por el jugador
-
-            //if (isLocalPlayer)
-            //{
-            //    GameStartManager gameStartManager = gameObject.AddComponent(typeof(GameStartManager)) as GameStartManager;
-            //    m_PolePositionManager.gameStartManager = gameStartManager;
-            //}
 
             if (isLocalPlayer)
             {
