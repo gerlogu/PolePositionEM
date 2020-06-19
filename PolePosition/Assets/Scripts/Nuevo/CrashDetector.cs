@@ -14,9 +14,12 @@ public class CrashDetector : MonoBehaviour
     #endregion
 
     #region Variables publicas
-    [Tooltip("Layer \"Road\"")] public LayerMask whatIsRoad; // Capa que indica qué es carretera
-    [Tooltip("Radio de detección de la carretera")] public float checkRadius = 0.5f; // Radio de detección de la carretera
-    public bool isGrounded = true;
+    [Tooltip("Layer \"Road\"")]
+    public LayerMask whatIsRoad; // Capa que indica qué es carretera
+    [Tooltip("Radio de detección de la carretera")]
+    public float checkRadius = 0.5f; // Radio de detección de la carretera
+    [Tooltip("Bool que determina si el coche se enecuentra tocando el suelo")]
+    public bool isGrounded = true; // Necesario para la detección de colisiones e impedir que el jugador se salga de la carretera
     #endregion
 
     /// <summary>
