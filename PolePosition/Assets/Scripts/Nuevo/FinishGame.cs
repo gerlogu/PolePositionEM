@@ -1,7 +1,4 @@
 ﻿using Mirror;
-using Mirror.Examples.Basic;
-using Mono.CecilX;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
