@@ -67,8 +67,6 @@ public class FinishGame : NetworkBehaviour
                         finalPositions[i] = m_players[i].ID;
                     }
 
-                    Debug.LogWarning("FinalPositions " + i + ": " + finalPositions[i]);
-
                     endTexts[0].text += m_playersNotOrdered[finalPositions[i]].Name + "\n";
                     endTexts[1].text += (i + 1) + "\n";
                     if (m_playersNotOrdered[finalPositions[i]].hasFinished)

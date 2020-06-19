@@ -29,7 +29,10 @@ public class PolePositionManager : NetworkBehaviour
 
     [SyncVar] public bool gameHasEnded;
 
-    //public SyncListFloat playersArcLengths;
+    [SyncVar] public string player1Name;
+    [SyncVar] public string player2Name;
+    [SyncVar] public string player3Name;
+    [SyncVar] public string player4Name;
 
     public LapManager m_LapManager;
     #endregion
@@ -43,6 +46,8 @@ public class PolePositionManager : NetworkBehaviour
     private bool someoneFinished = false;
     private bool timeEnded = false;
     private float timeToEnd = 20.0f;
+    private bool hasPlayerNames = false;
+    private GameStartManager m_GSM;
     #endregion
 
     #region Funciones Hook
@@ -70,6 +75,12 @@ public class PolePositionManager : NetworkBehaviour
         if (m_CircuitController == null)
         {
             m_CircuitController = FindObjectOfType<CircuitController>(); // Se busca el controlador del circuito en la escena
+        }
+
+        // Si no existe el game start manager
+        if (m_GSM == null)
+        {
+            m_GSM = GetComponent<GameStartManager>();
         }
 
         // Se inicializa el array de esferas en función del número de jugadores conectados
@@ -282,11 +293,6 @@ public class PolePositionManager : NetworkBehaviour
                                     break;
                             }
 
-                            /*for (int i = 0; i < totalTimes.Length; i++)
-                            {
-                                Debug.LogWarning("TotalTimes " + i + ": " + totalTimes[i]);
-                            }*/
-
                             player.lapTotalMinutes = totalTimes[0];
                             player.lapTotalSeconds = totalTimes[1];
                             player.lapTotalMiliseconds = totalTimes[2];
@@ -304,6 +310,29 @@ public class PolePositionManager : NetworkBehaviour
                         GetComponent<FinishGame>().RpcUpdateReadyToShow();
                         //CmdUpdateReadyToShow(); -> m_lapManager.readyToShowFinalScreen = true;
                     }
+                }
+
+                if (!hasPlayerNames && m_GSM.gameStarted)
+                {
+                    foreach (PlayerInfo player in m_PlayersNotOrdered)
+                    {
+                        switch (player.ID)
+                        {
+                            case 0:
+                                player.Name = player1Name;
+                                break;
+                            case 1:
+                                player.Name = player2Name;
+                                break;
+                            case 2:
+                                player.Name = player3Name;
+                                break;
+                            case 3:
+                                player.Name = player4Name;
+                                break;
+                        }
+                    }
+                    hasPlayerNames = true;
                 }
             }
         }
