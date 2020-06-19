@@ -89,53 +89,48 @@ public class FinishGame : NetworkBehaviour
                 m_UIManager.inGameHUD.SetActive(false);
                 m_UIManager.waitFinishHUD.SetActive(false);
 
-                m_UIManager.buttonFinishReturn.onClick.AddListener(() => ReturnListener());
+                m_UIManager.buttonFinishReturn.onClick.AddListener(() => ReturnToMenu());
                 m_UIManager.gameFinishHUD.SetActive(true);
 
             }
         }
     }
 
-    void ReturnListener()
+    /// <summary>
+    /// Se apaga el servidor y se recarga la escena.
+    /// </summary>
+    void ReturnToMenu()
     {
-        //int id = 0;
-        //foreach (PlayerInfo player in m_players)
-        //{
-        //    if (player.GetComponent<SetupPlayer>().isLocalPlayer)
-        //    {
-        //        id = player.ID;
-
-        //    }
-        //}
-
         if (isServer)
         {
             if (isServerOnly)
             {
-                Debug.Log("SOY SERVIDOR");
+                Debug.Log("StopServer ejecutado.");
                 NetworkManager.singleton.StopServer();
             }
             else
             {
-                Debug.Log("SOY HOST");
+                Debug.Log("StopHost ejecutado.");
 
-                GetComponent<PolePositionManager>().StopServer();
-               // NetworkServer.RemoveConnection(id);
-                //NetworkServer.connections.Clear();
-                //NetworkManager.singleton.StopHost();
+                //GetComponent<PolePositionManager>().StopServer();
+                NetworkManager.singleton.StopHost();
             }
         }
         else
         {
-            Debug.Log("SOY CLIENTE");
+            Debug.Log("StopClient ejecutado.");
             NetworkManager.singleton.StopClient();
         }
 
-        m_lapManager.RestartAllSyncVars();
-        m_UIManager.gameFinishHUD.SetActive(false);
-        m_UIManager.RestartMenu();
 
+        Debug.Log("Apagando servidor...");
         NetworkServer.Shutdown();
+
+        SceneManager.LoadScene(0);
+
+        //m_lapManager.RestartAllSyncVars();
+        //m_UIManager.gameFinishHUD.SetActive(false);
+        //m_UIManager.RestartMenu();
     }
 
 

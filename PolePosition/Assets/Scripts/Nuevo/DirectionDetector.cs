@@ -50,7 +50,7 @@ public class DirectionDetector : MonoBehaviour
                 //Debug.Log("Longitud de arco: " + actualArcLength);
             }
 
-            Debug.Log("First: " + firstBadArcLength + " | Last: " + lastArcLength + " | Actual: " + actualArcLength);
+           // Debug.Log("First: " + firstBadArcLength + " | Last: " + lastArcLength + " | Actual: " + actualArcLength);
 
             // Si acaba de cruzar la meta
             if (actualArcLength < lastArcLength && actualArcLength + 400.0f < lastArcLength && actualArcLength + 460.0f > lastArcLength)
