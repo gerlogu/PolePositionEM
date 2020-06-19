@@ -118,6 +118,7 @@ public class UIManager : MonoBehaviour
 
     public void RestartMenu()
     {
+        //m_NetworkManager.StopHost();
         connectionError.SetActive(false);
         inGameHUD.SetActive(false); // Se oculta la interfaz In Game
         carType = 0;

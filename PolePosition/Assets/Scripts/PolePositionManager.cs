@@ -56,6 +56,12 @@ public class PolePositionManager : NetworkBehaviour
     //}
     #endregion
 
+
+    public void StopServer()
+    {
+        NetworkManager.singleton.StopHost();
+    }
+
     private void Awake()
     {
         // Si no existe network manager

@@ -98,15 +98,15 @@ public class FinishGame : NetworkBehaviour
 
     void ReturnListener()
     {
-        int id = 0;
-        foreach (PlayerInfo player in m_players)
-        {
-            if (player.GetComponent<SetupPlayer>().isLocalPlayer)
-            {
-                id = player.ID;
+        //int id = 0;
+        //foreach (PlayerInfo player in m_players)
+        //{
+        //    if (player.GetComponent<SetupPlayer>().isLocalPlayer)
+        //    {
+        //        id = player.ID;
 
-            }
-        }
+        //    }
+        //}
 
         if (isServer)
         {
@@ -118,9 +118,11 @@ public class FinishGame : NetworkBehaviour
             else
             {
                 Debug.Log("SOY HOST");
-                NetworkServer.RemoveConnection(id);
-                
-                NetworkManager.singleton.StopHost();
+
+                GetComponent<PolePositionManager>().StopServer();
+               // NetworkServer.RemoveConnection(id);
+                //NetworkServer.connections.Clear();
+                //NetworkManager.singleton.StopHost();
             }
         }
         else
