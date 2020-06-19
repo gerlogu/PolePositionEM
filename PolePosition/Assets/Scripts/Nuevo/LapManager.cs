@@ -41,6 +41,37 @@ public class LapManager : NetworkBehaviour
 
     [Tooltip("Número total de vueltas")] [SyncVar] public int totalLaps; // Por poner algo de momento
 
+    public void RestartAllSyncVars()
+    {
+        player1Laps = -1;
+        player2Laps = -1;
+        player3Laps = -1;
+        player4Laps = -1;
+
+        player1Finished = false;
+        player2Finished = false;
+        player3Finished = false;
+        player4Finished = false;
+
+    // Cada una guarda la string del timer (quería usar SyncList pero son un infierno)
+        player1TotalTimer = "";
+        player2TotalTimer = "";
+        player3TotalTimer = "";
+        player4TotalTimer = "";
+
+        player1BestTimer = "";
+        player2BestTimer = "";
+        player3BestTimer = "";
+        player4BestTimer = "";
+
+        endPos1 = -1;
+        endPos2 = -1;
+        endPos3 = -1;
+        endPos4 = -1;
+        nextPos = 0;
+
+        readyToShowFinalScreen = false;
+}
 
     // Start is called before the first frame update
     void Start()

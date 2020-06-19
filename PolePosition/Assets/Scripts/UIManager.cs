@@ -84,6 +84,7 @@ public class UIManager : MonoBehaviour
     [Header("Finish HUD")]
     public GameObject waitFinishHUD;
     public GameObject gameFinishHUD;
+    public Button buttonFinishReturn;
 
 
     [Header("Car Selection Animation")]
@@ -115,7 +116,7 @@ public class UIManager : MonoBehaviour
         buttonReturn.onClick.AddListener(() => RestartMenu());
     }
 
-    void RestartMenu()
+    public void RestartMenu()
     {
         connectionError.SetActive(false);
         inGameHUD.SetActive(false); // Se oculta la interfaz In Game

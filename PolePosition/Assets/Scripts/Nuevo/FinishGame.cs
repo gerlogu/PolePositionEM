@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class FinishGame : NetworkBehaviour
 {
@@ -89,10 +90,54 @@ public class FinishGame : NetworkBehaviour
 
                 m_UIManager.inGameHUD.SetActive(false);
                 m_UIManager.waitFinishHUD.SetActive(false);
+
+                m_UIManager.buttonFinishReturn.onClick.AddListener(() => ReturnListener());
                 m_UIManager.gameFinishHUD.SetActive(true);
+
             }
         }
     }
+
+    void ReturnListener()
+    {
+        int id = 0;
+        foreach (PlayerInfo player in m_players)
+        {
+            if (player.GetComponent<SetupPlayer>().isLocalPlayer)
+            {
+                id = player.ID;
+
+            }
+        }
+
+        if (isServer)
+        {
+            if (isServerOnly)
+            {
+                Debug.Log("SOY SERVIDOR");
+                NetworkManager.singleton.StopServer();
+            }
+            else
+            {
+                Debug.Log("SOY HOST");
+                NetworkServer.RemoveConnection(id);
+                
+                NetworkManager.singleton.StopHost();
+            }
+        }
+        else
+        {
+            Debug.Log("SOY CLIENTE");
+            NetworkManager.singleton.StopClient();
+        }
+
+        m_lapManager.RestartAllSyncVars();
+        m_UIManager.gameFinishHUD.SetActive(false);
+        m_UIManager.RestartMenu();
+
+        NetworkServer.Shutdown();
+    }
+
 
     [ClientRpc]
     public void RpcUpdateEndTimerText(int timeTE)
