@@ -9,12 +9,16 @@ using UnityEngine.UI;
 public class GameStartManager : NetworkBehaviour
 {
     #region Variables Públicas
-    [SyncVar] public int minPlayers;
+    [Tooltip("Timer de la vuelta")]
     public LapTimer lapTimer = new LapTimer();
+    [Tooltip("Timer total de la partida")]
     public LapTimer totalTimer = new LapTimer();
+    [Tooltip("Referencia del Pole Position Manager")]
     public PolePositionManager m_PolePositionManager;
 
-    #region Variables Sincronizadas
+    #region Variables Sincronizadas Ocultas
+    [Tooltip("Jugadores requeridos para que empiece la partida")]
+    [HideInInspector] [SyncVar] public int minPlayers;
     [HideInInspector] [SyncVar(hook = nameof(H_SetGameStarted))] public bool gameStarted = false; // Estado de la partida
     [HideInInspector] [SyncVar(hook = nameof(H_UpdatePlayers))] public int numPlayers = 0;        // Números de jugadores listos tras finalizar el timer
     [HideInInspector] [SyncVar(hook = nameof(H_UpdateTimer))] public int timersListos = 0;        // Número de jugadores listos para iniciar el timer
@@ -23,26 +27,32 @@ public class GameStartManager : NetworkBehaviour
     #endregion
 
     #region Variables Inicializables
+    [Tooltip("Números iniciales de la partida")]
     [SerializeField] private Animator timerAnim;
+    [Tooltip("Objeto semáforo de la escena")]
     [SerializeField] private GameObject semaphore;
+    [Tooltip("Luces verdes del semáforo")]
     [SerializeField] private Material[] stateGreen;
+    [Tooltip("Luces naranjas del semáforo")]
     [SerializeField] private Material[] stateOrange;
+    [Tooltip("Luces rojas del semáforo")]
     [SerializeField] private Material[] stateRed;
+    [Tooltip("Objeto controlador del timer inicial")]
     [SerializeField] private GameObject gameTimer;
     #endregion
 
     #region Variables Privadas
-    private bool ended = false;
-    private List<PlayerInfo> m_Players;
-    private float timer = 3;
-    private SemaphoreSlim timerListo = new SemaphoreSlim(0);
-    private SemaphoreSlim jugadoresListos = new SemaphoreSlim(0);
-    private bool calledToGameStarted = false;
-    private Text timerText;
-    private Text totalTimerText;
-    private PolePositionManager m_PPM;
-    private bool didStart = false;
-    private bool auxBool = false;
+    private bool ended = false;                                   // Determina si la partida ha terminado
+    private List<PlayerInfo> m_Players;                           // Lista de jugadores (copia de la lista del pole position manager)
+    private float initialTime = 3;                                // Tiempo para que comience la carrera
+    private SemaphoreSlim timerListo = new SemaphoreSlim(0);      // Semáforo que sincronizar el inicio del timer inicial
+    private SemaphoreSlim jugadoresListos = new SemaphoreSlim(0); // Semáforo para sincronizar el final del timer inicial
+    private bool calledToGameStarted = false;                     // Determina si se ha modificado el bool gameStarted
+    private Text timerText;                                       // Texto del timer de la vuelta
+    private Text totalTimerText;                                  // Texto del timer de la partida
+    private PolePositionManager m_PPM;                            // Referencia al pole position manager
+    private bool didStart = false;                                // Determina si comenzó la partida
+    private bool auxBoolForServerOnly = false;                    // Determina si es Server Only
     #endregion
 
     /// <summary>
@@ -56,7 +66,7 @@ public class GameStartManager : NetworkBehaviour
 
     #region Funciones Hook
     /// <summary>
-    /// Inicia la animación del timer
+    /// Inicia la animación del timer.
     /// </summary>
     /// <param name="anterior">Valor anterior</param>
     /// <param name="nuevo">Valor nuevo</param>
@@ -127,9 +137,9 @@ public class GameStartManager : NetworkBehaviour
         }
 
         #region Temporizador Inicial
-        if (timer > 0)
+        if (initialTime > 0)
         {
-            timer -= Time.deltaTime;
+            initialTime -= Time.deltaTime;
         }
         else
         {
@@ -152,9 +162,9 @@ public class GameStartManager : NetworkBehaviour
                 {
                     didStart = gameStarted;
 
-                    if (didStart && !auxBool)
+                    if (didStart && !auxBoolForServerOnly)
                     {
-                        auxBool = true;
+                        auxBoolForServerOnly = true;
                         totalTimer.RestartTimer();
                     }
                 }
@@ -242,11 +252,11 @@ public class GameStartManager : NetworkBehaviour
 
         }
 
-        if (timer < 2.55f && timer > 1.65f)
+        if (initialTime < 2.55f && initialTime > 1.65f)
         {
             semaphore.GetComponent<MeshRenderer>().materials = stateRed;
         }
-        else if (timer <= 1.65f && timer > 0.5f)
+        else if (initialTime <= 1.65f && initialTime > 0.5f)
         {
             semaphore.GetComponent<MeshRenderer>().materials = stateOrange;
         }
