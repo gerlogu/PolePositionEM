@@ -15758,7 +15758,7 @@ MonoBehaviour:
   runInBackground: 1
   startOnHeadless: 1
   showDebugMessages: 0
-  serverTickRate: 30
+  serverTickRate: 60
   offlineScene: 
   onlineScene: Assets/_Scenes/Game.unity
   transport: {fileID: 2140735091}
