@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class CircuitController : MonoBehaviour
 {
+    public bool DebugLine = false;
+
     private LineRenderer m_CircuitPath; // Línea del recorrido donde se pintan las esferas
     private Vector3[] m_PathPos;        // Posición de las posiciones
     private float[] m_CumArcLength;     // ¿?
@@ -22,6 +24,13 @@ public class CircuitController : MonoBehaviour
         m_PathPos = new Vector3[numPoints];           // Posiciones de los vértices de la línea
         m_CumArcLength = new float[numPoints];        // Distancias desde el punto de partida hasta el actual
         m_CircuitPath.GetPositions(m_PathPos);        // ¿?
+
+        //m_CircuitPath.SetColors(new Color(0,0,0,0), new Color(0, 0, 0, 0)) ;
+        if (!DebugLine)
+        {
+            m_CircuitPath.enabled = false;
+        }
+       
 
         // Compute circuit arc-length
         m_CumArcLength[0] = 0;

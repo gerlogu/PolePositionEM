@@ -53,8 +53,8 @@ public class PlayerController : NetworkBehaviour
 
     public event OnSpeedChangeDelegate OnSpeedChangeEvent;
 
-    [HideInInspector] public GameObject nameTag;        // Name Tag del jugador (se encuentra encima del coche)
-    private Transform transformCamera; // Transform de la cámara que sigue al vehículo
+    
+    
     #endregion Variables
 
     #region Unity Callbacks
@@ -67,7 +67,7 @@ public class PlayerController : NetworkBehaviour
 
     private void Start()
     {
-        transformCamera = GameObject.FindGameObjectWithTag("MainCamera").transform; // Se busca la cámara que sigue al jugador
+        
     }
 
     public void Update()
@@ -90,9 +90,7 @@ public class PlayerController : NetworkBehaviour
 
         //Debug.LogWarning("ID: " + m_PlayerInfo.ID);
 
-        nameTag.transform.LookAt(transformCamera); // El nametag del jugador mira a la cámara
-
-        nameTag.transform.rotation = Quaternion.LookRotation(transform.position - transformCamera.position); // Se rota el nametag para que no se vea al revés
+        
     }
 
     public void FixedUpdate()

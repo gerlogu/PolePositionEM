@@ -8,6 +8,8 @@ using UnityEngine;
 public class PolePositionManager : NetworkBehaviour
 {
     #region Variables Públicas
+    [SerializeField] private bool debugSpheres = false;
+
     [Header("Synchronized Attributes")]
     [Tooltip("Número de Jugadores")]
     [SyncVar] public int numPlayers;
@@ -82,6 +84,10 @@ public class PolePositionManager : NetworkBehaviour
         {
             m_DebuggingSpheres[i] = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             m_DebuggingSpheres[i].GetComponent<SphereCollider>().enabled = false;
+            if (!debugSpheres)
+            {
+                m_DebuggingSpheres[i].GetComponent<MeshRenderer>().enabled = false;
+            }
         }
 
         // Se inicializa a 20 segundos
@@ -196,7 +202,7 @@ public class PolePositionManager : NetworkBehaviour
                     {
                         if (NetworkClient.active)
                         {
-                            Debug.LogError("JUGADOR DESCONECTADO");
+                            Debug.LogWarning("JUGADOR DESCONECTADO");
                             pj.GetComponent<SetupPlayer>().CmdUpdateNumDisconnections();
                         }
                         else
