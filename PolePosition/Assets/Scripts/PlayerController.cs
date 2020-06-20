@@ -13,8 +13,9 @@ public class PlayerController : NetworkBehaviour
     #region Variables
     public bool gameStarted;
 
-    [Header("Movement")] public List<AxleInfo> axleInfos;
-    public float forwardMotorTorque = 100000;
+    [Header("Movement")]
+    [Tooltip("Lista con la información de los ejes")] public List<AxleInfo> axleInfos;
+    [Tooltip("Potencia del motor hacia delante")] public float forwardMotorTorque = 100000;
     public float backwardMotorTorque = 50000;
     public float maxSteeringAngle = 15;
     public float engineBrake = 1e+12f;

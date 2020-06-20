@@ -264,12 +264,7 @@ public class SetupPlayer : NetworkBehaviour
             if (isLocalPlayer)
             {
                 CmdUpdateName(m_UIManager.playerName, m_ID);
-
                 CmdUpdateColor(m_UIManager.carType);
-                Debug.Log("Nombre del jugador:" + m_LapController.m_playerInfo.Name);
-
-                string carColor = m_PlayerInfo.carType.ToString();
-                Debug.Log("COLOR DE COCHE ESCOGIDO: <color=" + carColor + ">" + m_PlayerInfo.carType + "</color>");
             }
 
             Debug.Log("ID del coche: " + m_PlayerInfo.ID);
@@ -294,7 +289,6 @@ public class SetupPlayer : NetworkBehaviour
         m_CrashDetector.enabled     = true;
         m_DirectionDetector.enabled = true;
         m_LapController.enabled     = true;
-        m_LapController.canLap      = true;
         
         m_PlayerController.OnSpeedChangeEvent += OnSpeedChangeEventHandler;
         ConfigureCamera();

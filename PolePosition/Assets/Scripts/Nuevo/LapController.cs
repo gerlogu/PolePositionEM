@@ -1,35 +1,31 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using Mirror;
 
-using UnityEngine.UI;
 using System.Threading;
-using Ninja.WebSockets.Exceptions;
 
 public class LapController : NetworkBehaviour
 {
     #region Variables privadas
-    public PlayerInfo m_playerInfo;                   // Referencia al PlayerInfo
-    private DirectionDetector m_directionDetector;    // Referencia al DirectionDetector
-    private UIManager m_UIManager;                    // Referencia al UIManager
-    private bool malaVuelta = false;                  // Booleano que indica si la vuelta es mala (marcha atrás)
-    private GameStartManager m_GSM;                   
-    [SerializeField] private LapManager m_lapManager; 
-    public int num_players = 2;
-    private SemaphoreSlim endSemaphore = new SemaphoreSlim(0);
-    private PolePositionManager m_PPM;
-    private FinishGame m_FinishGame;
-    private bool gameThreadFinished;
-    private bool timeEnded = false;
-    private float enterArcLength;
-    #endregion
+    private bool malaVuelta = false;                            // Booleano que indica si la vuelta es mala (marcha atrás)
+    private bool gameThreadFinished;                            // Booleano que indica si el thread de fin de partida ha acabado
+    private bool timeEnded = false;                             // Booleano que indica si se ha acabado el tiempo
+    private int num_players = 2;                                // Numero de jugadores
+    private float enterArcLength;                               // Variable decimal que guarda la longitud de arco al entrar en el trigger de la meta
+    private PlayerInfo m_playerInfo;                            // Referencia al PlayerInfo
+    private DirectionDetector m_directionDetector;              // Referencia al DirectionDetector
+    private UIManager m_UIManager;                              // Referencia al UIManager
+    private GameStartManager m_GSM;                             // Referencia al GameStartManager
+    private LapManager m_lapManager;                            // Referencia al LapManager
+    private PolePositionManager m_PPM;                          // Referencia al PolePositionManager
+    private FinishGame m_FinishGame;                            // Referencia al FinishGame
+    private SemaphoreSlim endSemaphore = new SemaphoreSlim(0);  // Semáforo para gestionar el final de partida
 
-    #region Variables publicas
-    [HideInInspector] public bool canLap = false;                    // Bool que determina si puede sumar vueltas el jugador
     #endregion
 
     #region Command Functions
+    /// <summary>
+    /// Función que llama a actualizar el texto de tiempo restante
+    /// </summary>
     [Command]
     private void CmdUpdateTimeToEnd()
     {
@@ -39,12 +35,17 @@ public class LapController : NetworkBehaviour
         m_FinishGame.RpcUpdateEndTimerText(Mathf.RoundToInt(m_lapManager.timeToEnd));
     }
 
+    /// <summary>
+    /// Función que avisa de que el jugador ID ha terminado la carrera
+    /// </summary>
+    /// <param name="ID">Identificador del coche que ha terminado</param>
     [Command]
     private void CmdUpdatePlayerFinished(int ID)
     {
-        //GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
+        // Se obtiene una referencia al LapManager
         LapManager lm = FindObjectOfType<LapManager>();
 
+        // Se guarda al jugador en la siguiente posición final
         switch(lm.nextPos)
         {
             case 0:
@@ -63,6 +64,7 @@ public class LapController : NetworkBehaviour
 
         lm.nextPos++;
 
+        // Se modifica el booleano que indica que ha acabado
         switch (ID)
         {
             case 0:
@@ -80,6 +82,9 @@ public class LapController : NetworkBehaviour
         }
     }
 
+    /// <summary>
+    /// Función que avisa de que ya está listo para mostrar la pantalla final
+    /// </summary>
     [Command]
     public void CmdUpdateReadyToShow()
     {
@@ -88,13 +93,22 @@ public class LapController : NetworkBehaviour
         m_lapManager.readyToShowFinalScreen = true;
     }
 
+    /// <summary>
+    /// Función que guarda la mejor vuelta del jugador ID
+    /// </summary>
+    /// <param name="ID">Identificador del coche</param>
+    /// <param name="m">Minutos</param>
+    /// <param name="s">Segundos</param>
+    /// <param name="ms">Milisegundos</param>
     [Command]
     public void CmdUpdateBestLap(int ID, int m, int s, int ms)
     {
+        // Se toman las referencias necesarias
         m_lapManager = FindObjectOfType<LapManager>();
         m_GSM = FindObjectOfType<GameStartManager>();
         m_PPM = FindObjectOfType<PolePositionManager>();
 
+        // Se crea una string con los valores
         string st = "";
 
         //Corrección string
@@ -118,6 +132,7 @@ public class LapController : NetworkBehaviour
         else
             st += ms;
 
+        // Se guarda la string en el mejor tiempo del jugador ID
         switch (ID)
         {
             case 0:
@@ -135,17 +150,21 @@ public class LapController : NetworkBehaviour
         }
     }
 
+    /// <summary>
+    /// Función que guarda el tiempo total del jugador ID
+    /// </summary>
+    /// <param name="ID">Identificador del coche que actualiza su tiempo</param>
     [Command]
     public void CmdUpdateTimers(int ID)
     {
-        //GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
-        //m_PPM = FindObjectOfType<PolePositionManager>();
+        // Se toman las referencias necesarias
         m_GSM = FindObjectOfType<GameStartManager>();
+        m_lapManager = FindObjectOfType<LapManager>();
 
+        // Se guarda en una string el tiempo total
         string st = m_GSM.totalTimer.minutes + ":" + m_GSM.totalTimer.seconds + ":" + m_GSM.totalTimer.miliseconds;
-        if(!m_lapManager)
-            m_lapManager = FindObjectOfType<LapManager>();
 
+        // Se asigna el tiempo total al jugador ID
         switch (ID)
         {
             case 0:
@@ -162,8 +181,7 @@ public class LapController : NetworkBehaviour
                 break;
         }
         
-        // Ya que daba problemas con la lista de m_PlayersNotOrdered,
-        // lo he hecho con las endPos que son sincronizadas y funciona
+        // Si el jugador es el último, la partida acaba
         switch (num_players)
         {
             case 2:
@@ -180,20 +198,26 @@ public class LapController : NetworkBehaviour
                 break;
         }
 
+        // Si solo queda un jugador (el host), la partida acaba
         if (FindObjectOfType<NetworkManager>().numPlayers == 1)
             m_lapManager.readyToShowFinalScreen = true;
     }
 
+    /// <summary>
+    /// Función que indica que la partida ha terminado
+    /// </summary>
     [Command]
     private void CmdUpdateEndGame()
     {
-        //GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
-        if(!m_PPM)
-            m_PPM = FindObjectOfType<PolePositionManager>();
+        // Se toma la referencia al PolePositionManager
+        m_PPM = FindObjectOfType<PolePositionManager>();
+
+        // Se actualiza la variable compartida gameHasEnded del PolePositionManager
         m_PPM.gameHasEnded = true;
     }
     #endregion
 
+    #region Unity Callbacks
     /// <summary>
     /// Función Awake, que inicializa las siguientes variables.
     /// </summary>
@@ -208,26 +232,34 @@ public class LapController : NetworkBehaviour
 
     private void Start()
     {
+        // Se inicializa el tiempo de la mejor vuelta a 0
         m_playerInfo.lapBestMinutes = 0;
         m_playerInfo.lapBestSeconds = 0;
         m_playerInfo.lapBestMiliseconds = 0;
+
+        // Se obtiene el Lap Manager
         m_lapManager = FindObjectOfType<LapManager>();
+
         // Se obtiene el PolePositionManager
         m_PPM = FindObjectOfType<PolePositionManager>();
+
         // Se obtiene el GameStartManager
         m_GSM = FindObjectOfType<GameStartManager>();
+
         // Se obtiene el FinishGame
         m_FinishGame = FindObjectOfType<FinishGame>();
+
         // Se obtiene el UIManager y se establece el texto de las vueltas
         m_UIManager = FindObjectOfType<UIManager>();
         m_UIManager.UpdateLaps(1, m_lapManager.totalLaps);
     }
 
+    /// <summary>
+    /// Función Update, que se ejecuta cada frame
+    /// </summary>
     private void Update()
     {
-        /*if (m_LapManager.timeToEnd < 20)
-            Debug.Log("TimeToEnd: " + timeToEnd);*/
-
+        // Si solo queda un jugador una vez la partida ha empezado, acaba la partida
         if (FindObjectOfType<NetworkManager>().numPlayers == 1 && m_GSM.gameStarted)
         {
             m_playerInfo.hasFinished = true;
@@ -236,6 +268,7 @@ public class LapController : NetworkBehaviour
             gameThreadFinished = true;
         }
 
+        // Si el jugador se puede mover, guardamos su tiempo en el player info
         if (m_playerInfo.canMove)
         {
             m_playerInfo.lapTotalMinutes = m_GSM.totalTimer.minutes;
@@ -243,6 +276,7 @@ public class LapController : NetworkBehaviour
             m_playerInfo.lapTotalMiliseconds = m_GSM.totalTimer.miliseconds;
         }
 
+        // Comprobamos si alguien ha acabado la carrera
         bool[] playersFinished = { m_lapManager.player1Finished, m_lapManager.player2Finished, m_lapManager.player2Finished, m_lapManager.player4Finished };
         bool someoneFinished = false;
 
@@ -254,14 +288,17 @@ public class LapController : NetworkBehaviour
             }
         }
 
+        // Si alguien ha acabado
         if (someoneFinished)
         {
+            // Si es el servidor, actualiza el tiempo que falta para acabar
             if (isServer)
             {
                 m_lapManager.timeToEnd -= Time.deltaTime;
                 CmdUpdateTimeToEnd();
             }
 
+            // Si no queda tiempo para acabar, mostramos la información por pantalla
             if (m_lapManager.timeToEnd <= 0 && !timeEnded)
             {
                 timeEnded = true;
@@ -270,22 +307,27 @@ public class LapController : NetworkBehaviour
             }
         }
 
+        // Se obtienen las vueltas de cada jugador
         int[] playerLaps = { m_lapManager.player1Laps, m_lapManager.player2Laps, m_lapManager.player3Laps, m_lapManager.player4Laps };
 
         for (int i = 0; i < m_PPM.m_PlayersNotOrdered.Count; i++)
         {
-            //m_PPM.m_Players[m_PPM.m_Players[i].CurrentPosition].CurrentLap = playerLaps[i];
             m_PPM.m_PlayersNotOrdered[i].CurrentLap = playerLaps[i];
         }
 
+        // Si el thread de fin de partida ha acabado
         if (gameThreadFinished)
         {
+            // Si no está listo para mostrar la pantalla final, no continuamos
             if (!m_lapManager.readyToShowFinalScreen)
                 return;
+
+            // Si ya está listo, acaba la partida
             gameThreadFinished = false;
             CmdUpdateEndGame();
         }
 
+        // Se obtiene la información de si ha acabado cada jugador
         bool[] playerFinished = { m_lapManager.player1Finished, m_lapManager.player2Finished, m_lapManager.player3Finished, m_lapManager.player4Finished };
 
         for (int i = 0; i < m_PPM.m_PlayersNotOrdered.Count; i++)
@@ -293,6 +335,10 @@ public class LapController : NetworkBehaviour
             m_PPM.m_PlayersNotOrdered[i].hasFinished = playerFinished[i];
         }
     }
+
+    #endregion
+
+    #region Trigger Functions
 
     /// <summary>
     /// Comprueba si el coche entra en un trigger
@@ -314,7 +360,7 @@ public class LapController : NetworkBehaviour
         if (!m_PPM.gameHasEnded)
         {
             // Si toca la meta:
-            if (other.CompareTag("FinishLine") && canLap)
+            if (other.CompareTag("FinishLine"))
             {
                 // Si va en buena dirección:
                 if (enterArcLength > m_PPM.m_arcLengths[m_playerInfo.CurrentPosition] + 4.9f)
@@ -322,20 +368,17 @@ public class LapController : NetworkBehaviour
                     // Si NO ha entrado marcha atrás previamente:
                     if (!malaVuelta)
                     {
-                        Debug.LogWarning("VUELTA CORRECTA");
+                        // Actualizamos las vueltas del jugador
                         int laps = m_playerInfo.CurrentLap + 1;
                         m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(m_playerInfo.CurrentPosition, laps, m_playerInfo.ID);
-                        /*string st = "LISTA PLAYERS: ";
-                        for (int i = 0; i < m_PPM.m_Players.Count; i++) // Sincronizar numPlayers
-                        {
-                            st += m_PPM.m_Players[i].ToString() + ", ";
-                        }
-                        Debug.LogWarning(st);*/
 
+                        // Si lleva más de una vuelta
                         if (laps > 1)
                         {
+                            // Si lleva más de dos vueltas
                             if (laps > 2)
                             {
+                                // Comprobamos si esta vuelta ha sido la mejor
                                 bool isBetter = false;
 
                                 if (m_GSM.lapTimer.iMinutes < m_playerInfo.lapBestMinutes)
@@ -351,16 +394,16 @@ public class LapController : NetworkBehaviour
                                     isBetter = true;
                                 }
 
+                                // Si es mejor que la guardada, la actualizamos
                                 if (isBetter)
                                 {
-                                    /*Debug.LogWarning("Vuelta previa: " + m_playerInfo.lapBestMinutes + ":" + m_playerInfo.lapBestSeconds + ":" + m_playerInfo.lapBestMiliseconds
-                                        + " | Vuelta mejor: " + m_GSM.lapTimer.iMinutes + ":" + m_GSM.lapTimer.iSeconds + ":" + m_GSM.lapTimer.iMiliseconds);*/
                                     m_playerInfo.lapBestMinutes = m_GSM.lapTimer.iMinutes;
                                     m_playerInfo.lapBestSeconds = m_GSM.lapTimer.iSeconds;
                                     m_playerInfo.lapBestMiliseconds = m_GSM.lapTimer.iMiliseconds;
                                     CmdUpdateBestLap(m_playerInfo.ID, m_GSM.lapTimer.iMinutes, m_GSM.lapTimer.iSeconds, m_GSM.lapTimer.iMiliseconds);
                                 }
                             }
+                            // Si acaba de hacer la primera vuelta, guardamos ese tiempo como el mejor
                             else
                             {
                                 m_playerInfo.lapBestMinutes = m_GSM.lapTimer.iMinutes;
@@ -369,18 +412,22 @@ public class LapController : NetworkBehaviour
                                 CmdUpdateBestLap(m_playerInfo.ID, m_GSM.lapTimer.iMinutes, m_GSM.lapTimer.iSeconds, m_GSM.lapTimer.iMiliseconds);
                             }
 
+                            // Reiniciamos el timer de vuelta
                             m_GSM.lapTimer.RestartTimer();
 
                             // Si el jugador ha acabado la carrera
                             if (laps > m_lapManager.totalLaps)
                             {
-                                // Se paran los timers y avisa de que ha terminado
+                                // Se para el timer de vuelta y avisa de que ha terminado
                                 m_GSM.lapTimer.StopTimer();
-                                //m_GSM.totalTimer.StopTimer();
                                 m_playerInfo.hasFinished = true;
                                 CmdUpdatePlayerFinished(m_playerInfo.ID);
                                 CmdUpdateTimers(m_playerInfo.ID);
+
+                                // Se le impide moverse al jugador
                                 m_playerInfo.canMove = false;
+
+                                // Se muestra la UI correspondiente
                                 m_UIManager.waitFinishHUD.SetActive(true);
                                 m_UIManager.inGameHUD.SetActive(false);
 
@@ -401,16 +448,18 @@ public class LapController : NetworkBehaviour
                                 gameThreadFinished = true;
                                 });
 
+                                // Comienza la ejecución del hilo
                                 endGameThread.Start();
                             }
                         }
 
+                        // Se actualizan las vueltas en la interfaz
                         m_UIManager.UpdateLaps(laps, m_lapManager.totalLaps);
                     }
-                    // Si había entrado marcha atrás previamente:
+
+                    // Si había entrado marcha atrás previamente
                     else
                     {
-                        Debug.LogWarning("RECUPERAMOS VUELTA");
                         malaVuelta = false;
                         int laps = m_playerInfo.CurrentLap + 1;
                         m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(m_playerInfo.CurrentPosition, laps, m_playerInfo.ID);
@@ -419,17 +468,16 @@ public class LapController : NetworkBehaviour
                 //Entrar bien y salir mal
                 else if (enterArcLength > m_PPM.m_arcLengths[m_playerInfo.CurrentPosition])
                 {
-                    Debug.LogWarning("Me QUEDO IGUAL 1");
+                    // Tenemos que dejar esta comprobación
                 }
                 //Entrar mal y salir bien
                 else if (enterArcLength < m_PPM.m_arcLengths[m_playerInfo.CurrentPosition] && enterArcLength + 4.9f > m_PPM.m_arcLengths[m_playerInfo.CurrentPosition])
                 {
-                    Debug.LogWarning("Me QUEDO IGUAL 2");
+                    // Tenemos que dejar esta comprobación
                 }
-                // Si entra marcha atrás:
+                // Si entra marcha atrás
                 else
                 {
-                    Debug.LogWarning("MALA VUELTA");
                     malaVuelta = true;
                     int laps = m_playerInfo.CurrentLap - 1;
                     m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(m_playerInfo.CurrentPosition, laps, m_playerInfo.ID);
@@ -437,4 +485,6 @@ public class LapController : NetworkBehaviour
             }
         }
     }
+
+    #endregion
 }
