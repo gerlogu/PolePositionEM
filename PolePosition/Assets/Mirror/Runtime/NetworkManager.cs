@@ -1309,6 +1309,7 @@ namespace Mirror
             {
                 Transform startPosition = startPositions[startPositionIndex];
                 startPositionIndex = (startPositionIndex + 1) % startPositions.Count;
+
                 return startPosition;
             }
         }
