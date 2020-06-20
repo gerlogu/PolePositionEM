@@ -10,33 +10,37 @@ using Mirror;
 
 public class PlayerController : NetworkBehaviour
 {
-    #region Variables
-    public bool gameStarted;
-
+    #region Variables publicas
     [Header("Movement")]
     [Tooltip("Lista con la información de los ejes")] public List<AxleInfo> axleInfos;
     [Tooltip("Potencia del motor hacia delante")] public float forwardMotorTorque = 100000;
-    public float backwardMotorTorque = 50000;
-    public float maxSteeringAngle = 15;
-    public float engineBrake = 1e+12f;
-    public float footBrake = 1e+24f;
-    public float topSpeed = 200f;
-    public float downForce = 100f;
-    public float slipLimit = 0.2f;
+    [Tooltip("Potencia del motor hacia atras")] public float backwardMotorTorque = 50000;
+    [Tooltip("Maximo angulo de giro")] public float maxSteeringAngle = 15;
+    [Tooltip("Freno de motor")] public float engineBrake = 1e+12f;
+    [Tooltip("Freno de pie")] public float footBrake = 1e+24f;
+    [Tooltip("Velocidad maxima")] public float topSpeed = 200f;
+    [Tooltip("Fuerza de traccion hacia abajo")] public float downForce = 100f;
+    [Tooltip("Limite de deslizamiento")] public float slipLimit = 0.2f;
 
-    private float CurrentRotation { get; set; }
-    private float InputAcceleration { get; set; }
-    private float InputSteering { get; set; }
-    private float InputBrake { get; set; }
+    [HideInInspector] public GameObject nameTag;        // Name Tag del jugador (se encuentra encima del coche)
+    #endregion
 
-    private PlayerInfo m_PlayerInfo;
+    #region Variables privadas
 
-    private Rigidbody m_Rigidbody;
-    private float m_SteerHelper = 0.8f;
+    private float CurrentRotation { get; set; }     // Rotacion actual del coche
+    private float InputAcceleration { get; set; }   // Input de aceleracion
+    private float InputSteering { get; set; }       // Input de giro
+    private float InputBrake { get; set; }          // Input de freno
 
+    private float m_SteerHelper = 0.8f;             // Ayuda al giro
+    private float m_CurrentSpeed = 0;               // Velocidad actual
 
-    private float m_CurrentSpeed = 0;
+    private Transform transformCamera;              // Transform de la cámara que sigue al vehículo
 
+    private PlayerInfo m_PlayerInfo;                // Referencia al PlayerInfo
+    private Rigidbody m_Rigidbody;                  // Referencia al rigidody
+    
+    // Velocidad del coche
     private float Speed
     {
         get { return m_CurrentSpeed; }
@@ -49,29 +53,39 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
+    // Delegado que actualiza la velocidad
     public delegate void OnSpeedChangeDelegate(float newVal);
 
+    // Evento del delegado (mas bien handler)
     public event OnSpeedChangeDelegate OnSpeedChangeEvent;
-
-    
-    
     #endregion Variables
 
     #region Unity Callbacks
 
+    /// <summary>
+    /// Función Awake, que inicializa las siguientes variables
+    /// </summary>
     public void Awake()
     {
+        // Se obtienen las referencias
         m_Rigidbody = GetComponent<Rigidbody>();
         m_PlayerInfo = GetComponent<PlayerInfo>();
     }
 
+    /// <summary>
+    /// Función Start, que obtiene el transform de la camara
+    /// </summary>
     private void Start()
     {
         
     }
 
+    /// <summary>
+    /// Función Update, que se ejecuta cada frame
+    /// </summary>
     public void Update()
     {
+        // Si el jugador puede moverse, se obtienen sus inputs
         if (m_PlayerInfo.canMove)
         {
             InputAcceleration = Input.GetAxis("Vertical");
@@ -79,6 +93,7 @@ public class PlayerController : NetworkBehaviour
             InputBrake = Input.GetAxis("Jump");
             Speed = m_Rigidbody.velocity.magnitude;
         }
+        // Si no, y ha terminado la carrera, sus inputs valen 0
         else if (m_PlayerInfo.hasFinished)
         {
             InputAcceleration = 0;
@@ -87,32 +102,39 @@ public class PlayerController : NetworkBehaviour
             Speed = 0;
             m_Rigidbody.Sleep();
         }
-
-        //Debug.LogWarning("ID: " + m_PlayerInfo.ID);
-
         
     }
 
+    /// <summary>
+    /// Función FixedUpdate, que se ejecuta constantemente con velocidad fija de fotograma
+    /// </summary>
     public void FixedUpdate()
     {
+        // Si el jugador no ha terminado
         if (!m_PlayerInfo.hasFinished)
         {
+            // Se capan los inputs entre 0 y 1
             InputSteering = Mathf.Clamp(InputSteering, -1, 1);
             InputAcceleration = Mathf.Clamp(InputAcceleration, -1, 1);
             InputBrake = Mathf.Clamp(InputBrake, 0, 1);
 
+            // Se calcula el giro
             float steering = maxSteeringAngle * InputSteering;
 
+            // Por cada eje
             foreach (AxleInfo axleInfo in axleInfos)
             {
+                // Si esta activado el giro, giramos el eje
                 if (axleInfo.steering)
                 {
                     axleInfo.leftWheel.steerAngle = steering;
                     axleInfo.rightWheel.steerAngle = steering;
                 }
 
+                // Si esta activado el motor
                 if (axleInfo.motor)
                 {
+                    // Si esta acelerando, asignamos la potencia del motor
                     if (InputAcceleration > float.Epsilon)
                     {
                         axleInfo.leftWheel.motorTorque = forwardMotorTorque;
@@ -121,6 +143,7 @@ public class PlayerController : NetworkBehaviour
                         axleInfo.rightWheel.brakeTorque = 0;
                     }
 
+                    // Si esta decelerando, asignamos la potencia hacia atras del motor
                     if (InputAcceleration < -float.Epsilon)
                     {
                         axleInfo.leftWheel.motorTorque = -backwardMotorTorque;
@@ -129,6 +152,7 @@ public class PlayerController : NetworkBehaviour
                         axleInfo.rightWheel.brakeTorque = 0;
                     }
 
+                    // Si no hay aceleracion, lo establecemos todo a 0
                     if (Math.Abs(InputAcceleration) < float.Epsilon)
                     {
                         axleInfo.leftWheel.motorTorque = 0;
@@ -136,7 +160,8 @@ public class PlayerController : NetworkBehaviour
                         axleInfo.rightWheel.motorTorque = 0;
                         axleInfo.rightWheel.brakeTorque = engineBrake;
                     }
-
+                    
+                    // Si hay input de freno, se actualiza el freno de las ruedas
                     if (InputBrake > 0)
                     {
                         axleInfo.leftWheel.brakeTorque = footBrake;
@@ -144,10 +169,12 @@ public class PlayerController : NetworkBehaviour
                     }
                 }
 
+                // Se aplican las posiciones
                 ApplyLocalPositionToVisuals(axleInfo.leftWheel);
                 ApplyLocalPositionToVisuals(axleInfo.rightWheel);
             }
 
+            // Se llaman a los callbacks correspondientes
             SteerHelper();
             SpeedLimiter();
             AddDownForce();

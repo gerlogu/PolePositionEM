@@ -26,6 +26,11 @@ public class PolePositionManager : NetworkBehaviour
     [Tooltip("Nombre del jugador 4")]
     [SyncVar] public string player4Name;
 
+    [Tooltip("Lista de jugadores ordenados por posicion")] public List<PlayerInfo> m_Players = new List<PlayerInfo>(4);
+    [Tooltip("Lista de jugadores ordenados por ID")] public List<PlayerInfo> m_PlayersNotOrdered = new List<PlayerInfo>(4);
+    [Tooltip("Esferas de debug")] public GameObject[] m_DebuggingSpheres;
+    [Tooltip("Longitudes de arco")] public float[] m_arcLengths;
+
     [Header("References")]
     [Tooltip("Network Manager")]
     public NetworkManager m_NetworkManager;
@@ -42,15 +47,11 @@ public class PolePositionManager : NetworkBehaviour
     #endregion
 
     #region Variables Privadas
-    public List<PlayerInfo> m_Players = new List<PlayerInfo>(4);           // Lista de jugadores
-    public List<PlayerInfo> m_PlayersNotOrdered = new List<PlayerInfo>(4); // Lista de jugadores
-    private CircuitController m_CircuitController;                         // Controlador del circuito
-    public GameObject[] m_DebuggingSpheres;                                // Esferas para depurar
-    public float[] m_arcLengths;                                           // Longitudes de arco
-    private bool someoneFinished = false;                                  // Bool que determina si algún jugador ha completado la carrera
-    private bool timeEnded = false;                                        // Bool que determina si el temporizador de final de partida ha concluido
-    private float timeToEnd = 20.0f;                                       // Tiempo que dura el temporizador de final de partida
-    private bool hasPlayerNames = false;                                   // Bool que determina si se conoce el nombre de todos los jugadores      
+    private CircuitController m_CircuitController;    // Controlador del circuito
+    private bool someoneFinished = false;             // Bool que determina si algún jugador ha completado la carrera
+    private bool timeEnded = false;                   // Bool que determina si el temporizador de final de partida ha concluido
+    private float timeToEnd = 20.0f;                  // Tiempo que dura el temporizador de final de partida
+    private bool hasPlayerNames = false;              // Bool que determina si se conoce el nombre de todos los jugadores      
     #endregion
 
     /// <summary>
@@ -94,6 +95,9 @@ public class PolePositionManager : NetworkBehaviour
         timeToEnd = 20.0f;
     }
 
+    /// <summary>
+    /// Función Update, que se ejecuta cada frame
+    /// </summary>
     private void Update()
     {
         // Si el número de jugadores es igual a cero, no se actualiza el progreso de la carrera
@@ -157,12 +161,10 @@ public class PolePositionManager : NetworkBehaviour
     /// </summary>
     public void UpdateRaceProgress()
     {
-
         // Lock para que esto no se solape con otros procesos
         lock (xLock)
         {
             // Eliminación de jugadores desconectados
-
             PlayerInfo p = null; // Creamos un objeto auxiliar p
             bool hayNulo = false;
             int cont = 0;
@@ -186,7 +188,6 @@ public class PolePositionManager : NetworkBehaviour
 
             if (p == null && hayNulo) // si p es null significa que hay que eliminarlo de la lista
             {
-                //NetworkServer.RemoveConnection(cont2);
                 for (int i = cont2; i < m_Players.Count - 1; i++)
                 {
                     m_Players[i] = m_Players[i + 1];
@@ -207,7 +208,7 @@ public class PolePositionManager : NetworkBehaviour
                         }
                         else
                         {
-                            Debug.Log("Intento de desconexión interrumpido por finalización de la partida, el servidor será desconectado.");
+                            Debug.LogWarning("Intento de desconexión interrumpido por finalización de la partida, el servidor será desconectado.");
                         }
                     }
                 }
@@ -218,9 +219,9 @@ public class PolePositionManager : NetworkBehaviour
 
 
             // Se actualizan las longitudes de arco
-
             m_arcLengths = new float[m_Players.Count];
 
+            // Por cada jugador
             for (int i = 0; i < m_Players.Count; ++i)
             {
                 // Se actualiza la posición de la esfera si el personaje se encuentra dentro del camino a seguir
@@ -228,22 +229,24 @@ public class PolePositionManager : NetworkBehaviour
                 {
                     m_arcLengths[i] = ComputeCarArcLength(i);
                 }
-                
             }
 
+            // Se ordena la lista por longitudes de arco (posicion)
             m_Players.Sort(new PlayerInfoComparer(m_arcLengths));
 
-            // Se asigna la posición
+            // Se asigna la posicion a cada jugador
             for (int i = 0; i < m_Players.Count; ++i)
             {
                 m_Players[i].CurrentPosition = i;
             }
 
-            // Cálculos del servidor
+            // Calculos del servidor
             if (isServerOnly)
             {
+                // Se obtiene una referencia al LapManager
                 LapManager m_lapManager = FindObjectOfType<LapManager>();
 
+                // Se guardan las vueltas de cada jugador y se comprueba si han acabado
                 int[] playerLaps = { m_lapManager.player1Laps, m_lapManager.player2Laps, m_lapManager.player3Laps, m_lapManager.player4Laps };
 
                 for (int i = 0; i < m_PlayersNotOrdered.Count; i++)
@@ -271,8 +274,10 @@ public class PolePositionManager : NetworkBehaviour
                     }
                 }
 
+                // Si alguien ha terminado
                 if (someoneFinished)
                 {
+                    // Por cada jugador miramos si este ha terminado para guardar su tiempo total
                     foreach (PlayerInfo player in m_Players)
                     {
                         if (player.hasFinished)
@@ -301,10 +306,12 @@ public class PolePositionManager : NetworkBehaviour
                         }
                     }
 
+                    // Se actualiza el tiempo para terminar la partida
                     timeToEnd -= Time.deltaTime;
                     m_lapManager.timeToEnd = timeToEnd;
                     GetComponent<FinishGame>().RpcUpdateEndTimerText(Mathf.RoundToInt(m_lapManager.timeToEnd));
 
+                    // Si el tiempo ha acabado, se actualiza la variable que lo controla y se muestra la informacion de final de partida
                     if (m_LapManager.timeToEnd <= 0 && !timeEnded)
                     {
                         timeEnded = true;
@@ -312,6 +319,7 @@ public class PolePositionManager : NetworkBehaviour
                     }
                 }
 
+                // Si no tiene los nombres de los jugadores y la partida ha empezado, los obtiene
                 if (!hasPlayerNames && m_GameStartManager.gameStarted)
                 {
                     foreach (PlayerInfo player in m_PlayersNotOrdered)
@@ -337,6 +345,7 @@ public class PolePositionManager : NetworkBehaviour
             }
         }
 
+        // Se actualiza en la interfaz la posicion de cada jugador
         string myRaceOrder = "";
         foreach (var _player in m_Players)
         {
@@ -352,8 +361,6 @@ public class PolePositionManager : NetworkBehaviour
     /// <returns></returns>
     float ComputeCarArcLength(int ID)
     {
-        
-        // Debug.LogWarning("INFO " + ID + ": " + m_Players[ID].ToString());
         // Compute the projection of the car position to the closest circuit 
         // path segment and accumulate the arc-length along of the car along
         // the circuit.
@@ -380,8 +387,6 @@ public class PolePositionManager : NetworkBehaviour
                                    (m_Players[ID].CurrentLap - 1);
             }
         }
-        
-
         return minArcL;
     }
 }

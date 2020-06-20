@@ -13107,14 +13107,14 @@ MonoBehaviour:
   player2Name: 
   player3Name: 
   player4Name: 
-  m_NetworkManager: {fileID: 2140735090}
-  m_UIManager: {fileID: 1823041897}
-  m_GameStartManager: {fileID: 1839589616}
-  m_LapManager: {fileID: 1839589618}
   m_Players: []
   m_PlayersNotOrdered: []
   m_DebuggingSpheres: []
   m_arcLengths: []
+  m_NetworkManager: {fileID: 2140735090}
+  m_UIManager: {fileID: 1823041897}
+  m_GameStartManager: {fileID: 1839589616}
+  m_LapManager: {fileID: 1839589618}
 --- !u!4 &1839589614
 Transform:
   m_ObjectHideFlags: 0
