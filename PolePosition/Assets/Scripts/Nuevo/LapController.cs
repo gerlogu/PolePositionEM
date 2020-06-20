@@ -279,7 +279,7 @@ public class LapController : NetworkBehaviour
         }
 
         // Comprobamos si alguien ha acabado la carrera
-        bool[] playersFinished = { m_lapManager.player1Finished, m_lapManager.player2Finished, m_lapManager.player2Finished, m_lapManager.player4Finished };
+        bool[] playersFinished = { m_lapManager.player1Finished, m_lapManager.player2Finished, m_lapManager.player3Finished, m_lapManager.player4Finished };
         bool someoneFinished = false;
 
         for (int i = 0; i < m_PPM.m_PlayersNotOrdered.Count; i++)
