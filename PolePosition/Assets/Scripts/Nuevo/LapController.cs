@@ -370,7 +370,7 @@ public class LapController : NetworkBehaviour
                     {
                         // Actualizamos las vueltas del jugador
                         int laps = m_playerInfo.CurrentLap + 1;
-                        m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(m_playerInfo.CurrentPosition, laps, m_playerInfo.ID);
+                        m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(laps, m_playerInfo.ID);
 
                         // Si lleva más de una vuelta
                         if (laps > 1)
@@ -462,7 +462,7 @@ public class LapController : NetworkBehaviour
                     {
                         malaVuelta = false;
                         int laps = m_playerInfo.CurrentLap + 1;
-                        m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(m_playerInfo.CurrentPosition, laps, m_playerInfo.ID);
+                        m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(laps, m_playerInfo.ID);
                     }
                 }
                 //Entrar bien y salir mal
@@ -480,7 +480,7 @@ public class LapController : NetworkBehaviour
                 {
                     malaVuelta = true;
                     int laps = m_playerInfo.CurrentLap - 1;
-                    m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(m_playerInfo.CurrentPosition, laps, m_playerInfo.ID);
+                    m_playerInfo.GetComponent<SetupPlayer>().CmdUpdateLaps(laps, m_playerInfo.ID);
                 }
             }
         }
