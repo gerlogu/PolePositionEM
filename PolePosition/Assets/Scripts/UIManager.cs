@@ -23,6 +23,8 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Button buttonServer;
     [Tooltip("Input Field para el servidor")]
     [SerializeField] private InputField inputFieldIP;
+    [Tooltip("Botón \"QUIT\"")]
+    [SerializeField] private Button buttonQuit;
 
     [Header("In-Game HUD")]
     [Tooltip("HUD In Game")]
@@ -133,10 +135,11 @@ public class UIManager : MonoBehaviour
         connectionError.SetActive(false);
 
         // Se asocian los botones a las diferentes funciones
-        buttonHost.onClick.AddListener(() => ShowGameConfig(0));     // Name Selector (Host)
-        buttonClient.onClick.AddListener(() => ShowNameSelector(1)); // Name Selector (Cliente)
-        buttonServer.onClick.AddListener(() => ShowGameConfig(1));   // Servidor
-        ActivateMainMenu();                                          // Muestra por pantalla el menú principal
+        buttonHost.onClick.AddListener(() => ShowGameConfig(0));       // Name Selector (Host)
+        buttonClient.onClick.AddListener(() => ShowNameSelector(1));   // Name Selector (Cliente)
+        buttonServer.onClick.AddListener(() => ShowGameConfig(1));     // Servidor
+        buttonQuit.onClick.AddListener(() => { Application.Quit(); }); // Botón para salir del juego
+        ActivateMainMenu();                                            // Muestra por pantalla el menú principal
     }
 
     /// <summary>
