@@ -293,9 +293,11 @@ public class SetupPlayer : NetworkBehaviour
             if (isLocalPlayer)
             {
                 m_UIManager = FindObjectOfType<UIManager>();
+                m_UIManager.inGameHUD.SetActive(false);
                 m_UIManager.ShowConnectionErrorMessage();
             }
 
+            connectionToClient.Dispose();
             connectionToClient.Disconnect();
             return;
         }
