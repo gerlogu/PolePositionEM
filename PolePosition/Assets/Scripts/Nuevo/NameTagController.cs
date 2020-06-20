@@ -1,21 +1,24 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
+/// <summary>
+/// Controlador de posición para los name tags de los jugadores.
+/// </summary>
 public class NameTagController : MonoBehaviour
 {
     private Transform transformCamera; // Transform de la cámara que sigue al vehículo
-    public GameObject nameTag; // Name Tag del jugador (se encuentra encima del coche)
+    public GameObject nameTag;         // Name Tag del jugador (se encuentra encima del coche)
 
-    // Start is called before the first frame update
+    /// <summary>
+    /// Start is called before the first frame update
+    /// </summary>
     void Start()
     {
         transformCamera = GameObject.FindGameObjectWithTag("MainCamera").transform; // Se busca la cámara que sigue al jugador
-
-        
     }
 
-    // Update is called once per frame
+    /// <summary>
+    /// Update is called once per frame
+    /// </summary>
     void Update()
     {
         if (!transformCamera)

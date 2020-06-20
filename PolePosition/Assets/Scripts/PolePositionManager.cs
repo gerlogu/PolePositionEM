@@ -25,6 +25,7 @@ public class PolePositionManager : NetworkBehaviour
     [SyncVar] public string player3Name;
     [Tooltip("Nombre del jugador 4")]
     [SyncVar] public string player4Name;
+    public SyncListInt disconnectedPlayerIds = new SyncListInt();
 
     [Tooltip("Lista de jugadores ordenados por posicion")] public List<PlayerInfo> m_Players = new List<PlayerInfo>(4);
     [Tooltip("Lista de jugadores ordenados por ID")] public List<PlayerInfo> m_PlayersNotOrdered = new List<PlayerInfo>(4);
@@ -194,7 +195,9 @@ public class PolePositionManager : NetworkBehaviour
                     m_Players[i].CurrentPosition--;
                 }
                 indice = m_Players.Count - 1;
+
                 
+
                 m_Players.RemoveAt(indice);
 
                 foreach (PlayerInfo pj in m_Players)
@@ -203,8 +206,8 @@ public class PolePositionManager : NetworkBehaviour
                     {
                         if (NetworkClient.active)
                         {
-                            Debug.LogWarning("JUGADOR DESCONECTADO");
-                            pj.GetComponent<SetupPlayer>().CmdUpdateNumDisconnections();
+                            Debug.LogWarning("JUGADOR DESCONECTADO | ID: " + cont2);
+                            pj.GetComponent<SetupPlayer>().CmdUpdateNumDisconnections(cont2);
                         }
                         else
                         {

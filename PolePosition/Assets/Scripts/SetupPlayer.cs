@@ -40,14 +40,33 @@ public class SetupPlayer : NetworkBehaviour
         // Si no es solo servidor
         if (!isServerOnly)
         {
-            // Se obtiene la ID de la conexion
-            m_ID = connectionToClient.connectionId - m_PolePositionManager.numDesconexiones;
+
+            if(m_PolePositionManager.disconnectedPlayerIds.Count > 0)
+            {
+                m_ID = m_PolePositionManager.disconnectedPlayerIds[0];
+                m_PolePositionManager.disconnectedPlayerIds.RemoveAt(0);
+            }
+            else
+            {
+                // Se obtiene la ID de la conexion
+                m_ID = connectionToClient.connectionId - m_PolePositionManager.numDesconexiones;
+            }
+            
         }
         // Si iniciamos el modo solo servidor
         else
         {
-            // Se asigna como ID la id -1.
-            m_ID = connectionToClient.connectionId - 1 - m_PolePositionManager.numDesconexiones;
+            if (m_PolePositionManager.disconnectedPlayerIds.Count > 0)
+            {
+                m_ID = m_PolePositionManager.disconnectedPlayerIds[0];
+                m_PolePositionManager.disconnectedPlayerIds.RemoveAt(0);
+            }
+            else
+            {
+                // Se asigna como ID la id - 1
+                m_ID = connectionToClient.connectionId - 1 - m_PolePositionManager.numDesconexiones;
+            }
+            
 
             m_PlayerInfo.CurrentLap = 0; // Vuelta actual alcanzada por el jugador
 
@@ -121,10 +140,11 @@ public class SetupPlayer : NetworkBehaviour
     /// Funcion que actualiza el numero de desconexiones
     /// </summary>
     [Command]
-    public void CmdUpdateNumDisconnections()
+    public void CmdUpdateNumDisconnections(int id)
     {
         GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
         m_PolePositionManager.numDesconexiones++;
+        m_PolePositionManager.disconnectedPlayerIds.Add(id);
     }
 
     #region Commands del GameStartManager
@@ -267,11 +287,9 @@ public class SetupPlayer : NetworkBehaviour
     {
         base.OnStartClient();
 
-        // Gestion de desconexiones CAMBIAR
+        // Gestion de desconexiones
         if ((m_ID - m_PolePositionManager.numDesconexiones) > m_PolePositionManager.m_GameStartManager.minPlayers - 1)
         {
-            CmdUpdateNumDisconnections();
-
             if (isLocalPlayer)
             {
                 m_UIManager = FindObjectOfType<UIManager>();
