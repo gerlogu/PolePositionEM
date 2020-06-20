@@ -262,7 +262,7 @@ public class LapController : NetworkBehaviour
     private void Update()
     {
         // Si solo queda un jugador una vez la partida ha empezado, acaba la partida
-        if (FindObjectOfType<NetworkManager>().numPlayers == 1 && m_GSM.gameStarted)
+        if (FindObjectOfType<NetworkManager>().numPlayers == 1 && FindObjectOfType<GameStartManager>().gameStarted)
         {
             m_playerInfo.hasFinished = true;
             CmdUpdatePlayerFinished(m_playerInfo.ID);

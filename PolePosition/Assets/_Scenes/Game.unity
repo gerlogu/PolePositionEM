@@ -13293,11 +13293,6 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   debugSpheres: 0
-  Spawns:
-  - {fileID: 9126478173077015712}
-  - {fileID: 9126478172654521164}
-  - {fileID: 9126478172896605523}
-  - {fileID: 9126478173010760339}
   numPlayers: 0
   numDesconexiones: 0
   gameHasEnded: 0
