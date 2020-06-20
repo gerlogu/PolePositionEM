@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using Mirror;
 using UnityEngine;
-
-using System.Threading.Tasks;
 
 /// <summary>
 /// Manager que gestiona el estado de la partida.
@@ -14,27 +8,35 @@ using System.Threading.Tasks;
 public class PolePositionManager : NetworkBehaviour
 {
     #region Variables Públicas
+    [Header("Synchronized Attributes")]
     [Tooltip("Número de Jugadores")]
-    [SyncVar(hook = nameof(H_UpdateNumPlayers))] public int numPlayers;
-    [Tooltip("Network Manager")]
-    public NetworkManager networkManager;
-
+    [SyncVar] public int numPlayers;
+    [Tooltip("Número de desconexiones totales")]
     [SyncVar] public int numDesconexiones;
-
-    public UIManager uiManager;
-
-    public GameStartManager gameStartManager;
-
-    public object xLock = new object();
-
+    [Tooltip("Bool que determina si la partida ha terminado")]
     [SyncVar] public bool gameHasEnded;
-
+    [Tooltip("Nombre del jugador 1")]
     [SyncVar] public string player1Name;
+    [Tooltip("Nombre del jugador 2")]
     [SyncVar] public string player2Name;
+    [Tooltip("Nombre del jugador 3")]
     [SyncVar] public string player3Name;
+    [Tooltip("Nombre del jugador 4")]
     [SyncVar] public string player4Name;
 
+    [Header("References")]
+    [Tooltip("Network Manager")]
+    public NetworkManager m_NetworkManager;
+    [Tooltip("Referencia al UIManager de la escena")]
+    public UIManager m_UIManager;
+    [Tooltip("Referencia del GameStartManager de la escena")]
+    public GameStartManager m_GameStartManager;
+    [Tooltip("Referencia del LapManager de la escena")]
     public LapManager m_LapManager;
+
+    [Header("Others")]
+    [Tooltip("Cerrojo principal")]
+    public object xLock = new object();
     #endregion
 
     #region Variables Privadas
@@ -43,51 +45,40 @@ public class PolePositionManager : NetworkBehaviour
     private CircuitController m_CircuitController;                         // Controlador del circuito
     public GameObject[] m_DebuggingSpheres;                                // Esferas para depurar
     public float[] m_arcLengths;                                           // Longitudes de arco
-    private bool someoneFinished = false;
-    private bool timeEnded = false;
-    private float timeToEnd = 20.0f;
-    private bool hasPlayerNames = false;
-    private GameStartManager m_GSM;
+    private bool someoneFinished = false;                                  // Bool que determina si algún jugador ha completado la carrera
+    private bool timeEnded = false;                                        // Bool que determina si el temporizador de final de partida ha concluido
+    private float timeToEnd = 20.0f;                                       // Tiempo que dura el temporizador de final de partida
+    private bool hasPlayerNames = false;                                   // Bool que determina si se conoce el nombre de todos los jugadores      
     #endregion
 
-    #region Funciones Hook
-    void H_UpdateNumPlayers(int anterior, int nuevo)
-    {
-        numPlayers = nuevo;
-    }
-    #endregion
-
-
-    public void StopServer()
-    {
-        NetworkManager.singleton.StopHost();
-    }
-
+    /// <summary>
+    /// Método Awake
+    /// </summary>
     private void Awake()
     {
         // Si no existe network manager
-        if (networkManager == null)
+        if (!m_NetworkManager)
         {
-            networkManager = FindObjectOfType<NetworkManager>(); // Se busca el networkManager en la escena
+            m_NetworkManager = FindObjectOfType<NetworkManager>(); // Se busca el networkManager en la escena
         }
 
         // Si no existe el controlador del circuito
-        if (m_CircuitController == null)
+        if (!m_CircuitController)
         {
             m_CircuitController = FindObjectOfType<CircuitController>(); // Se busca el controlador del circuito en la escena
         }
 
         // Si no existe el game start manager
-        if (m_GSM == null)
+        if (!m_GameStartManager)
         {
-            m_GSM = GetComponent<GameStartManager>();
+            m_GameStartManager = GetComponent<GameStartManager>(); // Se busca el componente en el objeto
         }
 
         // Se inicializa el array de esferas en función del número de jugadores conectados
-        m_DebuggingSpheres = new GameObject[networkManager.maxConnections];
+        m_DebuggingSpheres = new GameObject[m_NetworkManager.maxConnections];
 
         // Se inicializan las esferas
-        for (int i = 0; i < networkManager.maxConnections; ++i)
+        for (int i = 0; i < m_NetworkManager.maxConnections; ++i)
         {
             m_DebuggingSpheres[i] = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             m_DebuggingSpheres[i].GetComponent<SphereCollider>().enabled = false;
@@ -113,22 +104,36 @@ public class PolePositionManager : NetworkBehaviour
     public void AddPlayer(PlayerInfo player)
     {
         m_Players.Add(player); // Se añade a la lista el jugador
-        m_PlayersNotOrdered.Add(player);
-        //CmdUpdateGameReady(m_Players.Count);
-        uiManager.textNumPlayers.text = "P: " + m_Players.Count;
-        if(gameStartManager)
-            gameStartManager.UpdateGameStarted(m_Players.Count, m_Players);
+        m_PlayersNotOrdered.Add(player); // Se añade jugador a la lista no ordenada
+        m_UIManager.textNumPlayers.text = "P: " + m_Players.Count; // Se actualiza el texto que muestra el número de jugadores
+        
+        // Si existe Game Start Manager
+        if(m_GameStartManager)
+            m_GameStartManager.UpdateGameStarted(m_Players.Count, m_Players); // Se actualiza el número de jugadores del Game Start Manager
     }
 
+    /// <summary>
+    /// Comparador de la posición de los jugadores.
+    /// </summary>
     private class PlayerInfoComparer : Comparer<PlayerInfo>
     {
-        float[] m_ArcLengths;
+        float[] m_ArcLengths; // Longitudes de arco de las esferas de los jugadores
 
+        /// <summary>
+        /// Constructor de la clase
+        /// </summary>
+        /// <param name="arcLengths">Logitudes de arco actuales</param>
         public PlayerInfoComparer(float[] arcLengths)
         {
             m_ArcLengths = arcLengths;
         }
 
+        /// <summary>
+        /// Comparador de la posición de dos coches para saber quién va por delante del otro.
+        /// </summary>
+        /// <param name="x">Primer jugador</param>
+        /// <param name="y">Segundo jugador</param>
+        /// <returns>Valor que determina cuál va primero</returns>
         public override int Compare(PlayerInfo x, PlayerInfo y)
         {
             var diferencia = m_ArcLengths[x.CurrentPosition] - m_ArcLengths[y.CurrentPosition];
@@ -140,21 +145,24 @@ public class PolePositionManager : NetworkBehaviour
         }
     }
 
+
+    /// <summary>
+    /// Actualiza el estado de la carrera
+    /// </summary>
     public void UpdateRaceProgress()
     {
 
         // Lock para que esto no se solape con otros procesos
         lock (xLock)
         {
-            // Esto no puede fallar, lo hago así, porque no se puede hacer un remove de
-            // la lista que se está recorriendo con el foreach dentro del mismo foreach
+            // Eliminación de jugadores desconectados
 
             PlayerInfo p = null; // Creamos un objeto auxiliar p
-            bool hayNulo = false ;
+            bool hayNulo = false;
             int cont = 0;
             int cont2 = 0;
             int indice = 0;
-            //p = new PlayerInfo(); // p es igual a un objeto genérico
+
             foreach (PlayerInfo player in m_Players) // Recorremos la lista de jugadores
             {
                 if (player == null) // Si el player es null (es decir, si se ha desconectado)
@@ -177,10 +185,8 @@ public class PolePositionManager : NetworkBehaviour
                 {
                     m_Players[i] = m_Players[i + 1];
                     m_Players[i].CurrentPosition--;
-                    //m_Players[i].ID--;
                 }
                 indice = m_Players.Count - 1;
-                //m_Players.Remove(p); // Eliminamos el jugador
                 
                 m_Players.RemoveAt(indice);
 
@@ -200,12 +206,12 @@ public class PolePositionManager : NetworkBehaviour
                     }
                 }
 
-                if (gameStartManager.gameStarted)
+                if (m_GameStartManager.gameStarted)
                     return; // Volvemos a empezar el bucle, porque hay que comprobar si hay más players nulos
             }
 
 
-            // Update car arc-lengths
+            // Se actualizan las longitudes de arco
 
             m_arcLengths = new float[m_Players.Count];
 
@@ -214,9 +220,6 @@ public class PolePositionManager : NetworkBehaviour
                 // Se actualiza la posición de la esfera si el personaje se encuentra dentro del camino a seguir
                 if (m_Players[i].GetComponent<CrashDetector>().isGrounded)
                 {
-                    // ComputeCarArcLength calcula la longitud de arco para el coche con id i
-                    // arcLengths[i] guarda la longitud de arco ordenados por id
-                    //m_arcLengths[m_Players[i].ID] = ComputeCarArcLength(m_Players[i].ID); // POR ESO TENEMOS QUE HACER COMPUTE POR POSICION, PILLANDO LA ID DEL QUE VA PRIMERO, SEGUNDO...
                     m_arcLengths[i] = ComputeCarArcLength(i);
                 }
                 
@@ -229,13 +232,6 @@ public class PolePositionManager : NetworkBehaviour
             {
                 m_Players[i].CurrentPosition = i;
             }
-
-            /*string st = "Players: ";
-            for (int i = 0; i < m_Players.Count; ++i)
-            {
-                st += "[" + m_Players[i].ToString() + "]";
-            }
-            Debug.Log(st);*/
 
             // Cálculos del servidor
             if (isServerOnly)
@@ -301,18 +297,16 @@ public class PolePositionManager : NetworkBehaviour
 
                     timeToEnd -= Time.deltaTime;
                     m_lapManager.timeToEnd = timeToEnd;
-                    //GetComponent<FinishGame>().CmdUpdateEndTime(timeToEnd);
                     GetComponent<FinishGame>().RpcUpdateEndTimerText(Mathf.RoundToInt(m_lapManager.timeToEnd));
 
                     if (m_LapManager.timeToEnd <= 0 && !timeEnded)
                     {
                         timeEnded = true;
                         GetComponent<FinishGame>().RpcUpdateReadyToShow();
-                        //CmdUpdateReadyToShow(); -> m_lapManager.readyToShowFinalScreen = true;
                     }
                 }
 
-                if (!hasPlayerNames && m_GSM.gameStarted)
+                if (!hasPlayerNames && m_GameStartManager.gameStarted)
                 {
                     foreach (PlayerInfo player in m_PlayersNotOrdered)
                     {
@@ -342,9 +336,14 @@ public class PolePositionManager : NetworkBehaviour
         {
             myRaceOrder += _player.Name + "\n";
         }
-        uiManager.UpdatePlayerNames(myRaceOrder);
+        m_UIManager.UpdatePlayerNames(myRaceOrder);
     }
 
+    /// <summary>
+    /// Cálculo de las longitudes de arco en función de la ID del jugador
+    /// </summary>
+    /// <param name="ID">Identificador del jugador (de 0 a 3)</param>
+    /// <returns></returns>
     float ComputeCarArcLength(int ID)
     {
         
@@ -363,7 +362,7 @@ public class PolePositionManager : NetworkBehaviour
 
         this.m_DebuggingSpheres[ID].transform.position = carProj;
 
-        if (gameStartManager.gameStarted)
+        if (m_GameStartManager.gameStarted)
         {
             if (m_Players[ID].CurrentLap == 0)
             {

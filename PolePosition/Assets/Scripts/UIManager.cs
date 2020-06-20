@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using Mirror;
+﻿using Mirror;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -47,56 +44,88 @@ public class UIManager : MonoBehaviour
     [SerializeField] private InputField inputFieldName;
 
     [Header("Game Configuration Menu")]
+    [Tooltip("Menú de configuración")]
     [SerializeField] private GameObject configMenu;
+    [Tooltip("Texto de la cantidad de jugadores de la carrera")]
     [SerializeField] private Text playersText;
+    [Tooltip("Botón izquierdo")]
     [SerializeField] private Button buttonPlayersLeft;
+    [Tooltip("Botón derecho")]
     [SerializeField] private Button buttonPlayersRight;
+    [Tooltip("Texto de las vueltas de la carrera")]
     [SerializeField] private Text lapsText;
+    [Tooltip("Botón izquierdo")]
     [SerializeField] private Button buttonLapsLeft;
+    [Tooltip("Botón derecho")]
     [SerializeField] private Button buttonLapsRight;
+    [Tooltip("Botón para aceptar la configuración")]
     [SerializeField] private Button buttonSelectConfig;
+    [Tooltip("Número de jugadores actual")]
+    [SerializeField] private int players = 2;
+    [Tooltip("Número de vueltas actual")]
+    [SerializeField] private int laps = 3;
+
+    [Header("References")]
+    [Tooltip("Referencia de un game start manager de la escena")]
     [SerializeField] private GameStartManager m_GameStartManager;
+    [Tooltip("Referencia de un lap manager de la escena")]
     [SerializeField] private LapManager m_LapManager;
-
-    public int players = 2;
-    public int laps = 3;
-
+    
+    [Header("Texto de error")]
+    [Tooltip("Cartel de error")]
     [SerializeField] private GameObject connectionError;
+    [Tooltip("Botón para regresar al menú de inicio")]
     [SerializeField] private Button buttonReturn;
 
-
     [Header("Car Selector")]
+    [Tooltip("Tipos de coche disponibles")]
     public Car[] cars;
+    [Tooltip("Selector de coches")]
     public GameObject carSelector;
+    [Tooltip("Botón izquierdo")]
     [SerializeField] private Button buttonLeftCar;
+    [Tooltip("Botón derecho")]
     [SerializeField] private Button buttonRightCar;
+    [Tooltip("Botón para seleccinar un coche")]
     [SerializeField] private Button buttonSelectCar;
+    [Tooltip("Texto del tipo de coche actual")]
     [SerializeField] private Text carText;
+    [Tooltip("Bool que determina si se puede seleccionar coche o no")]
     public bool canSelect = true;
 
     NameSelectorManager selectorManager;                   // Clase que contiene las funciones necesarias para el selector de nombres
     [HideInInspector] public string playerName = "player"; // Nombre introducido en el InputField
-    [HideInInspector] public int carType = 0;
+    [HideInInspector] public int carType = 0;              // Tipo de coche actual
 
     [Header("Wrong Direction")]
+    [Tooltip("Cartel de dirección incorrecta")]
     public GameObject incorrectDirection;
 
     [Header("Finish HUD")]
+    [Tooltip("Cartel de espera al menú final")]
     public GameObject waitFinishHUD;
+    [Tooltip("Menú final")]
     public GameObject gameFinishHUD;
+    [Tooltip("Botón del menú final para volver al menú de inicio")]
     public Button buttonFinishReturn;
 
 
     [Header("Car Selection Animation")]
+    [Tooltip("Animator del selector de coches")]
     [SerializeField] private Animator anim;
-    [SerializeField] private int currentCar = 0;
+    private int currentCar = 0; // Coche actual
 
-
+    /// <summary>
+    /// Función Awake.
+    /// </summary>
     private void Awake()
     {
         m_NetworkManager = FindObjectOfType<NetworkManager>(); // Se busca el network manager en la escena
     }
 
+    /// <summary>
+    /// Función Start.
+    /// </summary>
     private void Start()
     {
         selectorManager = new NameSelectorManager(inputFieldName, "Player");
@@ -110,49 +139,63 @@ public class UIManager : MonoBehaviour
         ActivateMainMenu();                                          // Muestra por pantalla el menú principal
     }
 
+    /// <summary>
+    /// Muestra el texto de error de conexión por pantalla al estar la partida llena.
+    /// </summary>
     public void ShowConnectionErrorMessage()
     {
         connectionError.SetActive(true);
-        buttonReturn.onClick.AddListener(() => RestartMenu());
+        buttonReturn.onClick.AddListener(() => RestartMenu()); // Asociamos la función de retorno al menú principal
     }
 
+    /// <summary>
+    /// Reinicio del menú de inicio.
+    /// </summary>
     public void RestartMenu()
     {
-        //m_NetworkManager.StopHost();
-        connectionError.SetActive(false);
-        inGameHUD.SetActive(false); // Se oculta la interfaz In Game
-        carType = 0;
-        currentCar = 0;
-        mainMenu.SetActive(true);
-        anim.enabled = true;
-        anim.Play("Idle");
+        connectionError.SetActive(false); // Se oculta el menú de error
+        inGameHUD.SetActive(false);       // Se oculta la interfaz In Game
+        carType = 0;                      // Se reinicia el tipo de coche actual
+        currentCar = 0;                   // Se reinicia el coche elegido
+        mainMenu.SetActive(true);         // Se muestra nuevamente el menú de inicio
+        anim.enabled = true;              // Se activa el animator para el selector de coches
+        anim.Play("Idle");                // Se activa la animación inicial
     }
 
+    /// <summary>
+    /// Se muestra el menú de configuración de partida
+    /// </summary>
+    /// <param name="type"> 0: Host | 1: Servidor </param>
     private void ShowGameConfig(int type)
     {
-        mainMenu.SetActive(false);
-        configMenu.SetActive(true);
+        mainMenu.SetActive(false);  // Se oculta el menú de inicio
+        configMenu.SetActive(true); // Se muestra el menú de configuración
+
+        // Se puede elegir desde 1 vuelta a 9 vueltas para dar
         buttonLapsLeft.onClick.AddListener(() => { laps = (laps > 1) ? (laps - 1) : laps; });
         buttonLapsRight.onClick.AddListener(() => { laps = (laps < 9) ? (laps + 1) : laps; });
 
+        // Se puede elegir un partida para desde 2 hasta 4 jugadores
         buttonPlayersLeft.onClick.AddListener(() => { players = (players > 2) ? players - 1 : players;});
         buttonPlayersRight.onClick.AddListener(() => { players = (players < 4) ? players + 1 : players; });
 
+        // Botón para confirmar la configuración actual
         buttonSelectConfig.onClick.AddListener(() => 
         {
-            m_GameStartManager.minPlayers = players;
-            m_LapManager.totalLaps = laps;
-            configMenu.SetActive(false);
+            m_GameStartManager.minPlayers = players; // Se actualiza el número de jugadores necesarios para comenzar la partida
+            m_LapManager.totalLaps = laps;           // Se actualiza el número de vueltas para terminar la partida
+            configMenu.SetActive(false);             // Se desactiva el menú de configuración
             
             switch (type)
             {
                 case 0:
-                    ShowNameSelector(0);
+                    ShowNameSelector(0); // Se muestra el selector de nombre
                     break;
                 case 1:
-                    StartServer();
+                    StartServer(); // Se inicia el servidor con la configuración elegida
                     break;
                 default:
+                    Debug.LogError("<color=red>ERROR</color> -> Opción no permitida. Ubicación: ShowGameConfig().");
                     break;
             }
         });
@@ -170,6 +213,7 @@ public class UIManager : MonoBehaviour
             selectorManager.CheckPlayerName(out playerName); // Se actualiza el nombre del jugador
         }
 
+        // Si el menú de configuración se encuentra activado, se actualizan los textos que muestran el valor de las variables
         if (configMenu.activeSelf)
         {
             playersText.text = players.ToString();
@@ -218,7 +262,7 @@ public class UIManager : MonoBehaviour
     {
         mainMenu.SetActive(false);     // Se oculta el menú principal
         nameSelector.SetActive(false); // Se oculta el selector de nombres
-        carSelector.SetActive(false);
+        carSelector.SetActive(false);  // Se oculta el menú del selector de coches
 
         // Si showGUI está a true (se desea mostrar la interfaz)
         if (showGUI)
@@ -253,6 +297,9 @@ public class UIManager : MonoBehaviour
         buttonRightCar.onClick.AddListener(() => UpdateCarRight());
     }
 
+    /// <summary>
+    /// Se actualiza el coche elegido hacia la derecha si está disponible.
+    /// </summary>
     private void UpdateCarRight()
     {
         if (!canSelect || currentCar == 3)
@@ -276,10 +323,14 @@ public class UIManager : MonoBehaviour
                 carText.text = "WHITE";
                 break;
             default:
+                Debug.LogError("<color=red>ERROR</color> -> Valor no permitido. Ubicación: UpdateCarRight()");
                 break;
         }
     }
 
+    /// <summary>
+    /// Se actualiza el coche elegido hacia la izquierda si está disponible.
+    /// </summary>
     private void UpdateCarLeft()
     {
         if (!canSelect || currentCar == 0)
@@ -305,14 +356,15 @@ public class UIManager : MonoBehaviour
                 carText.text = "RED";
                 break;
             default:
+                Debug.LogError("<color=red>ERROR</color> -> Valor no permitido. Ubicación: UpdateCarLeft()");
                 break;
         }
     }
 
     /// <summary>
-    /// 
+    /// Seleccionador de un coche e inicializador de la partida
     /// </summary>
-    /// <param name="carType"></param>
+    /// <param name="carType">Tipo de coche</param>
     /// <param name="type"> 0: Host | 1: Cliente </param>
     private void SelectCar(int carType, int type)
     {
@@ -347,11 +399,11 @@ public class UIManager : MonoBehaviour
     {
         m_NetworkManager.networkAddress = (inputFieldIP.text != "") ? inputFieldIP.text : "localhost";
         m_NetworkManager.StartClient(); // Se inicia el cliente
-        ActivateInGameHUD(); // Se activa el GUI de la partida
+        ActivateInGameHUD();            // Se activa el GUI de la partida
     }
 
     /// <summary>
-    /// NI IDEA
+    /// Inicializa un servidor para que puedan jugar clientes en él.
     /// </summary>
     private void StartServer()
     {

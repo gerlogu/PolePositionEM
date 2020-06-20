@@ -124,13 +124,6 @@ public class SetupPlayer : NetworkBehaviour
         m_CarType = type;
     }
 
-    //[Command]
-    //public void CmdGetNumDisconnections()
-    //{
-    //    GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
-    //    numDesconexiones = numDesconexiones;
-    //}
-
     [Command]
     public void CmdUpdateNumDisconnections()
     {
@@ -143,14 +136,14 @@ public class SetupPlayer : NetworkBehaviour
     public void CmdUpdatePlayers()
     {
         GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
-        m_PolePositionManager.gameStartManager.numPlayers++; // Se actualiza el número de jugadores LISTOS tras terminar el timer
+        m_PolePositionManager.m_GameStartManager.numPlayers++; // Se actualiza el número de jugadores LISTOS tras terminar el timer
     }
 
     [Command]
     public void CmdUpdateTimer()
     {
         GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
-        m_PolePositionManager.gameStartManager.timersListos++; // Se actualiza el número de timers listos para iniciarse
+        m_PolePositionManager.m_GameStartManager.timersListos++; // Se actualiza el número de timers listos para iniciarse
     }
 
     /// <summary>
@@ -160,7 +153,7 @@ public class SetupPlayer : NetworkBehaviour
     public void CmdUpdateGameStarted()
     {
         GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
-        m_PolePositionManager.gameStartManager.gameStarted = true; // Se actualiza el estado de la partida para los jugadores
+        m_PolePositionManager.m_GameStartManager.gameStarted = true; // Se actualiza el estado de la partida para los jugadores
     }
 
     [Command]
@@ -249,7 +242,7 @@ public class SetupPlayer : NetworkBehaviour
 
         //numDesconexiones = CmdGetNumDisconnections();
 
-        if ((m_ID - m_PolePositionManager.numDesconexiones)> m_PolePositionManager.gameStartManager.minPlayers - 1)
+        if ((m_ID - m_PolePositionManager.numDesconexiones)> m_PolePositionManager.m_GameStartManager.minPlayers - 1)
         {
             //numDesconexiones++;
             CmdUpdateNumDisconnections();
