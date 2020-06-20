@@ -13,7 +13,7 @@ public class FinishGame : NetworkBehaviour
     #region Variables privadas
     private bool endedGame;             // Booleano que indica si la partida ha acabado
     private bool hasShownFinalGUI;      // Booleano que indica si ya ha mostrado la pantalla final
-    private float timer = 2f;           // Contador de segundos que espera para mostrar la informacion
+    private float timer = 1f;           // Contador de segundos que espera para mostrar la informacion
     private UIManager m_UIManager;      // Referencia al UIManager
     private PolePositionManager m_PPM;  // Referencia al PolePositionManager
     private LapManager m_lapManager;    // Referencia al LapManager
