@@ -5,6 +5,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// Clase para gestionar el final de partida
+/// </summary>
 public class FinishGame : NetworkBehaviour
 {
     #region Variables privadas
@@ -68,58 +71,63 @@ public class FinishGame : NetworkBehaviour
         // Si el juego ya ha terminado
         else
         {
-            // Si no ha mostrado la pantalla final, la muestra
-            if (!hasShownFinalGUI)
+            // Escribimos los textos de final de partida
+            endTexts[0].text = "Player\n\n";
+            endTexts[1].text = "Position\n\n";
+            endTexts[2].text = "Total time\n\n";
+            endTexts[3].text = "Best lap\n\n";
+
+            // Creamos arrays auxiliares para acceder a la información del lap manager
+            string[] totalTimers = { m_lapManager.player1TotalTimer, m_lapManager.player2TotalTimer, m_lapManager.player3TotalTimer, m_lapManager.player4TotalTimer };
+            string[] bestTimers = { m_lapManager.player1BestTimer, m_lapManager.player2BestTimer, m_lapManager.player3BestTimer, m_lapManager.player4BestTimer };
+
+            int[] finalPositions = { m_lapManager.endPos1, m_lapManager.endPos2, m_lapManager.endPos3, m_lapManager.endPos4 };
+
+            // Por cada jugador, escribimos su información en la pantalla final
+            for (int i = 0; i < m_playersNotOrdered.Count; i++)
             {
-                hasShownFinalGUI = true;
-
-                // Escribimos los textos de final de partida
-                endTexts[0].text = "Player\n\n";
-                endTexts[1].text = "Position\n\n";
-                endTexts[2].text = "Total time\n\n";
-                endTexts[3].text = "Best lap\n\n";
-
-                // Creamos arrays auxiliares para acceder a la información del lap manager
-                string[] totalTimers = { m_lapManager.player1TotalTimer, m_lapManager.player2TotalTimer, m_lapManager.player3TotalTimer, m_lapManager.player4TotalTimer };
-                string[] bestTimers = { m_lapManager.player1BestTimer, m_lapManager.player2BestTimer, m_lapManager.player3BestTimer, m_lapManager.player4BestTimer };
-
-                int[] finalPositions = { m_lapManager.endPos1, m_lapManager.endPos2, m_lapManager.endPos3, m_lapManager.endPos4 };
-
-                // Por cada jugador, escribimos su información en la pantalla final
-                for (int i = 0; i < m_playersNotOrdered.Count; i++)
+                if (finalPositions[i] == -1)
                 {
-                    if (finalPositions[i] == -1)
-                    {
-                        finalPositions[i] = m_players[i].ID;
-                    }
-
-                    endTexts[0].text += m_playersNotOrdered[finalPositions[i]].Name + "\n";
-                    endTexts[1].text += (i + 1) + "\n";
-                    if (m_playersNotOrdered[finalPositions[i]].hasFinished)
-                        endTexts[2].text += totalTimers[m_playersNotOrdered[finalPositions[i]].ID] + "\n";
-                    else
-                        endTexts[2].text += "NF\n";
-
-                    if (bestTimers[m_playersNotOrdered[finalPositions[i]].ID] != "")
-                        endTexts[3].text += bestTimers[m_playersNotOrdered[finalPositions[i]].ID] + "\n";
-                    else
-                        endTexts[3].text += "---\n";
+                    finalPositions[i] = m_players[i].ID;
                 }
 
-                // Se le impide el movimiento a cada coche
-                foreach (PlayerInfo p in m_playersNotOrdered)
-                    p.canMove = false;
+                endTexts[0].text += m_playersNotOrdered[finalPositions[i]].Name + "\n";
+                endTexts[1].text += (i + 1) + "\n";
+                if (m_playersNotOrdered[finalPositions[i]].hasFinished)
+                {
+                    if (totalTimers[m_playersNotOrdered[finalPositions[i]].ID] == "")
+                    {
+                        endTexts[2].text += m_playersNotOrdered[finalPositions[i]].lapTotalMinutes + ":"
+                            + m_playersNotOrdered[finalPositions[i]].lapTotalSeconds + ":"
+                            + m_playersNotOrdered[finalPositions[i]].lapTotalMiliseconds + "\n";
+                    }
+                    else
+                        endTexts[2].text += totalTimers[m_playersNotOrdered[finalPositions[i]].ID] + "\n";
+                }
+                else
+                    endTexts[2].text += "NF\n";
 
-                // Escondemos las otras interfaces y mostramos la pantalla final
+                if (bestTimers[m_playersNotOrdered[finalPositions[i]].ID] != "")
+                    endTexts[3].text += bestTimers[m_playersNotOrdered[finalPositions[i]].ID] + "\n";
+                else
+                    endTexts[3].text += "---\n";
+            }
+
+            // Se le impide el movimiento a cada coche
+            foreach (PlayerInfo p in m_playersNotOrdered)
+                p.canMove = false;
+
+            // Escondemos las otras interfaces y mostramos la pantalla final
+            if (!hasShownFinalGUI)
+            {
                 m_UIManager.inGameHUD.SetActive(false);
                 m_UIManager.waitFinishHUD.SetActive(false);
                 m_UIManager.gameFinishHUD.SetActive(true);
-
-                // Añadimos al botón de volver el callback de la función de volver al menú
-                m_UIManager.buttonFinishReturn.onClick.AddListener(() => ReturnToMenu());
-                
-
+                hasShownFinalGUI = true;
             }
+
+            // Añadimos al botón de volver el callback de la función de volver al menú
+            m_UIManager.buttonFinishReturn.onClick.AddListener(() => ReturnToMenu());
         }
     }
 

@@ -3,13 +3,15 @@ using Mirror;
 
 using System.Threading;
 
+/// <summary>
+/// Clase que controla las vueltas
+/// </summary>
 public class LapController : NetworkBehaviour
 {
     #region Variables privadas
     private bool malaVuelta = false;                            // Booleano que indica si la vuelta es mala (marcha atrás)
     private bool gameThreadFinished;                            // Booleano que indica si el thread de fin de partida ha acabado
     private bool timeEnded = false;                             // Booleano que indica si se ha acabado el tiempo
-    private int num_players = 2;                                // Numero de jugadores
     private float enterArcLength;                               // Variable decimal que guarda la longitud de arco al entrar en el trigger de la meta
     private PlayerInfo m_playerInfo;                            // Referencia al PlayerInfo
     private DirectionDetector m_directionDetector;              // Referencia al DirectionDetector
@@ -182,7 +184,7 @@ public class LapController : NetworkBehaviour
         }
         
         // Si el jugador es el último, la partida acaba
-        switch (num_players)
+        switch (m_GSM.numPlayers)
         {
             case 2:
                 if (m_lapManager.endPos2 == ID)
@@ -232,10 +234,10 @@ public class LapController : NetworkBehaviour
 
     private void Start()
     {
-        // Se inicializa el tiempo de la mejor vuelta a 0
-        m_playerInfo.lapBestMinutes = 0;
-        m_playerInfo.lapBestSeconds = 0;
-        m_playerInfo.lapBestMiliseconds = 0;
+        // Se inicializa el tiempo de la mejor vuelta a unos valores maximos
+        m_playerInfo.lapBestMinutes = 99;
+        m_playerInfo.lapBestSeconds = 99;
+        m_playerInfo.lapBestMiliseconds = 999;
 
         // Se obtiene el Lap Manager
         m_lapManager = FindObjectOfType<LapManager>();
@@ -360,7 +362,7 @@ public class LapController : NetworkBehaviour
         if (!m_PPM.gameHasEnded)
         {
             // Si toca la meta:
-            if (other.CompareTag("FinishLine"))
+            if (other.CompareTag("FinishLine") && isLocalPlayer)
             {
                 // Si va en buena dirección:
                 if (enterArcLength > m_PPM.m_arcLengths[m_playerInfo.CurrentPosition] + 4.9f)
@@ -381,6 +383,7 @@ public class LapController : NetworkBehaviour
                                 // Comprobamos si esta vuelta ha sido la mejor
                                 bool isBetter = false;
 
+                                m_GSM = FindObjectOfType<GameStartManager>();
                                 if (m_GSM.lapTimer.iMinutes < m_playerInfo.lapBestMinutes)
                                 {
                                     isBetter = true;
@@ -406,15 +409,19 @@ public class LapController : NetworkBehaviour
                             // Si acaba de hacer la primera vuelta, guardamos ese tiempo como el mejor
                             else
                             {
+                                m_playerInfo = GetComponent<PlayerInfo>();
+                                m_GSM = FindObjectOfType<GameStartManager>();
                                 m_playerInfo.lapBestMinutes = m_GSM.lapTimer.iMinutes;
                                 m_playerInfo.lapBestSeconds = m_GSM.lapTimer.iSeconds;
                                 m_playerInfo.lapBestMiliseconds = m_GSM.lapTimer.iMiliseconds;
                                 CmdUpdateBestLap(m_playerInfo.ID, m_GSM.lapTimer.iMinutes, m_GSM.lapTimer.iSeconds, m_GSM.lapTimer.iMiliseconds);
                             }
 
+                            m_GSM = FindObjectOfType<GameStartManager>();
                             // Reiniciamos el timer de vuelta
                             m_GSM.lapTimer.RestartTimer();
 
+                            m_lapManager = FindObjectOfType<LapManager>();
                             // Si el jugador ha acabado la carrera
                             if (laps > m_lapManager.totalLaps)
                             {
@@ -427,6 +434,7 @@ public class LapController : NetworkBehaviour
                                 // Se le impide moverse al jugador
                                 m_playerInfo.canMove = false;
 
+                                m_UIManager = FindObjectOfType<UIManager>();
                                 // Se muestra la UI correspondiente
                                 m_UIManager.waitFinishHUD.SetActive(true);
                                 m_UIManager.inGameHUD.SetActive(false);
@@ -435,9 +443,9 @@ public class LapController : NetworkBehaviour
                                 Thread endGameThread = new Thread(() =>
                                 {
                                 // Si es el último, libera los permisos
-                                if (m_playerInfo.CurrentPosition == num_players - 1)
+                                if (m_playerInfo.CurrentPosition == m_GSM.numPlayers - 1)
                                     {
-                                        endSemaphore.Release(num_players - 1);
+                                        endSemaphore.Release(m_GSM.numPlayers - 1);
                                     }
                                 // Si no, se espera el tiempo que falte
                                 else
