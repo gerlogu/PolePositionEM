@@ -53,6 +53,7 @@ public class PolePositionManager : NetworkBehaviour
     private bool timeEnded = false;                   // Bool que determina si el temporizador de final de partida ha concluido
     private float timeToEnd = 20.0f;                  // Tiempo que dura el temporizador de final de partida
     private bool hasPlayerNames = false;              // Bool que determina si se conoce el nombre de todos los jugadores      
+    [SyncVar] private bool noPlayers = true;          // Determina si no hay jugadores en la partida
     #endregion
 
     /// <summary>
@@ -103,8 +104,17 @@ public class PolePositionManager : NetworkBehaviour
     {
         // Si el número de jugadores es igual a cero, no se actualiza el progreso de la carrera
         if (m_Players.Count == 0)
+        {
+            if (!noPlayers && isServerOnly)
+            {
+                noPlayers = true;
+                numDesconexiones++;
+                disconnectedPlayerIds.Add(0);
+            }
+            
             return;
-
+        }
+            
         UpdateRaceProgress(); // Se actualiza el progreso de la carrera
     }
 
@@ -117,7 +127,7 @@ public class PolePositionManager : NetworkBehaviour
         m_Players.Add(player); // Se añade a la lista el jugador
         m_PlayersNotOrdered.Add(player); // Se añade jugador a la lista no ordenada
         m_UIManager.textNumPlayers.text = "P: " + m_Players.Count; // Se actualiza el texto que muestra el número de jugadores
-        
+        noPlayers = false;
         // Si existe Game Start Manager
         if(m_GameStartManager)
             m_GameStartManager.UpdateGameStarted(m_Players.Count, m_Players); // Se actualiza el número de jugadores del Game Start Manager
@@ -187,6 +197,8 @@ public class PolePositionManager : NetworkBehaviour
                 cont++;
             }
 
+            
+            
             if (p == null && hayNulo) // si p es null significa que hay que eliminarlo de la lista
             {
                 for (int i = cont2; i < m_Players.Count - 1; i++)
@@ -196,25 +208,41 @@ public class PolePositionManager : NetworkBehaviour
                 }
                 indice = m_Players.Count - 1;
 
-                
-
                 m_Players.RemoveAt(indice);
 
                 foreach (PlayerInfo pj in m_Players)
                 {
-                    if (pj.GetComponent<SetupPlayer>().isServer)
+                    if (!isServerOnly)
                     {
-                        if (NetworkClient.active)
+                        if (pj.GetComponent<SetupPlayer>().isServer)
                         {
-                            Debug.LogWarning("JUGADOR DESCONECTADO | ID: " + cont2);
-                            pj.GetComponent<SetupPlayer>().CmdUpdateNumDisconnections(cont2);
-                        }
-                        else
-                        {
-                            Debug.LogWarning("Intento de desconexión interrumpido por finalización de la partida, el servidor será desconectado.");
+                            if (NetworkClient.active && !isServerOnly)
+                            {
+                                Debug.LogWarning("JUGADOR DESCONECTADO | ID: " + cont2);
+                                pj.GetComponent<SetupPlayer>().CmdUpdateNumDisconnections(cont2);
+                            }
+                            else if (isServerOnly && isServer && !isLocalPlayer)
+                            {
+                                Debug.LogWarning("JUGADOR DESCONECTADO | ID: " + cont2);
+                                numDesconexiones++;
+                                disconnectedPlayerIds.Add(cont2);
+                            }
+                            else
+                            {
+                                Debug.LogWarning("Intento de desconexión interrumpido por finalización de la partida, el servidor será desconectado.");
+                            }
                         }
                     }
+                        
                 }
+
+                if (isServerOnly)
+                {
+                     Debug.LogWarning("JUGADOR DESCONECTADO | ID: " + cont2);
+                     numDesconexiones++;
+                     disconnectedPlayerIds.Add(cont2);
+                }
+                
 
                 if (m_GameStartManager.gameStarted)
                     return; // Volvemos a empezar el bucle, porque hay que comprobar si hay más players nulos
@@ -303,9 +331,13 @@ public class PolePositionManager : NetworkBehaviour
                                     break;
                             }
 
-                            player.lapTotalMinutes = totalTimes[0];
-                            player.lapTotalSeconds = totalTimes[1];
-                            player.lapTotalMiliseconds = totalTimes[2];
+                            if (NetworkClient.active)
+                            {
+                                player.lapTotalMinutes = totalTimes[0];
+                                player.lapTotalSeconds = totalTimes[1];
+                                player.lapTotalMiliseconds = totalTimes[2];
+                            }
+                            
                         }
                     }
 
