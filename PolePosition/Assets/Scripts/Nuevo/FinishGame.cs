@@ -13,6 +13,7 @@ public class FinishGame : NetworkBehaviour
     #region Variables privadas
     private bool endedGame;             // Booleano que indica si la partida ha acabado
     private bool hasShownFinalGUI;      // Booleano que indica si ya ha mostrado la pantalla final
+    private float timer = 2f;           // Contador de segundos que espera para mostrar la informacion
     private UIManager m_UIManager;      // Referencia al UIManager
     private PolePositionManager m_PPM;  // Referencia al PolePositionManager
     private LapManager m_lapManager;    // Referencia al LapManager
@@ -62,10 +63,18 @@ public class FinishGame : NetworkBehaviour
             // Si el Pole Position Manager indicia que el juego ha terminado
             if (m_PPM.gameHasEnded)
             {
-                // Establecemos que el juego ha terminado y hacemos una copia de las listas del Pole Position Manager
-                endedGame = true;
-                m_playersNotOrdered = m_PPM.m_PlayersNotOrdered.ToList<PlayerInfo>();
-                m_players = m_PPM.m_Players.ToList<PlayerInfo>();
+                // Mientras el timer no sea 0, se espera
+                if (timer > 0)
+                {
+                    timer -= Time.deltaTime;
+                }
+                // Se establece que el juego ha terminado y hacemos una copia de las listas del Pole Position Manager
+                else
+                {
+                    m_playersNotOrdered = m_PPM.m_PlayersNotOrdered.ToList<PlayerInfo>();
+                    m_players = m_PPM.m_Players.ToList<PlayerInfo>();
+                    endedGame = true;
+                }
             }
         }
         // Si el juego ya ha terminado
