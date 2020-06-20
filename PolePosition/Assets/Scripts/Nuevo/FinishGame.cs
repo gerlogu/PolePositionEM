@@ -120,6 +120,7 @@ public class FinishGame : NetworkBehaviour
             // Escondemos las otras interfaces y mostramos la pantalla final
             if (!hasShownFinalGUI)
             {
+                GetComponent<GameStartManager>().totalTimer.StopTimer();
                 m_UIManager.inGameHUD.SetActive(false);
                 m_UIManager.waitFinishHUD.SetActive(false);
                 m_UIManager.gameFinishHUD.SetActive(true);
