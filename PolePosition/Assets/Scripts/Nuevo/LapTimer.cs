@@ -1,43 +1,55 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using UnityEngine;
 
 /// <summary>
-/// Crónometro para las vueltas
+/// Crónometro con las variables formateadas, tanto como strings como enteros.
 /// </summary>
 public class LapTimer
 {
     #region Variables Públicas
-    public string hours;
-    public string minutes;
-    public string seconds;
-    public string miliseconds;
+    // Datos como cadenas de caracteres
+    [HideInInspector] public string hours;
+    [HideInInspector] public string minutes;
+    [HideInInspector] public string seconds;
+    [HideInInspector] public string miliseconds;
+    // Datos como enteros
+    [HideInInspector] public int iHours;
+    [HideInInspector] public int iMinutes;
+    [HideInInspector] public int iSeconds;
+    [HideInInspector] public int iMiliseconds;
     #endregion
 
     #region Variables Privadas
-    public int iHours;
-    public int iMinutes;
-    public int iSeconds;
-    public int iMiliseconds;
-    private Stopwatch timer;      // Timer de la vuelta
+    private Stopwatch timer; // Timer de la vuelta
     #endregion
 
+    /// <summary>
+    /// Constructor vacío de la clase.
+    /// </summary>
     public LapTimer()
     {
         timer = new Stopwatch();
     }
 
+    /// <summary>
+    /// Inicia el timer.
+    /// </summary>
     public void StartTimer()
     {
         timer.Start();
     }
 
+    /// <summary>
+    /// Detiene el timer.
+    /// </summary>
     public void StopTimer()
     {
         timer.Stop();
     }
 
+    /// <summary>
+    /// Reinicia el timer desde cero.
+    /// </summary>
     public void RestartTimer()
     {
         if (!timer.IsRunning)
@@ -47,6 +59,9 @@ public class LapTimer
         timer.Restart();
     }
 
+    /// <summary>
+    /// Se calculan los valores de las horas, minutos, segundos y milisegundos; tanto como strings (formateado) como enteros.
+    /// </summary>
     public void CalculateTime()
     {
         int _hours = Mathf.RoundToInt((float)timer.Elapsed.Hours);

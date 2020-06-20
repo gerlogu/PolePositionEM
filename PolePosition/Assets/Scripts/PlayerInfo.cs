@@ -12,7 +12,7 @@ public class PlayerInfo : MonoBehaviour
     public string Name { get; set; }
 
     // ID del jugador
-    public int ID;
+    public int ID { get; set; }
 
     // Posición actual del jugador
     public int CurrentPosition { get; set; }
@@ -20,8 +20,10 @@ public class PlayerInfo : MonoBehaviour
     // Vuelta en la que se encuentra el jugador actualmente
     public int CurrentLap { get; set; }
 
+    // Tipo de coche
     public CarType carType { get; set; }
 
+    // Enumerador de los tipos de coches posibles
     public enum CarType
     {
         GREEN = 0,
@@ -30,6 +32,10 @@ public class PlayerInfo : MonoBehaviour
         WHITE = 3
     }
 
+    /// <summary>
+    /// Se actualizas el tipo de coche en función de un índice introducido.
+    /// </summary>
+    /// <param name="index">Índice</param>
     public void SetCarType(int index)
     {
         switch (index)
@@ -52,6 +58,7 @@ public class PlayerInfo : MonoBehaviour
         }
     }
 
+    // Bool que determina si el jugador se puede mover
     public bool canMove { get; set; }
 
     // Tiempo total
