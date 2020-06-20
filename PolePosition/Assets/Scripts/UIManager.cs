@@ -1,6 +1,7 @@
 ﻿using Mirror;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Manager de la interfaz de usuario (Menú principal, selector de nombres o GUI).
@@ -148,7 +149,7 @@ public class UIManager : MonoBehaviour
     public void ShowConnectionErrorMessage()
     {
         connectionError.SetActive(true);
-        buttonReturn.onClick.AddListener(() => RestartMenu()); // Asociamos la función de retorno al menú principal
+        buttonReturn.onClick.AddListener(() => { SceneManager.LoadScene(0); }); // Asociamos la función de retorno al menú principal
     }
 
     /// <summary>

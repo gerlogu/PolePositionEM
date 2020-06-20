@@ -2,6 +2,7 @@
 using Mirror;
 using UnityEngine;
 
+
 /// <summary>
 /// Manager que gestiona el estado de la partida.
 /// </summary>
@@ -9,6 +10,8 @@ public class PolePositionManager : NetworkBehaviour
 {
     #region Variables Públicas
     [SerializeField] private bool debugSpheres = false;
+
+    public Transform[] Spawns;
 
     [Header("Synchronized Attributes")]
     [Tooltip("Número de Jugadores")]

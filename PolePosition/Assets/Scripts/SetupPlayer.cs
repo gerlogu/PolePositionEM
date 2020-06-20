@@ -51,7 +51,9 @@ public class SetupPlayer : NetworkBehaviour
                 // Se obtiene la ID de la conexion
                 m_ID = connectionToClient.connectionId - m_PolePositionManager.numDesconexiones;
             }
-            
+
+            this.transform.position = m_PolePositionManager.Spawns[m_ID].position;
+
         }
         // Si iniciamos el modo solo servidor
         else
@@ -66,7 +68,8 @@ public class SetupPlayer : NetworkBehaviour
                 // Se asigna como ID la id - 1
                 m_ID = connectionToClient.connectionId - 1 - m_PolePositionManager.numDesconexiones;
             }
-            
+
+            this.transform.position = m_PolePositionManager.Spawns[m_ID].position;
 
             m_PlayerInfo.CurrentLap = 0; // Vuelta actual alcanzada por el jugador
 
@@ -287,18 +290,23 @@ public class SetupPlayer : NetworkBehaviour
     {
         base.OnStartClient();
 
+        Debug.Log("OnStartClient, " + m_ID);
         // Gestion de desconexiones
         if ((m_ID - m_PolePositionManager.numDesconexiones) > m_PolePositionManager.m_GameStartManager.minPlayers - 1)
         {
+            Debug.Log("Entro en el primer IF");
             if (isLocalPlayer)
             {
+                Debug.Log("IsLocalPlayer");
                 m_UIManager = FindObjectOfType<UIManager>();
                 m_UIManager.ShowConnectionErrorMessage();
             }
 
-            connectionToClient.Disconnect();
+            connectionToClient.Disconnect(); // ESTO ES LO QUE FALLA
             return;
         }
+
+        this.transform.position = m_PolePositionManager.Spawns[m_ID].position;
 
         // Si no es solo servidor
         if (!isServerOnly)
